@@ -1242,22 +1242,30 @@ export function AlertDemo() {
   );
 }
 export function DrawerDemo() {
+  const [open, setOpen] = useState(false);
   return (
-    <UI.Drawer
-      title="Project details"
-      trigger={<UI.Button>Open drawer</UI.Button>}
-      footer={
-        <>
-          <UI.Button size="sm">Cancel</UI.Button>
-          <UI.Button size="sm" variant="primary">
-            Save
-          </UI.Button>
-        </>
-      }
-    >
-      <p>A little extra space for a focused task.</p>
-      <UI.Input aria-label="Project name" placeholder="Project name" />
-    </UI.Drawer>
+    <UI.Space wrap>
+      <UI.Drawer
+        title="Project details"
+        trigger={<UI.Button>Open drawer</UI.Button>}
+        footer={
+          <>
+            <UI.Button size="sm">Cancel</UI.Button>
+            <UI.Button size="sm" variant="primary">
+              Save
+            </UI.Button>
+          </>
+        }
+      >
+        <p>A little extra space for a focused task.</p>
+        <UI.Input aria-label="Project name" placeholder="Project name" />
+      </UI.Drawer>
+      {/* Controlled and trigger-less, the way an application opens one from its own button. */}
+      <UI.Button onClick={() => setOpen(true)}>Open controlled drawer</UI.Button>
+      <UI.Drawer open={open} onOpenChange={setOpen} title="Rename project">
+        <UI.Input aria-label="New name" placeholder="New name" autoFocus />
+      </UI.Drawer>
+    </UI.Space>
   );
 }
 export function MessageDemo() {
