@@ -1257,6 +1257,16 @@ export function DrawerDemo() {
     >
       <p>A little extra space for a focused task.</p>
       <UI.Input aria-label="Project name" placeholder="Project name" />
+      <UI.FormItem label="Status">
+        <UI.Select
+          placeholder="Choose a status"
+          options={[
+            { value: "draft", label: "Draft" },
+            { value: "active", label: "Active" },
+            { value: "archived", label: "Archived" },
+          ]}
+        />
+      </UI.FormItem>
     </UI.Drawer>
   );
 }
