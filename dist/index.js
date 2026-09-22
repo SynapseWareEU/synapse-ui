@@ -6567,7 +6567,7 @@ function qA({
                 "div",
                 {
                   id: `${c}-description`,
-                  className: "text-caption-1 text-label-tertiary",
+                  className: "text-caption-1 text-label-secondary",
                   children: r
                 }
               )
