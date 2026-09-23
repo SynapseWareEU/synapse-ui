@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { IconX } from "@tabler/icons-react";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useRef, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { Button } from "../general/Button";
 import { iconDefaults } from "../general/Icon";
 import { cn } from "../../utils/cn";
@@ -26,6 +26,15 @@ export function Drawer({
   trigger,
   ...rest
 }: DrawerProps) {
+  // Radix hands focus back to a Dialog.Trigger as the dialog closes. A drawer opened through a
+  // controlled `open` has none, so focus fell to <body> and a keyboard user started again at the
+  // top of the page. Remember what held focus as the drawer opened and give it back on close.
+  // Read while rendering the open, not in onOpenAutoFocus: an autoFocus field inside the drawer
+  // takes focus during the commit, and Radix then skips that event.
+  const opener = useRef<HTMLElement | null>(null);
+  const wasOpen = useRef(false);
+  if (rest.open && !wasOpen.current) opener.current = document.activeElement as HTMLElement | null;
+  wasOpen.current = rest.open === true;
   return (
     <Dialog.Root {...rest}>
       {trigger ? <Dialog.Trigger asChild>{trigger}</Dialog.Trigger> : null}
@@ -39,6 +48,12 @@ export function Drawer({
               : "right-0 border-l border-solid border-rule-strong animate-su-slide-in",
           )}
           style={{ width }}
+          onCloseAutoFocus={(event) => {
+            if (trigger) return; // Radix focuses the trigger itself
+            // No "is it still open" guard: a drawer that closes by unmounting never renders closed.
+            event.preventDefault();
+            opener.current?.focus();
+          }}
           {...(!description ? { "aria-describedby": undefined } : {})}
         >
           <div

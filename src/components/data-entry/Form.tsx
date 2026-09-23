@@ -199,7 +199,7 @@ export function FormItem({
             help && (
               <div
                 id={`${id}-description`}
-                className="text-caption-1 text-label-tertiary"
+                className="text-caption-1 text-label-secondary"
               >
                 {help}
               </div>

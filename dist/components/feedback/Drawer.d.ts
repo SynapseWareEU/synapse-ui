@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { type ComponentPropsWithoutRef, type ReactNode } from "react";
 export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root> {
     title?: ReactNode;
     description?: ReactNode;
