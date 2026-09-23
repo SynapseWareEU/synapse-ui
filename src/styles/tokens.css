@@ -208,7 +208,7 @@
   --su-z-base: 0;
   --su-z-sticky: 100;
   --su-z-float: 150; /* persistent floating chrome (FloatButton) above sticky, below menus */
-  --su-z-dropdown: 200;
+  --su-z-dropdown: 450; /* menus, listboxes, popovers, tooltips: above the drawer or modal they open in */
   --su-z-overlay: 300;
   --su-z-modal: 400;
   --su-z-toast: 500;
