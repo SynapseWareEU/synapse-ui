@@ -9,6 +9,8 @@ export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root
     footer?: ReactNode;
     children?: ReactNode;
     trigger?: ReactNode;
+    /** The close button's accessible name, "Close drawer" by default. Pass the application's word. */
+    closeLabel?: string;
 }
-export declare function Drawer({ title, description, placement, width, footer, children, trigger, ...rest }: DrawerProps): import("react").JSX.Element;
+export declare function Drawer({ title, description, placement, width, footer, children, trigger, closeLabel, ...rest }: DrawerProps): import("react").JSX.Element;
 //# sourceMappingURL=Drawer.d.ts.map
