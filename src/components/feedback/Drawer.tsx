@@ -14,6 +14,8 @@ export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root
   footer?: ReactNode;
   children?: ReactNode;
   trigger?: ReactNode;
+  /** The close button's accessible name, "Close drawer" by default. Pass the application's word. */
+  closeLabel?: string;
 }
 
 export function Drawer({
@@ -24,6 +26,7 @@ export function Drawer({
   footer,
   children,
   trigger,
+  closeLabel = "Close drawer",
   ...rest
 }: DrawerProps) {
   // Radix hands focus back to a Dialog.Trigger as the dialog closes. A drawer opened through a
@@ -74,7 +77,7 @@ export function Drawer({
                 variant="ghost"
                 size="sm"
                 className="shrink-0 ms-auto min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 text-ink-2 enabled:hover:(text-ink bg-fill-tertiary)"
-                aria-label="Close drawer"
+                aria-label={closeLabel}
               >
                 <IconX size={16} {...iconDefaults} />
               </Button>

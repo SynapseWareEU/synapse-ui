@@ -1270,9 +1270,15 @@ export function DrawerDemo() {
           />
         </UI.FormItem>
       </UI.Drawer>
-      {/* Controlled and trigger-less, the way an application opens one from its own button. */}
+      {/* Controlled and trigger-less, the way an application opens one from its own button.
+          closeLabel names the close button; an application passes one in its own language. */}
       <UI.Button onClick={() => setOpen(true)}>Open controlled drawer</UI.Button>
-      <UI.Drawer open={open} onOpenChange={setOpen} title="Rename project">
+      <UI.Drawer
+        open={open}
+        onOpenChange={setOpen}
+        title="Rename project"
+        closeLabel="Close without renaming"
+      >
         <UI.Input aria-label="New name" placeholder="New name" autoFocus />
       </UI.Drawer>
     </UI.Space>

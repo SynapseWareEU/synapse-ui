@@ -14519,10 +14519,11 @@ function US({
   footer: n,
   children: a,
   trigger: i,
-  ...s
+  closeLabel: s = "Close drawer",
+  ...c
 }) {
-  const c = de(null), l = de(!1);
-  return s.open && !l.current && (c.current = document.activeElement), l.current = s.open === !0, /* @__PURE__ */ $(ho, { ...s, children: [
+  const l = de(null), f = de(!1);
+  return c.open && !f.current && (l.current = document.activeElement), f.current = c.open === !0, /* @__PURE__ */ $(ho, { ...c, children: [
     i ? /* @__PURE__ */ u(In, { asChild: !0, children: i }) : null,
     /* @__PURE__ */ $(go, { children: [
       /* @__PURE__ */ u(bo, { className: "su-overlay" }),
@@ -14534,9 +14535,9 @@ function US({
             r === "left" ? "left-0 border-r border-solid border-rule-strong animate-su-slide-in-left" : "right-0 border-l border-solid border-rule-strong animate-su-slide-in"
           ),
           style: { width: o },
-          onCloseAutoFocus: (f) => {
-            var d;
-            i || (f.preventDefault(), (d = c.current) == null || d.focus());
+          onCloseAutoFocus: (d) => {
+            var p;
+            i || (d.preventDefault(), (p = l.current) == null || p.focus());
           },
           ...e ? {} : { "aria-describedby": void 0 },
           children: [
@@ -14555,7 +14556,7 @@ function US({
                       variant: "ghost",
                       size: "sm",
                       className: "shrink-0 ms-auto min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 text-ink-2 enabled:hover:text-ink enabled:hover:bg-fill-tertiary",
-                      "aria-label": "Close drawer",
+                      "aria-label": s,
                       children: /* @__PURE__ */ u(Cn, { size: 16, ...Kt })
                     }
                   ) })
