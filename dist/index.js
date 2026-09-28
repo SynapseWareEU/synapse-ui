@@ -14522,8 +14522,17 @@ function US({
   closeLabel: s = "Close drawer",
   ...c
 }) {
+  var d, p;
   const l = de(null), f = de(!1);
-  return c.open && !f.current && (l.current = document.activeElement), f.current = c.open === !0, /* @__PURE__ */ $(ho, { ...c, children: [
+  if (c.open && !f.current) {
+    l.current = document.activeElement;
+    for (let h = 0; h < 4; h++) {
+      const b = (p = (d = l.current) == null ? void 0 : d.closest("[role=menu]")) == null ? void 0 : p.getAttribute("aria-labelledby"), g = b && document.getElementById(b);
+      if (!g) break;
+      l.current = g;
+    }
+  }
+  return f.current = c.open === !0, /* @__PURE__ */ $(ho, { ...c, children: [
     i ? /* @__PURE__ */ u(In, { asChild: !0, children: i }) : null,
     /* @__PURE__ */ $(go, { children: [
       /* @__PURE__ */ u(bo, { className: "su-overlay" }),
@@ -14535,9 +14544,9 @@ function US({
             r === "left" ? "left-0 border-r border-solid border-rule-strong animate-su-slide-in-left" : "right-0 border-l border-solid border-rule-strong animate-su-slide-in"
           ),
           style: { width: o },
-          onCloseAutoFocus: (d) => {
-            var p;
-            i || (d.preventDefault(), (p = l.current) == null || p.focus());
+          onCloseAutoFocus: (h) => {
+            var b;
+            i || (h.preventDefault(), (b = l.current) == null || b.focus());
           },
           ...e ? {} : { "aria-describedby": void 0 },
           children: [
