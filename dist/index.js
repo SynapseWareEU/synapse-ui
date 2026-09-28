@@ -13811,9 +13811,10 @@ function $S({
   color: t = "default",
   closable: e = !1,
   onClose: r,
-  className: o,
-  children: n,
-  ...a
+  removeLabel: o,
+  className: n,
+  children: a,
+  ...i
 }) {
   return /* @__PURE__ */ $(
     "span",
@@ -13824,18 +13825,18 @@ function $S({
         // close button's invisible box spill over neighbouring tags.
         e ? "py-0 pr-0 min-h-[var(--su-hit-target)]" : "py-su1",
         ay[t],
-        o
+        n
       ),
-      ...a,
+      ...i,
       children: [
-        n,
+        a,
         e ? /* @__PURE__ */ u(
           "button",
           {
             type: "button",
             className: "inline-flex items-center justify-center shrink-0 self-stretch p-0 min-w-[var(--su-hit-target)] bg-transparent text-inherit text-[14px] leading-none cursor-pointer su-focus-ring",
             onClick: r,
-            "aria-label": typeof n == "string" ? `Remove ${n}` : "Remove tag",
+            "aria-label": o ?? (typeof a == "string" ? `Remove ${a}` : "Remove tag"),
             children: /* @__PURE__ */ u("span", { "aria-hidden": "true", children: "×" })
           }
         ) : null
@@ -14473,13 +14474,14 @@ function VS({
   title: e,
   closable: r = !1,
   onClose: o,
-  showIcon: n = !1,
-  icon: a,
-  className: i,
-  children: s,
-  ...c
+  closeLabel: n = "Close alert",
+  showIcon: a = !1,
+  icon: i,
+  className: s,
+  children: c,
+  ...l
 }) {
-  const l = wf[t], f = Ey[t], d = a ?? (n ? /* @__PURE__ */ u(f, { size: 18, ...Kt }) : null);
+  const f = wf[t], d = Ey[t], p = i ?? (a ? /* @__PURE__ */ u(d, { size: 18, ...Kt }) : null);
   return /* @__PURE__ */ $(
     "div",
     {
@@ -14487,14 +14489,14 @@ function VS({
       className: M(
         "w-full flex items-start gap-su3 py-su3 px-su4 rounded-none border border-solid border-rule bg-paper",
         as[t],
-        i
+        s
       ),
-      ...c,
+      ...l,
       children: [
-        d ? /* @__PURE__ */ u("span", { "aria-hidden": !0, className: M("shrink-0 mt-[2px] leading-none", l), children: d }) : null,
+        p ? /* @__PURE__ */ u("span", { "aria-hidden": !0, className: M("shrink-0 mt-[2px] leading-none", f), children: p }) : null,
         /* @__PURE__ */ $("div", { className: "flex-1 min-w-0 break-words", children: [
           e ? /* @__PURE__ */ u("div", { className: "text-subhead font-semibold text-label", children: e }) : null,
-          s ? /* @__PURE__ */ u("div", { className: "mt-su1 text-footnote text-label-secondary leading-[var(--su-leading-normal)]", children: s }) : null
+          c ? /* @__PURE__ */ u("div", { className: "mt-su1 text-footnote text-label-secondary leading-[var(--su-leading-normal)]", children: c }) : null
         ] }),
         r ? /* @__PURE__ */ u(
           Be,
@@ -14503,7 +14505,7 @@ function VS({
             size: "sm",
             className: "shrink-0 min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 -my-su2 text-ink-2 enabled:hover:text-ink enabled:hover:bg-fill-tertiary",
             onClick: o,
-            "aria-label": "Close alert",
+            "aria-label": n,
             children: /* @__PURE__ */ u(Cn, { size: 16, ...Kt })
           }
         ) : null
@@ -14987,51 +14989,54 @@ me(Ho, "focusFirst");
 var Ef = My, Pf = Oy, If = Vy, Ky = Yy, qy = Xy;
 const Tf = no(null);
 let Jy = 0;
-function Zy({ children: t }) {
-  const [e, r] = Q([]), { direction: o } = Mr(), n = Re((i) => {
-    const s = `msg-${++Jy}`;
-    r((c) => [...c, { ...i, id: s }]);
-  }, []), a = Fe(
+function Zy({
+  children: t,
+  closeLabel: e = "Dismiss"
+}) {
+  const [r, o] = Q([]), { direction: n } = Mr(), a = Re((s) => {
+    const c = `msg-${++Jy}`;
+    o((l) => [...l, { ...s, id: c }]);
+  }, []), i = Fe(
     () => ({
-      open: n,
-      success: (i) => n({ content: i, type: "success" }),
-      error: (i) => n({ content: i, type: "error" }),
-      info: (i) => n({ content: i, type: "info" }),
-      warning: (i) => n({ content: i, type: "warning" })
+      open: a,
+      success: (s) => a({ content: s, type: "success" }),
+      error: (s) => a({ content: s, type: "error" }),
+      info: (s) => a({ content: s, type: "info" }),
+      warning: (s) => a({ content: s, type: "warning" })
     }),
-    [n]
+    [a]
   );
-  return le(() => (mt._api = a, () => {
-    mt._api === a && (mt._api = null);
-  }), [a]), /* @__PURE__ */ u(Tf.Provider, { value: a, children: /* @__PURE__ */ $(Ef, { swipeDirection: o === "rtl" ? "left" : "right", children: [
+  return le(() => (mt._api = i, () => {
+    mt._api === i && (mt._api = null);
+  }), [i]), /* @__PURE__ */ u(Tf.Provider, { value: i, children: /* @__PURE__ */ $(Ef, { swipeDirection: n === "rtl" ? "left" : "right", children: [
     t,
-    e.map((i) => /* @__PURE__ */ $(
+    r.map((s) => /* @__PURE__ */ $(
       If,
       {
         className: M(
           "flex items-center gap-su3 py-su3 px-su4 rounded-none bg-paper shadow-none border border-solid border-rule border-t-rule-strong",
           "data-[state=open]:animate-su-rise-in motion-reduce:animate-none",
           "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-transform data-[swipe=cancel]:duration-[var(--su-duration-fast)] data-[swipe=cancel]:ease-[var(--su-ease-out)]",
-          as[i.type ?? "info"]
+          as[s.type ?? "info"]
         ),
-        duration: i.duration === 0 ? 1 / 0 : i.duration ?? 3e3,
-        onOpenChange: (s) => {
-          s || r((c) => c.filter((l) => l.id !== i.id));
+        duration: s.duration === 0 ? 1 / 0 : s.duration ?? 3e3,
+        onOpenChange: (c) => {
+          c || o((l) => l.filter((f) => f.id !== s.id));
         },
         children: [
-          i.icon ? /* @__PURE__ */ u("div", { className: "shrink-0 text-label-secondary", children: i.icon }) : null,
-          /* @__PURE__ */ u(Ky, { className: "flex-1 text-subhead text-label", children: i.content }),
+          s.icon ? /* @__PURE__ */ u("div", { className: "shrink-0 text-label-secondary", children: s.icon }) : null,
+          /* @__PURE__ */ u(Ky, { className: "flex-1 text-subhead text-label", children: s.content }),
           /* @__PURE__ */ u(
             qy,
             {
               className: yf,
-              "aria-label": "Dismiss",
+              "aria-label": e,
               children: "×"
             }
           )
         ]
       },
-      i.id
+      s.id
     )),
     /* @__PURE__ */ u(Pf, { className: "fixed top-su4 left-1/2 -translate-x-1/2 z-[var(--su-z-toast)] flex flex-col gap-su2 w-[min(420px,calc(100vw-var(--su-space-8)))] outline-none" })
   ] }) });
@@ -15822,8 +15827,8 @@ function V5({ children: t }) {
     )
   ] });
 }
-function ZS({ children: t, ...e }) {
-  return /* @__PURE__ */ u(V0, { ...e, children: /* @__PURE__ */ u(vf, { children: /* @__PURE__ */ u(Zy, { children: /* @__PURE__ */ u(V5, { children: t }) }) }) });
+function ZS({ children: t, closeLabel: e, ...r }) {
+  return /* @__PURE__ */ u(V0, { ...r, children: /* @__PURE__ */ u(vf, { children: /* @__PURE__ */ u(Zy, { closeLabel: e, children: /* @__PURE__ */ u(V5, { children: t }) }) }) });
 }
 function e_() {
   const t = Ar(zf);

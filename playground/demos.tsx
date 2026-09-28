@@ -1151,6 +1151,8 @@ export function TagDemo() {
           key={tag}
           color={i === 1 ? "warning" : "default"}
           closable
+          // removeLabel names the remove button; an application passes one in its own language.
+          removeLabel={i === 1 ? "Mark as reviewed" : undefined}
           onClose={() => setTags((prev) => prev.filter((t) => t !== tag))}
         >
           {tag}
@@ -1228,7 +1230,13 @@ export function TreeDemo() {
 export function AlertDemo() {
   return (
     <UI.Space vertical block>
-      <UI.Alert type="info" title="A little heads-up">
+      {/* closeLabel names the close button; an application passes one in its own language. */}
+      <UI.Alert
+        type="info"
+        title="A little heads-up"
+        closable
+        closeLabel="Hide this tip"
+      >
         Your changes are saved automatically.
       </UI.Alert>
       <UI.Alert type="success" showIcon title="All up to date">
@@ -1310,7 +1318,21 @@ export function MessageDemo() {
       <UI.Button onClick={() => message.error("Could not save. Try again.")}>
         Error message
       </UI.Button>
+      {/* closeLabel names every toast's close button. An application passes one in its own
+          language on its App, which hands it to MessageProvider; this App is nested only to
+          show both names side by side. */}
+      <UI.App closeLabel="Close message">
+        <LabelledMessage />
+      </UI.App>
     </UI.Space>
+  );
+}
+function LabelledMessage() {
+  const { message } = UI.useApp();
+  return (
+    <UI.Button onClick={() => message.info("Draft kept for later")}>
+      Labelled message
+    </UI.Button>
   );
 }
 export function ModalDemo() {

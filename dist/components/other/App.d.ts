@@ -38,8 +38,10 @@ interface AppContextValue {
 }
 export interface AppProps extends ConfigProviderProps {
     children: ReactNode;
+    /** The close button's accessible name on every message toast, "Dismiss" by default. Passed to MessageProvider. */
+    closeLabel?: string;
 }
-export declare function App({ children, ...config }: AppProps): import("react").JSX.Element;
+export declare function App({ children, closeLabel, ...config }: AppProps): import("react").JSX.Element;
 export declare function useApp(): AppContextValue;
 export {};
 //# sourceMappingURL=App.d.ts.map

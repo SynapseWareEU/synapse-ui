@@ -14,8 +14,10 @@ interface MessageContextValue {
     info: (content: ReactNode) => void;
     warning: (content: ReactNode) => void;
 }
-export declare function MessageProvider({ children }: {
+export declare function MessageProvider({ children, closeLabel, }: {
     children: ReactNode;
+    /** The close button's accessible name on every toast, "Dismiss" by default. Pass the application's word. */
+    closeLabel?: string;
 }): import("react").JSX.Element;
 export declare function useMessage(): MessageContextValue;
 /** Imperative helper when provider is mounted via App */

@@ -173,13 +173,15 @@ function AppInner({ children }: { children: ReactNode }) {
 
 export interface AppProps extends ConfigProviderProps {
   children: ReactNode;
+  /** The close button's accessible name on every message toast, "Dismiss" by default. Passed to MessageProvider. */
+  closeLabel?: string;
 }
 
-export function App({ children, ...config }: AppProps) {
+export function App({ children, closeLabel, ...config }: AppProps) {
   return (
     <ConfigProvider {...config}>
       <TooltipProvider>
-        <MessageProvider>
+        <MessageProvider closeLabel={closeLabel}>
           <AppInner>{children}</AppInner>
         </MessageProvider>
       </TooltipProvider>

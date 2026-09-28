@@ -18,6 +18,8 @@ export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
   title?: ReactNode;
   closable?: boolean;
   onClose?: () => void;
+  /** The close button's accessible name, "Close alert" by default. Pass the application's word. */
+  closeLabel?: string;
   /** Show the per-type status glyph, so state isn't carried by colour alone. */
   showIcon?: boolean;
   /** Custom glyph; implies `showIcon`. */
@@ -37,6 +39,7 @@ export function Alert({
   title,
   closable = false,
   onClose,
+  closeLabel = "Close alert",
   showIcon = false,
   icon,
   className,
@@ -78,7 +81,7 @@ export function Alert({
           size="sm"
           className="shrink-0 min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 -my-su2 text-ink-2 enabled:hover:text-ink enabled:hover:bg-fill-tertiary"
           onClick={onClose}
-          aria-label="Close alert"
+          aria-label={closeLabel}
         >
           <IconX size={16} {...iconDefaults} />
         </Button>

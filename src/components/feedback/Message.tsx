@@ -37,7 +37,14 @@ const MessageContext = createContext<MessageContextValue | null>(null);
 
 let idCounter = 0;
 
-export function MessageProvider({ children }: { children: ReactNode }) {
+export function MessageProvider({
+  children,
+  closeLabel = "Dismiss",
+}: {
+  children: ReactNode;
+  /** The close button's accessible name on every toast, "Dismiss" by default. Pass the application's word. */
+  closeLabel?: string;
+}) {
   const [items, setItems] = useState<MessageItem[]>([]);
 
   const { direction } = useConfig();
@@ -91,7 +98,7 @@ export function MessageProvider({ children }: { children: ReactNode }) {
             </Toast.Description>
             <Toast.Close
               className={dismissButtonClass}
-              aria-label="Dismiss"
+              aria-label={closeLabel}
             >
               ×
             </Toast.Close>
