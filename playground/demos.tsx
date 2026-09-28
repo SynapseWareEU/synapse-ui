@@ -1243,6 +1243,7 @@ export function AlertDemo() {
 }
 export function DrawerDemo() {
   const [open, setOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
   return (
     <UI.Space wrap>
       <UI.Drawer
@@ -1280,6 +1281,17 @@ export function DrawerDemo() {
         closeLabel="Close without renaming"
       >
         <UI.Input aria-label="New name" placeholder="New name" autoFocus />
+      </UI.Drawer>
+      {/* Opened from a menu item, the way a table row's menu opens one. The item is gone once
+          the menu closes, so closing the drawer gives focus back to the menu's trigger. */}
+      <UI.Dropdown>
+        <UI.DropdownTrigger>Project actions</UI.DropdownTrigger>
+        <UI.DropdownContent>
+          <UI.DropdownItem onSelect={() => setSharing(true)}>Share project</UI.DropdownItem>
+        </UI.DropdownContent>
+      </UI.Dropdown>
+      <UI.Drawer open={sharing} onOpenChange={setSharing} title="Share project">
+        <UI.Input aria-label="Email" placeholder="Email" />
       </UI.Drawer>
     </UI.Space>
   );

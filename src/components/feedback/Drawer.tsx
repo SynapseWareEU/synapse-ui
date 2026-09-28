@@ -34,9 +34,20 @@ export function Drawer({
   // top of the page. Remember what held focus as the drawer opened and give it back on close.
   // Read while rendering the open, not in onOpenAutoFocus: an autoFocus field inside the drawer
   // takes focus during the commit, and Radix then skips that event.
+  // A menu item that opened the drawer is gone once its menu closes, so remember the menu's
+  // trigger instead: the element its content's aria-labelledby names (getElementById, because
+  // React 18 ids hold colons). A submenu's trigger is an item too, so walk out a few levels.
   const opener = useRef<HTMLElement | null>(null);
   const wasOpen = useRef(false);
-  if (rest.open && !wasOpen.current) opener.current = document.activeElement as HTMLElement | null;
+  if (rest.open && !wasOpen.current) {
+    opener.current = document.activeElement as HTMLElement | null;
+    for (let depth = 0; depth < 4; depth++) {
+      const id = opener.current?.closest("[role=menu]")?.getAttribute("aria-labelledby");
+      const menuTrigger = id && document.getElementById(id);
+      if (!menuTrigger) break;
+      opener.current = menuTrigger;
+    }
+  }
   wasOpen.current = rest.open === true;
   return (
     <Dialog.Root {...rest}>
