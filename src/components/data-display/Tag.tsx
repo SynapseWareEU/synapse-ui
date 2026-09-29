@@ -7,6 +7,8 @@ export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   color?: TagColor;
   closable?: boolean;
   onClose?: () => void;
+  /** The remove button's accessible name, "Remove <text>" (or "Remove tag") by default. Pass the application's words. */
+  removeLabel?: string;
   children?: ReactNode;
 }
 
@@ -24,6 +26,7 @@ export function Tag({
   color = "default",
   closable = false,
   onClose,
+  removeLabel,
   className,
   children,
   ...rest
@@ -49,7 +52,8 @@ export function Tag({
           className="inline-flex items-center justify-center shrink-0 self-stretch p-0 min-w-[var(--su-hit-target)] bg-transparent text-inherit text-[14px] leading-none cursor-pointer su-focus-ring"
           onClick={onClose}
           aria-label={
-            typeof children === "string" ? `Remove ${children}` : "Remove tag"
+            removeLabel ??
+            (typeof children === "string" ? `Remove ${children}` : "Remove tag")
           }
         >
           <span aria-hidden="true">×</span>
