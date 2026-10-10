@@ -20,8 +20,9 @@ export interface ResultBandProps extends Omit<HTMLAttributes<HTMLDivElement>, "t
 /**
  * Result band (spec §4.7): full-width answer to the scan just read, readable across the aisle.
  * Padding 16, gap 6; a 28 title row (icon + title, signal pushed right), then 17/22 lines.
- * 88 tall with one line (success), 110 with two (danger). The band colours are fixed in both
- * themes; the text is `on-action` white.
+ * 88 tall with one line (success), 110 with two (danger); the title and the lines wrap, so a
+ * longer answer grows the band instead of being cut. The band colours are fixed in both themes;
+ * the text is `on-action` white.
  */
 export declare function ResultBand({ tone, title, signal, icon, instruction, children, className, role, ...rest }: ResultBandProps): import("react").JSX.Element;
 //# sourceMappingURL=ResultBand.d.ts.map

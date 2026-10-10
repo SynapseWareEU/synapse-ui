@@ -933,6 +933,19 @@ export function SelectDemo() {
           { value: "lot", label: "Lot" },
         ]}
       />
+      {/* Ghost: the picker in chrome (a header's site switcher). The name and the test handle are
+          on the trigger itself. */}
+      <UI.Select
+        variant="ghost"
+        aria-label="Warehouse"
+        data-testid="warehouse-switcher"
+        defaultValue="buc"
+        className="max-w-[280px]"
+        options={[
+          { value: "buc", code: "RO_BUC_01", label: "Bucharest" },
+          { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
+        ]}
+      />
     </UI.Space>
   );
 }
@@ -959,6 +972,11 @@ export function SwitchDemo() {
       <UI.Switch loading defaultChecked>
         Saving…
       </UI.Switch>
+      {/* In a FormItem the label above names the switch; the words beside it say the state. */}
+      <UI.FormItem label="Inspection on receipt">
+        <UI.Switch defaultChecked>{(on) => (on ? "Asked at every receipt" : "Not asked")}</UI.Switch>
+      </UI.FormItem>
+      <UI.Switch aria-label="Shared device">{(on) => (on ? "On" : "Off")}</UI.Switch>
     </UI.Space>
   );
 }
@@ -1483,7 +1501,8 @@ export function TableDemo() {
           </UI.Table.Body>
         </UI.Table>
       </div>
-      <UI.Table aria-label="Stock by location">
+      {/* stack="lg": under 1024 the same tree is a list of records, with no sideways scroll. */}
+      <UI.Table aria-label="Stock by location" stack="lg">
         <UI.Table.Head>
           <UI.Table.Row>
             <UI.Table.Th>
@@ -1531,6 +1550,9 @@ export function TableDemo() {
                   <UI.Table.Row
                     selected={row.id === "A-01-02-1"}
                     expanded={isOpen}
+                    data-testid={`stock-${row.id}`}
+                    // The meta line is a second <tr>; metaRowProps is how it gets a handle.
+                    metaRowProps={{ "data-testid": `stock-${row.id}-meta` }}
                     meta={
                       row.lot ? undefined : (
                         <UI.Table.Meta
@@ -1576,7 +1598,12 @@ export function TableDemo() {
                     </UI.Table.Td>
                   </UI.Table.Row>
                   {isOpen ? (
-                    <UI.Table.Detail colSpan={6} id={detailId}>
+                    <UI.Table.Detail
+                      colSpan={6}
+                      id={detailId}
+                      // rowProps reach the detail's own <tr>; the rest reach its <td>.
+                      rowProps={{ "data-testid": `stock-${row.id}-detail` }}
+                    >
                       <UI.Table size="nested" aria-label={`Pallets in ${row.id}`}>
                         <UI.Table.Head>
                           <UI.Table.Row>
@@ -2060,6 +2087,22 @@ export function HandheldTopBarDemo() {
           user="Ioana P."
         />
       </UI.ConfigProvider>
+      {/* A write in flight: both buttons stay in place, disabled. A long operator name is cut,
+          and the flow name is the page's h1. */}
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.HandheldTopBar
+          flow="Change password"
+          flowAs="h1"
+          onBack={() => message.info("Back")}
+          backLabel="Back"
+          backDisabled
+          site="RO_CONSTANTA_PORT_SOUTH_03"
+          user="Maria-Alexandra Constantinescu-Dumitrescu"
+          onSessionClick={() => message.info("Session menu")}
+          sessionAriaLabel="Session: RO_CONSTANTA_PORT_SOUTH_03, Maria-Alexandra Constantinescu-Dumitrescu"
+          sessionDisabled
+        />
+      </UI.ConfigProvider>
     </div>
   );
 }
@@ -2218,6 +2261,18 @@ export function ResultBandDemo() {
           instruction="Scan the shelf label, not the pallet's."
         >
           <code>PAL-0042</code> is a pallet label.
+        </UI.ResultBand>
+      </UI.ConfigProvider>
+      {/* A refusal is a whole sentence: the lines wrap and the band grows. */}
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.ResultBand
+          tone="danger"
+          title="Refused"
+          signal="2 beeps · long vibration"
+          instruction="Put the pallet aside and ask the shift lead to check the delivery note."
+        >
+          Lot <code>L-2026-0917-B</code> expires in 12 days, and this product needs at least 60 days
+          of shelf life at receipt.
         </UI.ResultBand>
       </UI.ConfigProvider>
     </div>

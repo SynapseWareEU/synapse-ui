@@ -28,13 +28,16 @@ const toneClass: Record<ResultBandTone, string> = {
   danger: "bg-danger-strong",
 };
 
-const lineClass = "m-0 min-w-0 truncate text-hh-band-line";
+// Lines wrap: a refusal is a whole sentence, and a cut sentence cannot be acted on. A word longer
+// than the band (a pasted identifier) breaks rather than widening the page.
+const lineClass = "m-0 min-w-0 break-words text-hh-band-line";
 
 /**
  * Result band (spec §4.7): full-width answer to the scan just read, readable across the aisle.
  * Padding 16, gap 6; a 28 title row (icon + title, signal pushed right), then 17/22 lines.
- * 88 tall with one line (success), 110 with two (danger). The band colours are fixed in both
- * themes; the text is `on-action` white.
+ * 88 tall with one line (success), 110 with two (danger); the title and the lines wrap, so a
+ * longer answer grows the band instead of being cut. The band colours are fixed in both themes;
+ * the text is `on-action` white.
  */
 export function ResultBand({
   tone = "success",
@@ -72,11 +75,15 @@ export function ResultBand({
       )}
       {...rest}
     >
-      <div className="flex items-center gap-su2 h-su7 min-w-0">
-        {glyph ? <span className="inline-flex shrink-0 [&>svg]:block">{glyph}</span> : null}
-        <span className="min-w-0 truncate text-hh-primary font-semibold">{title}</span>
+      {/* Top-aligned, with the icon and the signal each centred on the first 28 line, so a title
+          that wraps to a second line leaves them where they were. */}
+      <div className="flex items-start gap-su2 min-h-su7 min-w-0">
+        {glyph ? (
+          <span className="inline-flex items-center shrink-0 h-su7 [&>svg]:block">{glyph}</span>
+        ) : null}
+        <span className="min-w-0 break-words text-hh-primary font-semibold">{title}</span>
         {signal ? (
-          <span className="flex items-center gap-[6px] shrink-0 ms-auto text-small font-semibold whitespace-nowrap">
+          <span className="flex items-center gap-[6px] shrink-0 h-su7 ms-auto text-small font-semibold whitespace-nowrap">
             <IconVolume size={16} stroke={HH_STROKE} aria-hidden className="shrink-0" />
             {signal}
           </span>

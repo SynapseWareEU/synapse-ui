@@ -68,6 +68,8 @@ export type {
   TableProps,
   TableSize,
   TableSort,
+  TableStack,
+  TableRowAttributes,
   TableCellKind,
   TableRowProps,
   TableThProps,

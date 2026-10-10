@@ -111,6 +111,10 @@ Entries in bold are new in 0.2.
 - **Status is never colour alone.** A `StatusDot` or a Tag dot always sits next to a word, because the warning and success solids are below 3:1.
 - **Forms**: labels above fields, help or error below. There is no required asterisk; mark the optional fields with `FormItem optional` instead. `Form layout="horizontal"` is the page form: `FormSection`s in one panel, ended by `FormActions` (primary first, left-packed).
 - **Tables** are always a panel: `Table.Th sort / onSort / facet / numeric`, `Table.Td kind`, `Table.Row selected / expanded / meta`, and `footer` for keyset paging (`Pagination variant="keyset"`).
+- **A table on a phone is the same tree.** `<Table stack="lg">` draws the table as a list of records below that breakpoint (list roles, no header row, no sideways scroll); keep its `aria-label`, which names the list, and give a value its own label where the header was the only thing naming it. `Table.Row metaRowProps` and `Table.Detail rowProps` put attributes on the `<tr>`s you do not render yourself.
+- **Switch**: the field label names it (a `FormItem` label, `aria-label` or `aria-labelledby`); its children are the state in words and may be a function of the state. With no other name, the children are the label.
+- **Select** passes `aria-label`, `data-testid` and its other props to the trigger. `variant="ghost"` is the borderless picker for chrome, such as a header's site switcher.
+- **Handheld**: `ResultBand` lines wrap. `HandheldTopBar` takes `backDisabled`, `sessionDisabled` and `flowAs="h1"`, and cuts a long site or operator name.
 - Icons are Tabler (`@tabler/icons-react`) with `iconDefaults` (stroke 1.75, round caps and joins). `Icon size` is `sm` 14, `md` 16, `lg` 20, or a number of pixels.
 - `Form` uses native submission and validation; read values with `FormData`. Set `htmlType="submit"` on the submit button.
 - `Pagination.total` is a page count unless you pass `pageSize`, in which case it is an item count.
@@ -140,5 +144,6 @@ npm run test:browser # needs Google Chrome and a running dev server
 The suite:
 - renders every component route;
 - drives the key interactions: dialogs, selects, transfer, splitter, virtualisation, table filtering, uploads, tour, search and theme persistence;
+- checks release A: the switch name, the ghost Select, the top bar's disabled buttons, truncation and heading, the wrapping result band, `--su-inverse-ink-2`, the table `<tr>` props and the stacked shape (read from Chrome's accessibility tree at 390);
 - checks the v2 look: 36px default controls, 6px radius, sans sentence-case labels, IBM Plex loaded, drawer 480, modal at 96, and 44px touch targets under `(hover: none)`;
 - checks for horizontal overflow at 390, 820 and 1440 px.

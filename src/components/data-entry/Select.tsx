@@ -1,6 +1,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { IconCheck, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "../../utils/cn";
 import { useFieldState, useFormItemContext } from "./Form";
 import { selectTriggerClass, selectTriggerSizeClass } from "./Input";
@@ -9,7 +9,17 @@ import type { InputSize, SelectOption } from "./types";
 /** Shared combobox trigger surface: Select, Cascader, TreeSelect (defined beside the field in Input). */
 export { selectTriggerClass, selectTriggerSizeClass };
 
-export interface SelectProps {
+export type SelectVariant = "outlined" | "ghost";
+
+/**
+ * Anything else (`aria-label`, `aria-labelledby`, `data-testid`, `id`, `autoFocus`, `onBlur`…)
+ * lands on the trigger, the `role="combobox"` button.
+ */
+export interface SelectProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    "value" | "defaultValue" | "prefix" | "children" | "name" | "form" | "type"
+  > {
   value?: string;
   defaultValue?: string;
   placeholder?: string;
@@ -23,8 +33,28 @@ export interface SelectProps {
    * The trigger then sizes to its content instead of filling the row.
    */
   prefix?: ReactNode;
+  /**
+   * `outlined` (default): the field. `ghost`: no border and no ground, for a picker that sits in
+   * chrome rather than in a form (the header's site switcher): 36 tall, padding 0 10, radius 6,
+   * `fill` under a pointer and while open. It sizes to its content; cap it with a `max-w-*` class.
+   */
+  variant?: SelectVariant;
   onValueChange?: (value: string) => void;
 }
+
+/*
+ * Ghost trigger: transparent, borderless, the shared focus outline. Its own class list rather than
+ * overrides on the field's, because `cn()` never resolves two utilities for one property.
+ */
+const ghostTriggerClass =
+  "inline-flex items-center gap-su2 min-w-0 w-auto max-w-full font-sans font-normal text-start text-ink whitespace-nowrap cursor-pointer bg-transparent border-0 rounded-su-control su-focus-ring transition-[background-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:enabled:bg-fill data-[state=open]:bg-fill disabled:text-ink-3 disabled:cursor-not-allowed";
+
+/** Ghost geometry: 32 / 36 / 48 tall · padding 0 8 / 0 10 / 0 12. */
+const ghostTriggerSizeClass: Record<InputSize, string> = {
+  sm: "min-h-[var(--su-control-sm)] px-su2 text-control",
+  md: "min-h-[var(--su-control-md)] px-[10px] text-control",
+  lg: "min-h-[var(--su-control-lg)] px-su3 text-section [[data-density=handheld]_&]:text-control",
+};
 
 /**
  * An option's main line. With a `code` it is the reference pair (§2.2): the code in mono 500,
@@ -64,7 +94,9 @@ export function Select({
   className,
   children,
   prefix,
+  variant = "outlined",
   onValueChange,
+  ...rest
 }: SelectProps) {
   const item = useFormItemContext();
   const { size, disabled: isDisabled } = useFieldState(sizeProp, disabled);
@@ -79,14 +111,19 @@ export function Select({
     >
       <SelectPrimitive.Trigger
         id={item?.id}
-        className={cn(
-          selectTriggerClass,
-          selectTriggerSizeClass[size],
-          hasPrefix ? "w-auto max-w-full whitespace-nowrap" : "w-full",
-          className,
-        )}
+        className={
+          variant === "ghost"
+            ? cn(ghostTriggerClass, ghostTriggerSizeClass[size], className)
+            : cn(
+                selectTriggerClass,
+                selectTriggerSizeClass[size],
+                hasPrefix ? "w-auto max-w-full whitespace-nowrap" : "w-full",
+                className,
+              )
+        }
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}
+        {...rest}
       >
         {/* Radix's SelectValue drops className, so the truncation lives on a wrapper. */}
         <span className="flex-1 min-w-0 truncate">

@@ -97,6 +97,51 @@ try {
  await page.goto(BASE+'/#Modal');await page.getByRole('button',{name:'Open modal',exact:true}).click();await page.getByRole('dialog').waitFor();await page.waitForTimeout(400);
  assert.deepEqual(await page.getByRole('dialog').evaluate(d=>{const r=d.getBoundingClientRect();return [Math.round(r.top),Math.round(r.width),getComputedStyle(d).borderRadius,getComputedStyle(d).boxShadow!=='none']}),[96,480,'8px',true],'the modal is anchored 96 from the top, 480 wide, radius 8, with the overlay shadow');await page.keyboard.press('Escape');await page.getByRole('dialog').waitFor({state:'hidden'});
  console.log('PASS: v2 look — 36px default button, 6px control radius, no scan beam, sans sentence-case labels and headers, IBM Plex shipped, drawer 480, modal at 96.');
+ // --- release A: what the Lattice boards needed from the library ---
+ await page.goto(BASE+'/#Switch');const switches=page.locator('.detail-preview');
+ assert.equal(await switches.getByRole('switch',{name:'Notifications',exact:true}).count(),1,'a switch with no other name is still named by its words');
+ const inspection=switches.getByRole('switch',{name:'Inspection on receipt',exact:true});assert.equal(await inspection.count(),1,'in a FormItem the field label alone names the switch, not "label + state words"');
+ assert.equal(await switches.getByText('Asked at every receipt',{exact:true}).getAttribute('aria-hidden'),'true','state words beside a named switch are visual only');
+ await switches.getByText('Asked at every receipt',{exact:true}).click();await switches.getByText('Not asked',{exact:true}).waitFor();assert.equal(await inspection.getAttribute('aria-checked'),'false','the state words toggle the switch and follow its state');assert.equal(await inspection.count(),1,'the name does not change when the switch is flipped');
+ assert.equal(await switches.getByRole('switch',{name:'Shared device',exact:true}).count(),1,'aria-label is kept when a switch has state words');
+ await page.goto(BASE+'/#Select');const ghost=page.locator('.detail-preview').getByRole('combobox',{name:'Warehouse',exact:true});
+ assert.equal(await ghost.getAttribute('data-testid'),'warehouse-switcher','Select forwards rest props (aria-label, data-testid) to its trigger');
+ assert.deepEqual(await ghost.evaluate(b=>{const c=getComputedStyle(b);return [c.borderTopWidth,c.backgroundColor,Math.round(b.getBoundingClientRect().height),c.borderRadius,c.paddingLeft]}),['0px','rgba(0, 0, 0, 0)',36,'6px','10px'],'the ghost Select is borderless and transparent: 36 tall, radius 6, padding 0 10');
+ await ghost.click();await page.getByRole('option',{name:/Cluj-Napoca/}).click();assert.match(await ghost.innerText(),/RO_CLJ_02/,'the ghost Select still picks a value');
+ assert.deepEqual(await page.locator('.detail-preview').getByRole('combobox').first().evaluate(b=>{const c=getComputedStyle(b);return [c.borderTopWidth,Math.round(b.getBoundingClientRect().height)]}),['1px',36],'the default Select is still the outlined field');
+ await page.goto(BASE+'/#HandheldTopBar');const bar=page.locator('.detail-preview header').nth(2);
+ assert.equal(await bar.getByRole('button',{name:'Back',exact:true}).isDisabled(),true,'backDisabled disables the back button and keeps it in place');
+ assert.equal(await bar.getByRole('button',{name:/^Session: /}).isDisabled(),true,'sessionDisabled disables the session button');
+ assert.equal(await bar.getByRole('heading',{name:'Change password',level:1}).count(),1,'flowAs renders the flow name as a heading');
+ assert.equal(await page.locator('.detail-preview header').first().getByRole('heading').count(),0,'without flowAs the flow name stays a span');
+ assert.equal(await page.locator('.detail-preview header').first().getByRole('button',{name:'Menu',exact:true}).isEnabled(),true,'the back button is enabled by default');
+ assert.deepEqual(await bar.evaluate(h=>{h.parentElement.style.width='280px';const row=h.firstElementChild,back=row.querySelector('button'),user=row.querySelectorAll('button')[1].lastElementChild;return [h.scrollWidth<=h.clientWidth,row.scrollWidth<=row.clientWidth,user.scrollWidth>user.clientWidth,getComputedStyle(user).textOverflow,back.scrollWidth<=back.clientWidth]}),[true,true,true,'ellipsis',true],'a long operator name is cut with an ellipsis; the bar never grows wider than its frame and the back button keeps its width');
+ await page.goto(BASE+'/#ResultBand');const bands=page.locator('.detail-preview [role="status"],.detail-preview [role="alert"]');
+ assert.deepEqual(await bands.evaluateAll(bs=>bs.slice(0,2).map(b=>Math.round(b.getBoundingClientRect().height))),[88,110],'one-line bands keep the drawn heights: 88 and 110');
+ const longBand=await bands.nth(2).evaluate(b=>{const lines=[...b.lastElementChild.children];return {h:Math.round(b.getBoundingClientRect().height),clipped:lines.filter(l=>l.scrollWidth>l.clientWidth||getComputedStyle(l).textOverflow==='ellipsis').length,lineHeights:lines.map(l=>Math.round(l.getBoundingClientRect().height))}});
+ assert.equal(longBand.clipped,0,'ResultBand lines wrap instead of clipping');assert.ok(longBand.h>110&&longBand.lineHeights.every(h=>h>22),`a long refusal grows the band over several 22 lines: ${JSON.stringify(longBand)}`);
+ for(const theme of ['light','dark']){const cur=await page.locator('html').getAttribute('data-theme');if(cur!==theme){await page.getByRole('button',{name:`Switch to ${theme} mode`}).click();await page.waitForTimeout(250)}
+  const inv=await page.evaluate(()=>{const p=document.createElement('i');document.body.append(p);const read=v=>{p.style.color=`var(${v})`;return getComputedStyle(p).color};const r={ink:read('--su-inverse-ink'),ink2:read('--su-inverse-ink-2'),raw:getComputedStyle(document.documentElement).getPropertyValue('--su-inverse-ink-2').trim()};p.remove();return r});
+  assert.ok(inv.raw!==''&&inv.ink2!==inv.ink,`--su-inverse-ink-2 is defined and is not inverse-ink in ${theme}: ${JSON.stringify(inv)}`);}
+ // Table: props on the second <tr> of a meta row and on a detail's <tr>, then the opt-in stacked shape,
+ // read from Chrome's own accessibility tree (whether a `display: block` table is still a table is the browser's call).
+ const axTree=async()=>{const cdp=await page.context().newCDPSession(page);const {nodes}=await cdp.send('Accessibility.getFullAXTree');await cdp.detach();const byId=new Map(nodes.map(n=>[n.nodeId,n]));const shown=id=>{let at=id===undefined?undefined:byId.get(id);while(at&&at.ignored===true)at=at.parentId===undefined?undefined:byId.get(at.parentId);return at&&at.nodeId};return nodes.filter(n=>n.ignored!==true).map(n=>({role:String(n.role?.value??''),name:String(n.name?.value??''),id:n.nodeId,parent:shown(n.parentId)}))};
+ await page.goto(BASE+'/#Table');await page.getByRole('table',{name:'Stock by location'}).waitFor();
+ assert.deepEqual(await page.locator('[data-testid="stock-A-02-01-3-meta"],[data-testid="stock-A-01-01-1-detail"]').evaluateAll(es=>es.map(e=>e.tagName).sort()),['TR','TR'],'metaRowProps reach the meta <tr> and rowProps reach the detail <tr>');
+ assert.equal(await page.locator('[data-testid="stock-A-02-01-3"]').evaluate(e=>e.tagName),'TR','the row\'s own props still reach its first <tr>');
+ assert.equal(await page.locator('#pallets-A-01-01-1').evaluate(e=>e.tagName),'TD','the other Table.Detail props still reach its <td>');
+ {const wide=await axTree();assert.ok(wide.some(n=>n.role==='table'&&n.name==='Stock by location')&&wide.some(n=>n.role==='columnheader'),'at desk width a stack table is a real table with its column headers');}
+ await page.setViewportSize({width:390,height:844});await page.goto(BASE+'/#Table');await page.locator('table[role="list"][aria-label="Stock by location"]').waitFor();
+ {const narrow=await axTree();const list=narrow.find(n=>n.role==='list'&&n.name==='Stock by location');assert.ok(list,'under its breakpoint a stack table is a list with the same name');
+  assert.deepEqual(narrow.filter(n=>n.role==='table').map(n=>n.name).sort(),['Loading','Projects'],'the stacked table and the table nested in its detail expose no table role (the two tables without stack stay tables)');
+  const owned=narrow.filter(n=>n.parent===list.id).map(n=>n.role);assert.ok(owned.length>=5&&owned.every(r=>r==='listitem'),`the list owns list items and nothing else: ${owned}`);
+  const nested=narrow.find(n=>n.role==='list'&&n.name==='Pallets in A-01-01-1');assert.ok(nested&&narrow.filter(n=>n.parent===nested.id).every(n=>n.role==='listitem'),'a table nested in a detail follows its parent into the list shape');}
+ assert.equal(await page.locator('table[aria-label="Stock by location"]').count(),1,'one tree: the stacked shape is the same <table>');
+ assert.equal(await page.locator('[data-testid="stock-A-02-01-3-meta"]').count(),0,'stacked, a meta line is not a row of its own');assert.match(await page.locator('[data-testid="stock-A-02-01-3"]').innerText(),/Count to approve/,'stacked, the meta line is inside its record');
+ assert.deepEqual(await page.locator('table[aria-label="Stock by location"]').evaluate(t=>[getComputedStyle(t.tHead).display,t.scrollWidth<=t.clientWidth,getComputedStyle(t.parentElement).overflowX,document.documentElement.scrollWidth===document.documentElement.clientWidth]),['none',true,'visible',true],'stacked, the header row is not drawn and nothing scrolls sideways');
+ assert.equal(await page.locator('table[aria-label="Projects"]').evaluate(t=>getComputedStyle(t).display),'table','a table without stack is a table at every width');
+ await page.setViewportSize({width:1440,height:1000});
+ console.log('PASS: release A — switch name and state words, ghost Select and rest props, top bar disabled buttons, truncation and heading, wrapping result band, inverse-ink-2, table tr props and the stacked shape.');
 
 
 

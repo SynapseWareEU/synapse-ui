@@ -24,6 +24,7 @@ const neutrals: Token[] = [
   ["ink-3", "Placeholders, disabled, “—”; on surface only"],
   ["control-raised", "Segmented thumb"],
   ["inverse-surface", "Tooltip"],
+  ["inverse-ink-2", "Secondary text on the inverse surface"],
 ];
 
 const action: Token[] = [

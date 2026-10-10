@@ -4,6 +4,15 @@ export type TableSize = "default" | "nested";
 /** Cell kinds bake in the face rule: mono only for identifiers. */
 export type TableCellKind = "text" | "id" | "idSecondary" | "secondary" | "number" | "empty" | "control" | "actions";
 export type TableSort = "ascending" | "descending" | "none";
+/** Breakpoint below which a `stack` table is drawn as a list. Same widths as the `sm:` … `xl:` variants. */
+export type TableStack = "sm" | "md" | "lg" | "xl";
+/**
+ * Attributes for a `<tr>` handed over as an object (`metaRowProps`, `rowProps`). `data-*` is
+ * spelled out because an object literal, unlike JSX, does not accept it on `HTMLAttributes`.
+ */
+export type TableRowAttributes = HTMLAttributes<HTMLTableRowElement> & {
+    [key: `data-${string}`]: string | number | boolean | undefined;
+};
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
     /** @deprecated No-op. v2 tables never stripe; a row shows surface-hover under a pointer. */
     striped?: boolean;
@@ -23,9 +32,21 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
     footer?: ReactNode;
     /** Marks the table busy (`aria-busy`). Render `<Table.SkeletonRow>`s of 40 in the body meanwhile. */
     loading?: boolean;
+    /**
+     * Opt-in narrow shape. Below this breakpoint the same tree is drawn as a list of records and
+     * nothing scrolls sideways: the header row is not drawn, each `Table.Row` is a wrapping block
+     * (padding 8 16, values 12 apart, a rule below) with its `meta` folded in as a last full-width
+     * line, and cells lose their padding, rule and column alignment (`kind="actions"` goes to the
+     * end of its line). Roles follow the shape: the table is a `list`, every row, group row, fold
+     * row and detail a `listitem`. Keep the `aria-label`: it names the list. Give a value its own
+     * label where the lost header was the only thing naming it, and lay a record out with classes
+     * on its cells (`basis-full` puts one on a line of its own). A table nested in a `Table.Detail`
+     * follows its parent. Default: off, a table at every width.
+     */
+    stack?: TableStack;
     children?: ReactNode;
 }
-export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, loading, className, children, ...rest }: TableProps): import("react").JSX.Element;
+export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, loading, stack, className, children, ...rest }: TableProps): import("react").JSX.Element;
 export declare namespace Table {
     var Head: typeof TableHead;
     var Body: typeof TableBody;
@@ -54,8 +75,14 @@ export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
     meta?: ReactNode;
     /** 1-based column where the meta line starts. Default 2. */
     metaStart?: number;
+    /**
+     * Props for the second `<tr>`, the one a `meta` line is drawn in (`data-testid`, `id`,
+     * `aria-*`). The row's own props reach the first `<tr>` only. Unused without `meta`, and in the
+     * stacked shape, where the meta line is inside the row itself.
+     */
+    metaRowProps?: TableRowAttributes;
 }
-export declare function TableRow({ selected, expanded, meta, metaStart, className, children, ...rest }: TableRowProps): import("react").JSX.Element;
+export declare function TableRow({ selected, expanded, meta, metaStart, metaRowProps, className, children, ...rest }: TableRowProps): import("react").JSX.Element;
 export interface TableThProps extends ThHTMLAttributes<HTMLTableCellElement> {
     /** Numeric column: right-aligned (the header and its cells). */
     numeric?: boolean;
@@ -105,12 +132,17 @@ export declare const TableFacet: import("react").ForwardRefExoticComponent<Table
 export interface TableDetailProps extends TdHTMLAttributes<HTMLTableCellElement> {
     /** All the table's columns. */
     colSpan: number;
+    /**
+     * Props for the detail's own `<tr>` (`id`, `data-testid`, `role`, `aria-*`). Every other prop
+     * reaches the `<td>` inside it.
+     */
+    rowProps?: TableRowAttributes;
 }
 /**
  * Detail block under an `expanded` row: padding 12 16 16 56 (lines up with column 2 behind the
  * 24 disclosure column), surface-2, bottom rule. Holds a `<Table size="nested">`.
  */
-export declare function TableDetail({ colSpan, className, children, ...rest }: TableDetailProps): import("react").JSX.Element;
+export declare function TableDetail({ colSpan, rowProps, className, children, ...rest }: TableDetailProps): import("react").JSX.Element;
 export interface TableFoldRowProps extends HTMLAttributes<HTMLTableRowElement> {
     /** All the table's columns. */
     colSpan: number;

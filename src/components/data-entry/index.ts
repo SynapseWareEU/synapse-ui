@@ -47,7 +47,7 @@ export { Rate } from "./Rate";
 export type { RateProps } from "./Rate";
 
 export { Select } from "./Select";
-export type { SelectProps } from "./Select";
+export type { SelectProps, SelectVariant } from "./Select";
 
 export { Slider } from "./Slider";
 export type { SliderProps } from "./Slider";

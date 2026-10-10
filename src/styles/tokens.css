@@ -49,6 +49,7 @@
   --su-control-raised: #ffffff; /* segmented thumb */
   --su-inverse-surface: #111418; /* tooltip */
   --su-inverse-ink: #ffffff;
+  --su-inverse-ink-2: #cdd2d9; /* secondary text on the inverse surface */
 
   /* ——— Action ——— */
   --su-action: #1d4ed8;
@@ -382,6 +383,7 @@
   --su-control-raised: #353a42;
   --su-inverse-surface: #eceef1;
   --su-inverse-ink: #111418;
+  --su-inverse-ink-2: #525866;
 
   --su-action: #2563eb;
   --su-action-hover: #2e6bf0;
@@ -460,6 +462,7 @@
     --su-control-raised: #353a42;
     --su-inverse-surface: #eceef1;
     --su-inverse-ink: #111418;
+    --su-inverse-ink-2: #525866;
 
     --su-action: #2563eb;
     --su-action-hover: #2e6bf0;
@@ -585,6 +588,7 @@
     --su-ink-3: GrayText;
     --su-inverse-surface: Canvas;
     --su-inverse-ink: CanvasText;
+    --su-inverse-ink-2: CanvasText;
 
     --su-action: Highlight;
     --su-action-hover: Highlight;

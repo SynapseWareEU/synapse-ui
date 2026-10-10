@@ -3,7 +3,9 @@ import {
   createContext,
   forwardRef,
   isValidElement,
+  useCallback,
   useContext,
+  useSyncExternalStore,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
@@ -17,6 +19,10 @@ import { statusDotToneClass, type StatusDotTone } from "./StatusDot";
  * Lattice UI v2 table: always a Panel (surface, 1px border, radius 8). Native <table> with
  * separate borders, so every row height includes its own 1px bottom rule (40 means 40).
  * Column gap 16: cells pad 8 inline, the first and last cell pad 16 at the edge.
+ *
+ * `stack` is the narrow shape: below the breakpoint the SAME tree is drawn as a list of records
+ * (no header row, a row is a wrapping block, a meta line folds into its row) and takes list roles,
+ * so there is one tree in the DOM and nothing scrolls sideways.
  */
 
 export type TableSize = "default" | "nested";
@@ -31,6 +37,16 @@ export type TableCellKind =
   | "control"
   | "actions";
 export type TableSort = "ascending" | "descending" | "none";
+/** Breakpoint below which a `stack` table is drawn as a list. Same widths as the `sm:` … `xl:` variants. */
+export type TableStack = "sm" | "md" | "lg" | "xl";
+
+/**
+ * Attributes for a `<tr>` handed over as an object (`metaRowProps`, `rowProps`). `data-*` is
+ * spelled out because an object literal, unlike JSX, does not accept it on `HTMLAttributes`.
+ */
+export type TableRowAttributes = HTMLAttributes<HTMLTableRowElement> & {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
 
 type Section = "head" | "body" | "foot" | undefined;
 type Line = "single" | "first" | "meta";
@@ -41,6 +57,37 @@ const RowContext = createContext<{ line: Line; expanded: boolean }>({
   line: "single",
   expanded: false,
 });
+/** True while the table is in its stacked (list) shape. A nested table inherits it. */
+const StackedContext = createContext(false);
+
+const stackWidth: Record<TableStack, number> = { sm: 640, md: 768, lg: 1024, xl: 1280 };
+const noSubscription = () => () => {};
+
+/**
+ * Whether the viewport is under the `stack` breakpoint. Read from `matchMedia` and not left to
+ * CSS, because the list roles have to change with the shape: a `display: block` table that still
+ * says `table` reads as a table with no headers. Server render: the table shape.
+ */
+function useBelow(stack: TableStack | undefined): boolean {
+  const query = stack ? `(min-width: ${stackWidth[stack]}px)` : undefined;
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      if (!query || typeof window === "undefined" || !window.matchMedia) return () => {};
+      const media = window.matchMedia(query);
+      media.addEventListener("change", onChange);
+      return () => media.removeEventListener("change", onChange);
+    },
+    [query],
+  );
+  return useSyncExternalStore(
+    query ? subscribe : noSubscription,
+    () =>
+      query != null && typeof window !== "undefined" && !!window.matchMedia
+        ? !window.matchMedia(query).matches
+        : false,
+    () => false,
+  );
+}
 
 // ——— glyphs (stroke 1.75, round caps and joins) ———
 function Glyph({ size, children, className }: { size: number; children: ReactNode; className?: string }) {
@@ -68,6 +115,13 @@ const cellInline = (size: TableSize) =>
     ? "px-su2 first:ps-[15px] last:pe-[15px]"
     : "px-su2 first:ps-su4 last:pe-su4";
 const ruleBottom = "border-b border-solid border-border";
+
+// ——— stacked shape (below the `stack` breakpoint) ———
+// A record is a wrapping line box: padding 8 16 (15 inside a nested frame), its values 12 apart
+// and 2 between lines, a rule below. The values carry no padding or rule of their own.
+const stackedInline = (size: TableSize) => (size === "nested" ? "px-[15px]" : "px-su4");
+const stackedRule = "border-b border-solid border-border last:border-b-0";
+const stackedCell = "block min-w-0 p-0";
 
 /**
  * Block padding and the bottom rule of a body cell. The first line of a meta row has no rule and
@@ -103,6 +157,18 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   footer?: ReactNode;
   /** Marks the table busy (`aria-busy`). Render `<Table.SkeletonRow>`s of 40 in the body meanwhile. */
   loading?: boolean;
+  /**
+   * Opt-in narrow shape. Below this breakpoint the same tree is drawn as a list of records and
+   * nothing scrolls sideways: the header row is not drawn, each `Table.Row` is a wrapping block
+   * (padding 8 16, values 12 apart, a rule below) with its `meta` folded in as a last full-width
+   * line, and cells lose their padding, rule and column alignment (`kind="actions"` goes to the
+   * end of its line). Roles follow the shape: the table is a `list`, every row, group row, fold
+   * row and detail a `listitem`. Keep the `aria-label`: it names the list. Give a value its own
+   * label where the lost header was the only thing naming it, and lay a record out with classes
+   * on its cells (`basis-full` puts one on a line of its own). A table nested in a `Table.Detail`
+   * follows its parent. Default: off, a table at every width.
+   */
+  stack?: TableStack;
   children?: ReactNode;
 }
 
@@ -113,45 +179,57 @@ export function Table({
   empty,
   footer,
   loading = false,
+  stack,
   className,
   children,
   ...rest
 }: TableProps) {
+  const below = useBelow(stack);
+  const inherited = useContext(StackedContext);
+  const stacked = stack ? below : inherited;
   return (
     <TableContext.Provider value={size}>
       <SectionContext.Provider value={undefined}>
-        <div className="su-panel font-sans text-ink">
-          {/* `relative`: the scroller is the containing block for absolutely positioned cell
-              content (an `sr-only` header label), so it cannot escape the scroll and widen the page. */}
-          <div className="relative overflow-x-auto">
-            <table
-              aria-busy={loading || undefined}
-              className={cn(
-                "w-full border-separate [border-spacing:0] text-start",
-                size === "nested" ? "text-small" : "text-body",
-                className,
-              )}
-              {...rest}
-            >
-              {children}
-            </table>
-          </div>
-          {empty}
-          {footer != null ? (
-            <div className="flex items-center gap-su2 min-h-[var(--su-panel-footer)] px-su4 border-t border-solid border-border text-small text-ink-2">
-              {footer}
+        <StackedContext.Provider value={stacked}>
+          <div className="su-panel font-sans text-ink">
+            {/* `relative`: the scroller is the containing block for absolutely positioned cell
+                content (an `sr-only` header label), so it cannot escape the scroll and widen the page.
+                Stacked, nothing is wider than the panel, so there is no scroller. */}
+            <div className={stacked ? "relative" : "relative overflow-x-auto"}>
+              <table
+                aria-busy={loading || undefined}
+                role={stacked ? "list" : undefined}
+                className={cn(
+                  stacked
+                    ? "block w-full text-start"
+                    : "w-full border-separate [border-spacing:0] text-start",
+                  size === "nested" ? "text-small" : "text-body",
+                  className,
+                )}
+                {...rest}
+              >
+                {children}
+              </table>
             </div>
-          ) : null}
-        </div>
+            {empty}
+            {footer != null ? (
+              <div className="flex items-center gap-su2 min-h-[var(--su-panel-footer)] px-su4 border-t border-solid border-border text-small text-ink-2">
+                {footer}
+              </div>
+            ) : null}
+          </div>
+        </StackedContext.Provider>
       </SectionContext.Provider>
     </TableContext.Provider>
   );
 }
 
 export function TableHead({ className, children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
+  const stacked = useContext(StackedContext);
   return (
     <SectionContext.Provider value="head">
-      <thead className={className} {...rest}>
+      {/* Stacked: the header row stays in the tree (one tree) but is not drawn or announced. */}
+      <thead className={cn(stacked && "hidden", className)} {...rest}>
         {children}
       </thead>
     </SectionContext.Provider>
@@ -159,9 +237,11 @@ export function TableHead({ className, children, ...rest }: HTMLAttributes<HTMLT
 }
 
 export function TableBody({ className, children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
+  const stacked = useContext(StackedContext);
   return (
     <SectionContext.Provider value="body">
-      <tbody className={className} {...rest}>
+      {/* Stacked: `none`, so the list owns its items directly. */}
+      <tbody role={stacked ? "none" : undefined} className={cn(stacked && "block", className)} {...rest}>
         {children}
       </tbody>
     </SectionContext.Provider>
@@ -180,6 +260,12 @@ export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   meta?: ReactNode;
   /** 1-based column where the meta line starts. Default 2. */
   metaStart?: number;
+  /**
+   * Props for the second `<tr>`, the one a `meta` line is drawn in (`data-testid`, `id`,
+   * `aria-*`). The row's own props reach the first `<tr>` only. Unused without `meta`, and in the
+   * stacked shape, where the meta line is inside the row itself.
+   */
+  metaRowProps?: TableRowAttributes;
 }
 
 /** Total columns a row's cells cover, and how many of them span down into the meta line. */
@@ -200,12 +286,14 @@ export function TableRow({
   expanded = false,
   meta,
   metaStart = 2,
+  metaRowProps,
   className,
   children,
   ...rest
 }: TableRowProps) {
   const section = useContext(SectionContext);
   const size = useContext(TableContext);
+  const stacked = useContext(StackedContext);
 
   if (section === "head") {
     return (
@@ -230,6 +318,30 @@ export function TableRow({
   const motion =
     "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none";
   const rowHeight = size === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]";
+
+  if (stacked) {
+    // One record, one list item: the meta line is the row's last line, not a row of its own.
+    return (
+      <RowContext.Provider value={{ line: "single", expanded }}>
+        <tr
+          role="listitem"
+          data-state={selected ? "selected" : undefined}
+          className={cn(
+            "flex flex-wrap items-baseline gap-x-su3 gap-y-[2px] py-su2",
+            stackedInline(size),
+            expanded ? undefined : stackedRule,
+            tone,
+            motion,
+            className,
+          )}
+          {...rest}
+        >
+          {children}
+          {meta != null ? <td className={cn(stackedCell, "basis-full")}>{meta}</td> : null}
+        </tr>
+      </RowContext.Provider>
+    );
+  }
 
   if (meta == null) {
     return (
@@ -277,7 +389,14 @@ export function TableRow({
       <RowContext.Provider value={{ line: "meta", expanded }}>
         <tr
           data-state={selected ? "selected" : undefined}
-          className={cn("h-[30px]", tone, motion, "[&:last-child>*]:border-b-0")}
+          {...metaRowProps}
+          className={cn(
+            "h-[30px]",
+            tone,
+            motion,
+            "[&:last-child>*]:border-b-0",
+            metaRowProps?.className,
+          )}
         >
           {Array.from({ length: lead }, (_, i) => (
             <TableTd key={i} />
@@ -315,16 +434,17 @@ export function TableTh({
   const section = useContext(SectionContext);
   const size = useContext(TableContext);
   const { line, expanded } = useContext(RowContext);
+  const stacked = useContext(StackedContext);
 
   // A <th scope="row"> inside the body reads as a body cell, not a header.
   if (section === "body") {
     return (
       <th
         className={cn(
-          cellInline(size),
-          bodyCell(line, expanded, (rest.rowSpan ?? 1) > 1),
+          stacked ? stackedCell : cellInline(size),
+          stacked ? undefined : bodyCell(line, expanded, (rest.rowSpan ?? 1) > 1),
           "[font-weight:inherit]",
-          numeric ? "text-end" : "text-start",
+          numeric && !stacked ? "text-end" : "text-start",
           className,
         )}
         {...rest}
@@ -418,6 +538,14 @@ const kindClass: Record<TableCellKind, string | undefined> = {
   actions: "w-px whitespace-nowrap",
 };
 
+// Stacked: the same faces, without the column behaviour (shrink-to-content tracks, right
+// alignment). The actions go to the end of whichever line they are on.
+const stackedKindClass: Record<TableCellKind, string | undefined> = {
+  ...kindClass,
+  control: "shrink-0 whitespace-nowrap",
+  actions: "shrink-0 ms-auto whitespace-nowrap",
+};
+
 export function TableTd({
   numeric = false,
   kind = "text",
@@ -428,8 +556,25 @@ export function TableTd({
 }: TableTdProps) {
   const size = useContext(TableContext);
   const { line, expanded } = useContext(RowContext);
+  const stacked = useContext(StackedContext);
   const end = numeric || kind === "number" || kind === "actions";
   const content = kind === "empty" && children == null ? "—" : children;
+  if (stacked) {
+    return (
+      <td
+        rowSpan={rowSpan}
+        className={cn(
+          stackedCell,
+          stackedKindClass[kind],
+          numeric && kind !== "number" ? "su-tabular whitespace-nowrap" : undefined,
+          className,
+        )}
+        {...rest}
+      >
+        {content}
+      </td>
+    );
+  }
   // First line of a meta row: a 20px line, as drawn. A control taller than that (the 32 "⋯", the
   // 24 disclosure) is centred on the line and overhangs it, instead of pushing the row past 60.
   const onFirstLine =
@@ -460,11 +605,19 @@ export function TableTd({
 
 /** Group row, 36: surface-2, 13/18 600 ink. Put a `Table.Disclosure` in the first cell. */
 export function TableGroupRow({ className, children, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
+  const size = useContext(TableContext);
+  const stacked = useContext(StackedContext);
   return (
     <RowContext.Provider value={{ line: "single", expanded: false }}>
       <tr
+        role={stacked ? "listitem" : undefined}
         className={cn(
-          "h-[var(--su-row-group)] bg-surface-2 text-small font-semibold text-ink [&:last-child>*]:border-b-0",
+          stacked
+            ? "flex items-center gap-su2 min-h-[var(--su-row-group)]"
+            : "h-[var(--su-row-group)] [&:last-child>*]:border-b-0",
+          stacked ? stackedInline(size) : undefined,
+          stacked ? stackedRule : undefined,
+          "bg-surface-2 text-small font-semibold text-ink",
           className,
         )}
         {...rest}
@@ -548,18 +701,37 @@ export const TableFacet = forwardRef<HTMLButtonElement, TableFacetProps>(functio
 export interface TableDetailProps extends TdHTMLAttributes<HTMLTableCellElement> {
   /** All the table's columns. */
   colSpan: number;
+  /**
+   * Props for the detail's own `<tr>` (`id`, `data-testid`, `role`, `aria-*`). Every other prop
+   * reaches the `<td>` inside it.
+   */
+  rowProps?: TableRowAttributes;
 }
 
 /**
  * Detail block under an `expanded` row: padding 12 16 16 56 (lines up with column 2 behind the
  * 24 disclosure column), surface-2, bottom rule. Holds a `<Table size="nested">`.
  */
-export function TableDetail({ colSpan, className, children, ...rest }: TableDetailProps) {
+export function TableDetail({ colSpan, rowProps, className, children, ...rest }: TableDetailProps) {
+  const size = useContext(TableContext);
+  const stacked = useContext(StackedContext);
   return (
-    <tr className="[&:last-child>*]:border-b-0">
+    <tr
+      // Stacked: an item of its own, so its contents do not sit loose between two records.
+      role={stacked ? "listitem" : undefined}
+      {...rowProps}
+      className={cn(stacked && "block", "[&:last-child>*]:border-b-0", rowProps?.className)}
+    >
       <td
         colSpan={colSpan}
-        className={cn("pt-su3 pb-su4 ps-[56px] pe-su4 bg-surface-2", ruleBottom, className)}
+        className={cn(
+          // Stacked: no disclosure column to line up behind, so the block starts at the row's edge.
+          stacked ? "block pt-su3 pb-su4" : "pt-su3 pb-su4 ps-[56px] pe-su4",
+          stacked ? stackedInline(size) : undefined,
+          "bg-surface-2",
+          ruleBottom,
+          className,
+        )}
         {...rest}
       >
         {children}
@@ -587,17 +759,32 @@ export function TableFoldRow({
   ...rest
 }: TableFoldRowProps) {
   const size = useContext(TableContext);
-  const lead = Math.max(0, Math.min(startColumn - 1, colSpan - 1));
+  const stacked = useContext(StackedContext);
+  // Stacked: there are no columns to start at, so the text starts at the row's edge.
+  const lead = stacked ? 0 : Math.max(0, Math.min(startColumn - 1, colSpan - 1));
   return (
     <RowContext.Provider value={{ line: "single", expanded: false }}>
       <tr
-        className={cn("h-[var(--su-row-group)] text-small [&:last-child>*]:border-b-0", className)}
+        role={stacked ? "listitem" : undefined}
+        className={cn(
+          stacked ? "block" : "h-[var(--su-row-group)]",
+          "text-small [&:last-child>*]:border-b-0",
+          className,
+        )}
         {...rest}
       >
         {Array.from({ length: lead }, (_, i) => (
           <TableTd key={i} />
         ))}
-        <td colSpan={colSpan - lead} className={cn(cellInline(size), "py-[4px] align-middle", ruleBottom)}>
+        <td
+          colSpan={colSpan - lead}
+          className={cn(
+            // Stacked: 9 + 18 + 9 keeps the fold line at 36.
+            stacked ? "block py-[9px]" : "py-[4px] align-middle",
+            stacked ? stackedInline(size) : cellInline(size),
+            ruleBottom,
+          )}
+        >
           <span className="inline-flex items-baseline gap-su3 flex-wrap">
             <span className="text-ink-2">{children}</span>
             {action != null ? <span className="font-medium">{action}</span> : null}
@@ -666,19 +853,22 @@ export interface TableSkeletonRowProps extends HTMLAttributes<HTMLTableRowElemen
 /** Loading placeholder row (40, 32 when nested). Pair with `<Table loading>`. */
 export function TableSkeletonRow({ columns, className, ...rest }: TableSkeletonRowProps) {
   const size = useContext(TableContext);
+  const stacked = useContext(StackedContext);
   return (
     <RowContext.Provider value={{ line: "single", expanded: false }}>
       <tr
         aria-hidden="true"
         className={cn(
           size === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]",
-          "[&:last-child>*]:border-b-0",
+          stacked ? "flex items-center gap-su3" : "[&:last-child>*]:border-b-0",
+          stacked ? stackedInline(size) : undefined,
+          stacked ? stackedRule : undefined,
           className,
         )}
         {...rest}
       >
         {Array.from({ length: columns }, (_, i) => (
-          <TableTd key={i}>
+          <TableTd key={i} className={stacked ? "flex-1" : undefined}>
             <span className="block h-[12px] w-full max-w-[160px] rounded-su-tag su-skeleton-active" />
           </TableTd>
         ))}

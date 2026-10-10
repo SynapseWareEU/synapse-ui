@@ -59,6 +59,7 @@ export default defineConfig({
       "control-raised": "var(--su-control-raised)",
       inverse: "var(--su-inverse-surface)",
       "inverse-ink": "var(--su-inverse-ink)",
+      "inverse-ink-2": "var(--su-inverse-ink-2)",
       scrim: "var(--su-scrim)",
       "scrim-strong": "var(--su-scrim-strong)",
       // ——— v2 action ———

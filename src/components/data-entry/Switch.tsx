@@ -1,5 +1,5 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { cn } from "../../utils/cn";
 import { useFormContext, useFormItemContext } from "./Form";
 
@@ -19,8 +19,14 @@ export interface SwitchProps {
   /**
    * The state in words, beside the switch in 14/20 ink ("Pornit", "Se cere la fiecare recepție").
    * v2 always pairs the switch with its state; the field label sits above, in a FormItem.
+   * A function receives the current state, so an uncontrolled switch can word both of them:
+   * `{(on) => (on ? "Pornit" : "Oprit")}`.
+   *
+   * When the switch already has a name (the FormItem's label, `aria-label` or `aria-labelledby`)
+   * that name is kept and the words are visual only: the state itself is announced by the switch
+   * role. With no other name, the words are the label, as a plain `<label>` wrapping them.
    */
-  children?: ReactNode;
+  children?: ReactNode | ((checked: boolean) => ReactNode);
   onCheckedChange?: (checked: boolean) => void;
 }
 
@@ -91,6 +97,14 @@ export function Switch({
   const form = useFormContext();
   const item = useFormItemContext();
   const isDisabled = disabled ?? form.disabled;
+  // Mirrors the uncontrolled state, only so `children` as a function can word it.
+  const [inner, setInner] = useState(defaultChecked ?? false);
+  const words = typeof children === "function" ? children(checked ?? inner) : children;
+  // The name the switch has without its state words. `aria-labelledby` outranks both the
+  // FormLabel's `htmlFor` and the wrapping <label>, so the words stay out of the name and the
+  // name does not change each time the switch is flipped.
+  const labelledBy = ariaLabelledBy ?? (ariaLabel == null ? item?.labelId : undefined);
+  const named = ariaLabel != null || labelledBy != null;
 
   return (
     <label
@@ -104,10 +118,8 @@ export function Switch({
     >
       <SwitchPrimitive.Root
         id={idProp ?? item?.id}
-        // Visible children already name the control via the wrapping <label>;
-        // forwarding aria-label too would let the two diverge (WCAG 2.5.3).
-        aria-label={children ? undefined : ariaLabel}
-        aria-labelledby={children ? undefined : ariaLabelledBy}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         checked={checked}
         defaultChecked={defaultChecked}
         disabled={isDisabled}
@@ -129,7 +141,9 @@ export function Switch({
           }
         }}
         onCheckedChange={(next) => {
-          if (!loading) onCheckedChange?.(next);
+          if (loading) return;
+          setInner(next);
+          onCheckedChange?.(next);
         }}
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}
@@ -139,9 +153,14 @@ export function Switch({
           {loading ? <ThumbSpinner /> : null}
         </SwitchPrimitive.Thumb>
       </SwitchPrimitive.Root>
-      {children && (
-        <span className={cn("text-body select-none", isDisabled ? "text-ink-3" : "text-ink")}>
-          {children}
+      {words && (
+        <span
+          // Named elsewhere: the words repeat what the switch role already says ("on" / "off").
+          aria-hidden={named || undefined}
+          data-su-switch-state=""
+          className={cn("text-body select-none", isDisabled ? "text-ink-3" : "text-ink")}
+        >
+          {words}
         </span>
       )}
     </label>
