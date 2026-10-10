@@ -30,13 +30,16 @@ export interface SelectProps
   children?: ReactNode;
   /**
    * Toolbar form ("Grupează: Produs"): a lead-in drawn in ink-2 before the value, which stays ink.
-   * The trigger then sizes to its content instead of filling the row.
+   * The trigger then sizes to its content instead of filling the row. On a `ghost` trigger it is
+   * a leading slot of its own, 8 before the value and never cut with it (the 16 building icon of
+   * a site switcher).
    */
   prefix?: ReactNode;
   /**
    * `outlined` (default): the field. `ghost`: no border and no ground, for a picker that sits in
    * chrome rather than in a form (the header's site switcher): 36 tall, padding 0 10, radius 6,
-   * `fill` under a pointer and while open. It sizes to its content; cap it with a `max-w-*` class.
+   * `fill` under a pointer and while open, an option's `code` in mono 600. It sizes to its
+   * content; cap it with a `max-w-*` class. On a touch screen its hit area is 44 tall.
    */
   variant?: SelectVariant;
   onValueChange?: (value: string) => void;
@@ -44,10 +47,12 @@ export interface SelectProps
 
 /*
  * Ghost trigger: transparent, borderless, the shared focus outline. Its own class list rather than
- * overrides on the field's, because `cn()` never resolves two utilities for one property.
+ * overrides on the field's, because `cn()` never resolves two utilities for one property. The code
+ * of the chosen option is 600 here, not the option row's 500: it is the page's place name. Under
+ * (hover: none) a centred pad makes the 36 box a 44 target, as on Button.
  */
 const ghostTriggerClass =
-  "inline-flex items-center gap-su2 min-w-0 w-auto max-w-full font-sans font-normal text-start text-ink whitespace-nowrap cursor-pointer bg-transparent border-0 rounded-su-control su-focus-ring transition-[background-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:enabled:bg-fill data-[state=open]:bg-fill disabled:text-ink-3 disabled:cursor-not-allowed";
+  "relative [&_[data-su-code]]:font-semibold [@media(hover:none)]:before:content-empty [@media(hover:none)]:before:absolute [@media(hover:none)]:before:inset-[min(0px,calc((100%_-_var(--su-hit-target))/2))] inline-flex items-center gap-su2 min-w-0 w-auto max-w-full font-sans font-normal text-start text-ink whitespace-nowrap cursor-pointer bg-transparent border-0 rounded-su-control su-focus-ring transition-[background-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:enabled:bg-fill data-[state=open]:bg-fill disabled:text-ink-3 disabled:cursor-not-allowed";
 
 /** Ghost geometry: 32 / 36 / 48 tall · padding 0 8 / 0 10 / 0 12. */
 const ghostTriggerSizeClass: Record<InputSize, string> = {
@@ -66,7 +71,9 @@ export function SelectOptionLabel({ option, label }: { option: SelectOption; lab
   if (!option.code) return <>{name}</>;
   return (
     <span className="inline-flex max-w-full items-baseline gap-su2 align-top">
-      <span className="shrink-0 font-mono font-medium">{option.code}</span>{" "}
+      <span data-su-code="" className="shrink-0 font-mono font-medium">
+        {option.code}
+      </span>{" "}
       <span className="min-w-0 truncate text-ink-2">{name}</span>
     </span>
   );
@@ -101,6 +108,7 @@ export function Select({
   const item = useFormItemContext();
   const { size, disabled: isDisabled } = useFieldState(sizeProp, disabled);
   const hasPrefix = prefix != null && prefix !== false && prefix !== "";
+  const ghost = variant === "ghost";
 
   return (
     <SelectPrimitive.Root
@@ -112,7 +120,7 @@ export function Select({
       <SelectPrimitive.Trigger
         id={item?.id}
         className={
-          variant === "ghost"
+          ghost
             ? cn(ghostTriggerClass, ghostTriggerSizeClass[size], className)
             : cn(
                 selectTriggerClass,
@@ -126,8 +134,11 @@ export function Select({
         {...rest}
       >
         {/* Radix's SelectValue drops className, so the truncation lives on a wrapper. */}
+        {hasPrefix && ghost ? (
+          <span className="inline-flex items-center shrink-0 text-ink-2">{prefix}</span>
+        ) : null}
         <span className="flex-1 min-w-0 truncate">
-          {hasPrefix && (
+          {hasPrefix && !ghost && (
             <>
               <span className="text-ink-2">{prefix}</span>{" "}
             </>

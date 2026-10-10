@@ -41,7 +41,9 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
      * row and detail a `listitem`. Keep the `aria-label`: it names the list. Give a value its own
      * label where the lost header was the only thing naming it, and lay a record out with classes
      * on its cells (`basis-full` puts one on a line of its own). A table nested in a `Table.Detail`
-     * follows its parent. Default: off, a table at every width.
+     * follows its parent, and so does one rendered from inside a stacked row through a portal (a
+     * drawer or popover opened from the row: React context crosses portals); give that table its
+     * own `stack` to decide for itself. Default: off, a table at every width.
      */
     stack?: TableStack;
     children?: ReactNode;
@@ -161,7 +163,10 @@ export interface TableMetaProps extends HTMLAttributes<HTMLSpanElement> {
     /** A 500 link after " · ". */
     action?: ReactNode;
 }
-/** Content of a row's meta line: dot · lead · 13/18 ink-2 text · link. */
+/**
+ * Content of a row's meta line: dot · lead · 13/18 ink-2 text · link. In a table one line, the
+ * text cut with an ellipsis; in a stacked record the same sentence wraps and is read in full.
+ */
 export declare function TableMeta({ tone, lead, action, className, children, ...rest }: TableMetaProps): import("react").JSX.Element;
 export interface TableSkeletonRowProps extends HTMLAttributes<HTMLTableRowElement> {
     /** All the table's columns. */

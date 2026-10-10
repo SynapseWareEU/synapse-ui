@@ -939,6 +939,7 @@ export function SelectDemo() {
         variant="ghost"
         aria-label="Warehouse"
         data-testid="warehouse-switcher"
+        prefix={<IconBuildingWarehouse size={16} {...UI.iconDefaults} className="text-ink-3" />}
         defaultValue="buc"
         className="max-w-[280px]"
         options={[
@@ -2273,6 +2274,17 @@ export function ResultBandDemo() {
         >
           Lot <code>L-2026-0917-B</code> expires in 12 days, and this product needs at least 60 days
           of shelf life at receipt.
+        </UI.ResultBand>
+      </UI.ConfigProvider>
+      {/* A title too long to share its line with the signal: the signal drops under it. */}
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.ResultBand
+          tone="danger"
+          title="Refused: wrong location"
+          signal="2 beeps · long vibration"
+          instruction="Scan the shelf label, not the pallet's."
+        >
+          <code>PAL-0042</code> is a pallet label.
         </UI.ResultBand>
       </UI.ConfigProvider>
     </div>

@@ -19,13 +19,16 @@ export interface SelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
     children?: ReactNode;
     /**
      * Toolbar form ("Grupează: Produs"): a lead-in drawn in ink-2 before the value, which stays ink.
-     * The trigger then sizes to its content instead of filling the row.
+     * The trigger then sizes to its content instead of filling the row. On a `ghost` trigger it is
+     * a leading slot of its own, 8 before the value and never cut with it (the 16 building icon of
+     * a site switcher).
      */
     prefix?: ReactNode;
     /**
      * `outlined` (default): the field. `ghost`: no border and no ground, for a picker that sits in
      * chrome rather than in a form (the header's site switcher): 36 tall, padding 0 10, radius 6,
-     * `fill` under a pointer and while open. It sizes to its content; cap it with a `max-w-*` class.
+     * `fill` under a pointer and while open, an option's `code` in mono 600. It sizes to its
+     * content; cap it with a `max-w-*` class. On a touch screen its hit area is 44 tall.
      */
     variant?: SelectVariant;
     onValueChange?: (value: string) => void;

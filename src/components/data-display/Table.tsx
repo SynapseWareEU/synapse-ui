@@ -121,7 +121,9 @@ const ruleBottom = "border-b border-solid border-border";
 // and 2 between lines, a rule below. The values carry no padding or rule of their own.
 const stackedInline = (size: TableSize) => (size === "nested" ? "px-[15px]" : "px-su4");
 const stackedRule = "border-b border-solid border-border last:border-b-0";
-const stackedCell = "block min-w-0 p-0";
+// A cell with nothing in it (a spacer under a lost column) is not a value: it takes no place, so
+// it adds no 12 gap either.
+const stackedCell = "block min-w-0 p-0 empty:hidden";
 
 /**
  * Block padding and the bottom rule of a body cell. The first line of a meta row has no rule and
@@ -166,7 +168,9 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
    * row and detail a `listitem`. Keep the `aria-label`: it names the list. Give a value its own
    * label where the lost header was the only thing naming it, and lay a record out with classes
    * on its cells (`basis-full` puts one on a line of its own). A table nested in a `Table.Detail`
-   * follows its parent. Default: off, a table at every width.
+   * follows its parent, and so does one rendered from inside a stacked row through a portal (a
+   * drawer or popover opened from the row: React context crosses portals); give that table its
+   * own `stack` to decide for itself. Default: off, a table at every width.
    */
   stack?: TableStack;
   children?: ReactNode;
@@ -337,7 +341,8 @@ export function TableRow({
           {...rest}
         >
           {children}
-          {meta != null ? <td className={cn(stackedCell, "basis-full")}>{meta}</td> : null}
+          {/* `order-last`: a screen may reorder its cells with `order-*`; the meta stays the last line. */}
+          {meta != null ? <td className={cn(stackedCell, "basis-full order-last")}>{meta}</td> : null}
         </tr>
       </RowContext.Provider>
     );
@@ -812,8 +817,39 @@ const toneText: Record<StatusDotTone, string> = {
   danger: "text-danger-text",
 };
 
-/** Content of a row's meta line: dot · lead · 13/18 ink-2 text · link. */
+/**
+ * Content of a row's meta line: dot · lead · 13/18 ink-2 text · link. In a table one line, the
+ * text cut with an ellipsis; in a stacked record the same sentence wraps and is read in full.
+ */
 export function TableMeta({ tone, lead, action, className, children, ...rest }: TableMetaProps) {
+  const stacked = useContext(StackedContext);
+  if (stacked) {
+    return (
+      <span className={cn("block min-w-0 break-words text-small text-ink-2", className)} {...rest}>
+        {tone ? (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "inline-block size-[6px] me-[6px] align-middle rounded-su-round forced-colors:[forced-color-adjust:none]",
+              statusDotToneClass[tone],
+            )}
+          />
+        ) : null}
+        {lead != null ? (
+          <>
+            <span className={cn("font-medium", tone ? toneText[tone] : "text-ink")}>{lead}</span>{" "}
+          </>
+        ) : null}
+        {children}
+        {action != null ? (
+          <>
+            {" "}
+            <span aria-hidden="true">·</span> <span className="font-medium">{action}</span>
+          </>
+        ) : null}
+      </span>
+    );
+  }
   return (
     <span
       className={cn(
