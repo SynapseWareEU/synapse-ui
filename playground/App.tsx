@@ -11,7 +11,12 @@ import {
 import { Glyph } from "./icons";
 import { PhaseMark } from "./PhaseMark";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { Code } from "./code";
+import { Tokens } from "./Tokens";
 import "./workbench.css";
+
+const VERSION = "0.2.0";
+const isMac = typeof navigator !== "undefined" && /Mac|iP(hone|ad|od)/.test(navigator.platform);
 
 const codeFor = (name: string) => {
   const body = demoSource
@@ -20,55 +25,12 @@ const codeFor = (name: string) => {
     ?.trim();
   return `import { useState } from 'react';\nimport * as UI from 'synapse-ui';\nimport 'synapse-ui/styles.css';\n\n// Render inside <UI.App> for shared theme and feedback APIs.\nexport function Example() ${body || "{}"}\n`;
 };
-function CopyButton({
-  text,
-  label = "Copy code",
-}: {
-  text: string;
-  label?: string;
-}) {
-  const [status, setStatus] = useState("");
-  useEffect(() => {
-    if (!status) return;
-    const timer = setTimeout(() => setStatus(""), 2500);
-    return () => clearTimeout(timer);
-  }, [status]);
-  return (
-    <button
-      className="quiet-button"
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setStatus("Copied");
-        } catch {
-          setStatus("Select and copy manually");
-        }
-      }}
-    >
-      <Glyph name={status === "Copied" ? "check" : "copy"} size={15} />
-      <span role="status">{status || label}</span>
-    </button>
-  );
-}
 function Demo({ name }: { name: ComponentName }) {
   const Preview = demos[`${name}Demo`];
   return (
     <ErrorBoundary key={name}>
       <Preview />
     </ErrorBoundary>
-  );
-}
-function Code({ text }: { text: string }) {
-  return (
-    <div className="code-block">
-      <div className="code-toolbar">
-        <span>React · TSX</span>
-        <CopyButton text={text} />
-      </div>
-      <pre>
-        <code>{text}</code>
-      </pre>
-    </div>
   );
 }
 function routeFromHash() {
@@ -78,17 +40,28 @@ function routeFromHash() {
     ? hash
     : "overview";
 }
+function readStored<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  try {
+    const value = localStorage.getItem(key);
+    return (allowed as readonly string[]).includes(value ?? "") ? (value as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function store(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+}
 export function PlaygroundApp() {
   const [route, setRoute] = useState(routeFromHash);
-  const [theme, setTheme] = useState<UI.ThemeMode>(() => {
-    try {
-      return localStorage.getItem("synapse-theme") === "dark"
-        ? "dark"
-        : "light";
-    } catch {
-      return "light";
-    }
-  });
+  const [theme, setTheme] = useState<UI.ThemeMode>(() =>
+    readStored("synapse-theme", ["light", "dark"] as const, "light"),
+  );
+  // Preview density: component previews render inside `data-density="handheld"` when it is on.
+  const [density, setDensity] = useState<UI.ConfigDensity>(() =>
+    readStored("synapse-density", ["desk", "handheld"] as const, "desk"),
+  );
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All components");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -122,6 +95,7 @@ export function PlaygroundApp() {
     setQuery("");
     setMobileOpen(false);
   };
+  const handheld = density === "handheld";
   const current = components.find((c) => c.name === route);
   const filtered = components.filter(
     (c) =>
@@ -154,7 +128,7 @@ export function PlaygroundApp() {
             <span>
               synapse<span className="brand-ui">ui</span>
             </span>
-            <span className="version">0.1</span>
+            <span className="version">{VERSION.replace(/\.0$/, "")}</span>
           </a>
           <div className="search-box">
             <Glyph name="search" size={16} />
@@ -165,13 +139,14 @@ export function PlaygroundApp() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <kbd>⌘ K</kbd>
+            <UI.Kbd aria-hidden="true">{isMac ? "⌘ K" : "Ctrl K"}</UI.Kbd>
           </div>
           <nav className="side-scroll">
             {!query && (
               <div className="top-links">
                 <a
                   className={route === "overview" ? "selected" : ""}
+                  aria-current={route === "overview" ? "page" : undefined}
                   href="#overview"
                 >
                   <Glyph name="grid" />
@@ -179,6 +154,7 @@ export function PlaygroundApp() {
                 </a>
                 <a
                   className={route === "start" ? "selected" : ""}
+                  aria-current={route === "start" ? "page" : undefined}
                   href="#start"
                 >
                   <Glyph name="arrow" />
@@ -186,9 +162,10 @@ export function PlaygroundApp() {
                 </a>
                 <a
                   className={route === "tokens" ? "selected" : ""}
+                  aria-current={route === "tokens" ? "page" : undefined}
                   href="#tokens"
                 >
-                  <Glyph name="settings" />
+                  <Glyph name="palette" />
                   Design tokens
                 </a>
               </div>
@@ -233,8 +210,11 @@ export function PlaygroundApp() {
               )}
           </nav>
           <div className="sidebar-foot">
-            <span className="status-dot" />
-            Built with Radix primitives<small>React + TypeScript</small>
+            <UI.StatusDot tone="success" />
+            <span>
+              Lattice UI v2
+              <small>React · Radix · UnoCSS · IBM Plex</small>
+            </span>
           </div>
         </aside>
         <div className="workspace">
@@ -246,10 +226,12 @@ export function PlaygroundApp() {
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen(!mobileOpen)}
               >
-                <Glyph name="menu" />
+                <Glyph name="menu" size={20} />
               </button>
-              <span>Library</span>
-              <Glyph name="chevron" size={12} />
+              <span className="toolbar-root">Library</span>
+              <span className="toolbar-root">
+                <Glyph name="chevron" size={14} />
+              </span>
               <strong>
                 {current?.name ||
                   (route === "tokens"
@@ -262,8 +244,29 @@ export function PlaygroundApp() {
               </strong>
             </div>
             <div className="toolbar-right">
-              <span className="release-label">v0.1.0</span>
+              <span className="release-label">v{VERSION}</span>
               <span className="toolbar-divider" />
+              <UI.Tooltip
+                content={
+                  handheld
+                    ? "Previews render at handheld density"
+                    : "Render previews at handheld density"
+                }
+              >
+                <button
+                  className="toolbar-toggle"
+                  aria-pressed={handheld}
+                  aria-label="Handheld density"
+                  onClick={() => {
+                    const next = handheld ? "desk" : "handheld";
+                    setDensity(next);
+                    store("synapse-density", next);
+                  }}
+                >
+                  <Glyph name={handheld ? "handheld" : "desk"} />
+                  <span>{handheld ? "Handheld" : "Desk"}</span>
+                </button>
+              </UI.Tooltip>
               <UI.Tooltip
                 content={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
               >
@@ -273,17 +276,15 @@ export function PlaygroundApp() {
                   onClick={() => {
                     const next = theme === "light" ? "dark" : "light";
                     setTheme(next);
-                    try {
-                      localStorage.setItem("synapse-theme", next);
-                    } catch {}
+                    store("synapse-theme", next);
                   }}
                 >
-                  <Glyph name={theme === "light" ? "moon" : "sun"} />
+                  <Glyph name={theme === "light" ? "moon" : "sun"} size={18} />
                 </button>
               </UI.Tooltip>
               <a className="toolbar-start" href="#start">
                 Get started
-                <Glyph name="arrow" size={15} />
+                <Glyph name="arrow" size={16} />
               </a>
             </div>
           </header>
@@ -292,7 +293,7 @@ export function PlaygroundApp() {
               <>
                 <div className="detail-heading">
                   <a className="back-link" href="#components">
-                    All components <Glyph name="chevron" size={12} />{" "}
+                    All components <Glyph name="chevron" size={14} />{" "}
                     {current.category}
                   </a>
                   <h1>{current.name}</h1>
@@ -300,9 +301,16 @@ export function PlaygroundApp() {
                 </div>
                 <div className="section-heading">
                   <h2>Preview</h2>
-                  <span>Interactive example</span>
+                  <span>
+                    {handheld
+                      ? 'Inside data-density="handheld"'
+                      : "Interactive example"}
+                  </span>
                 </div>
-                <div className="detail-preview">
+                <div
+                  className="detail-preview"
+                  data-density={handheld ? "handheld" : undefined}
+                >
                   <Demo name={current.name} />
                 </div>
                 <div className="section-heading" id="demo-code">
@@ -314,9 +322,9 @@ export function PlaygroundApp() {
                   <Glyph name="code" />
                   <p>
                     Import from <code>synapse-ui</code> and include{" "}
-                    <code>synapse-ui/styles.css</code> once. Wrap your
-                    application with <a href="#App">App</a> to share theme and
-                    feedback APIs.
+                    <code>synapse-ui/styles.css</code> once; it carries the tokens and
+                    the IBM Plex faces. Wrap your application with{" "}
+                    <a href="#App">App</a> to share theme, density and feedback APIs.
                   </p>
                 </div>
                 <div className="component-pagination">
@@ -344,39 +352,7 @@ export function PlaygroundApp() {
                 </div>
               </>
             ) : route === "start" ? (
-              <>
-                <div className="detail-heading">
-                  <h1>A familiar starting point.</h1>
-                  <p>
-                    Bring Synapse UI into your React application. Start with a
-                    provider, add the stylesheet, and make it yours.
-                  </p>
-                </div>
-                <div className="section-heading">
-                  <h2>1. Add the library</h2>
-                </div>
-                <p className="body-copy">
-                  This library is local. Build it, create a package, then
-                  install the resulting tarball in your application.
-                </p>
-                <Code
-                  text={
-                    "# In the synapse-ui directory\nnpm run build\nnpm pack\n\n# In your React application\nnpm install /path/to/synapse-ui-0.1.0.tgz"
-                  }
-                />
-                <div className="section-heading">
-                  <h2>2. Make yourself at home</h2>
-                </div>
-                <Code
-                  text={
-                    'import { App, Button } from "synapse-ui";\nimport "synapse-ui/styles.css";\n\nexport default function MyApp() {\n  return (\n    <App theme="light">\n      <Button variant="primary">Get started</Button>\n    </App>\n  );\n}'
-                  }
-                />
-                <a href="#components" className="text-link">
-                  Explore all {components.length} components{" "}
-                  <Glyph name="arrow" size={16} />
-                </a>
-              </>
+              <GettingStarted count={components.length} />
             ) : route === "tokens" ? (
               <Tokens />
             ) : (
@@ -389,29 +365,21 @@ export function PlaygroundApp() {
                       <span>accounted for.</span>
                     </h1>
                     <p>
-                      SynapseWare brand components. Square corners. One action colour.
-                      <br className="desktop-break" /> Built on Radix, styled with{" "}
-                      <code>--su-*</code> tokens.
+                      Lattice UI v2 for SynapseWare: white panels on a grey ground, one
+                      action blue, IBM Plex. Built on Radix, styled with{" "}
+                      <code>--su-*</code> tokens, from the desk to a 390-wide terminal.
                     </p>
                     <div className="intro-actions">
                       <UI.Button variant="primary" asChild>
                         <a href="#Button">Explore components</a>
                       </UI.Button>
-                      <UI.Button variant="ghost" asChild>
+                      <UI.Button asChild>
                         <a href="#start">Quick start</a>
                       </UI.Button>
+                      <UI.Button variant="ghost" asChild>
+                        <a href="#tokens">Design tokens</a>
+                      </UI.Button>
                     </div>
-                  </div>
-                  <div className="intro-note">
-                    <span className="radix-symbol" aria-hidden="true">
-                      <i />
-                      <b />
-                    </span>
-                    <span>
-                      Accessible foundations.
-                      <br />
-                      <strong>Your design language.</strong>
-                    </span>
                   </div>
                 </section>
                 <div className="preview-heading">
@@ -424,7 +392,7 @@ export function PlaygroundApp() {
                 >
                   <div className="feature-panel actions-panel">
                     <div className="sample-label">
-                      Actions{" "}
+                      Actions
                       <a href="#Button" aria-label="Explore Button">
                         <Glyph name="arrow" size={16} />
                       </a>
@@ -434,7 +402,7 @@ export function PlaygroundApp() {
                         variant="primary"
                         onClick={() => navigate("Button")}
                       >
-                        Get started
+                        Confirm receipt
                       </UI.Button>
                       <UI.Button onClick={() => navigate("Button")}>
                         Secondary
@@ -449,23 +417,27 @@ export function PlaygroundApp() {
                     <div className="sample-rule" />
                     <div className="mini-example-row">
                       <div>
-                        <span className="sample-caption">
-                          A touch of personality
-                        </span>
-                        <UI.Space>
-                          <UI.Avatar fallback="AM" />
-                          <UI.Avatar fallback="SC" />
-                          <UI.Avatar fallback="JL" />
-                          <span className="avatar-extra">+4</span>
+                        <span className="sample-caption">State, in words</span>
+                        <UI.Space wrap>
+                          <UI.Tag color="success" dot>
+                            Accepted
+                          </UI.Tag>
+                          <UI.Tag color="info" dot>
+                            In progress
+                          </UI.Tag>
+                          <UI.Tag color="warning" dot>
+                            Short pick
+                          </UI.Tag>
+                          <UI.Tag color="neutral">Draft</UI.Tag>
                         </UI.Space>
                       </div>
                       <div>
-                        <span className="sample-caption">
-                          Every state, considered
-                        </span>
-                        <UI.Space>
-                          <UI.Tag color="success">Published</UI.Tag>
-                          <UI.Tag color="accent">In progress</UI.Tag>
+                        <span className="sample-caption">Keys, not glyphs</span>
+                        <UI.Space size="small" align="center">
+                          <UI.Kbd>Ctrl K</UI.Kbd>
+                          <UI.Kbd>Esc</UI.Kbd>
+                          <UI.Kbd>↑</UI.Kbd>
+                          <UI.Kbd>↓</UI.Kbd>
                         </UI.Space>
                       </div>
                     </div>
@@ -479,25 +451,25 @@ export function PlaygroundApp() {
                     </div>
                     <div className="preference-row">
                       <span>
-                        <strong>Notifications</strong>
-                        <small>Stay in the loop</small>
+                        <strong>Short-pick alerts</strong>
+                        <small>Tell the supervisor at once</small>
                       </span>
                       <UI.Switch
                         defaultChecked
-                        aria-label="Enable notifications"
+                        aria-label="Enable short-pick alerts"
                       />
                     </div>
                     <div className="preference-row">
                       <span>
-                        <strong>Focus mode</strong>
-                        <small>A little less distraction</small>
+                        <strong>Beep on scan</strong>
+                        <small>One beep accepted, two refused</small>
                       </span>
-                      <UI.Switch aria-label="Enable focus mode" />
+                      <UI.Switch aria-label="Enable beep on scan" />
                     </div>
                     <div className="preference-slider">
-                      <Glyph name="sun" size={17} />
-                      <UI.Slider defaultValue={[64]} />
-                      <Glyph name="sun" size={23} />
+                      <Glyph name="sun" size={16} />
+                      <UI.Slider defaultValue={[64]} aria-label="Screen brightness" />
+                      <Glyph name="sun" size={20} />
                     </div>
                   </div>
                   <div className="feature-panel navigation-panel">
@@ -509,24 +481,25 @@ export function PlaygroundApp() {
                     </div>
                     <demos.SegmentedDemo />
                     <div className="navigation-caption">
-                      <span className="status-dot" />
+                      <UI.StatusDot tone="success" />
                       One view at a time. Everything in its place.
                     </div>
                   </div>
                   <div className="feature-panel input-panel">
                     <div className="sample-label">
-                      Room for your next idea
+                      Identifiers read character by character
                       <a href="#Input" aria-label="Explore Input">
                         <Glyph name="arrow" size={16} />
                       </a>
                     </div>
                     <UI.Input
-                      aria-label="Name your project"
-                      placeholder="Name your next project…"
-                      prefix={<Glyph name="layers" size={17} />}
+                      aria-label="Location"
+                      mono
+                      placeholder="A-09-01-1"
+                      prefix={<Glyph name="search" size={16} />}
                     />
                     <span className="sample-caption">
-                      Great things start with a simple input.
+                      Mono for SKUs, bins and order numbers; sans for everything else.
                     </span>
                   </div>
                 </section>
@@ -561,7 +534,7 @@ export function PlaygroundApp() {
                           <strong>{c.name}</strong>
                           <small>{descriptions[c.name]}</small>
                         </span>
-                        <Glyph name="chevron" size={15} />
+                        <Glyph name="chevron" size={16} />
                       </a>
                     ))}
                   </div>
@@ -573,11 +546,10 @@ export function PlaygroundApp() {
             )}
             <footer className="page-footer">
               <span>
-                Synapse UI <span className="footer-dot">·</span> Made for the
-                details.
+                Synapse UI {VERSION} <span className="footer-dot">·</span> Lattice UI v2
               </span>
               <a href="#tokens">
-                Explore the design language <Glyph name="arrow" size={14} />
+                Explore the design tokens <Glyph name="arrow" size={14} />
               </a>
             </footer>
           </main>
@@ -586,78 +558,61 @@ export function PlaygroundApp() {
     </UI.App>
   );
 }
-function Tokens() {
+
+function GettingStarted({ count }: { count: number }) {
   return (
     <>
       <div className="detail-heading">
-        <h1>SynapseWare brand tokens.</h1>
+        <h1>Getting started</h1>
         <p>
-          Paper, canvas, ink. One action colour. Square corners. Semantic{" "}
-          <code>--su-*</code> tokens from the brand guide.
+          Add the package, import one stylesheet, and wrap the application in{" "}
+          <code>App</code>. The IBM Plex faces ship with the library; nothing loads from a
+          font CDN.
         </p>
       </div>
       <div className="section-heading">
-        <h2>Brand ramp</h2>
-        <span>Light and dark appearances</span>
+        <h2>1. Add the package</h2>
+        <span>dist/ is committed, so a git dependency needs no build step</span>
       </div>
-      <div className="token-swatches">
-        {[
-          "navy",
-          "blue-deep",
-          "blue",
-          "cyan",
-          "teal",
-          "mint",
-          "action",
-          "accent",
-          "paper",
-          "canvas",
-          "ink",
-          "beam",
-        ].map((token) => (
-          <div key={token}>
-            <div
-              className="token-color"
-              style={{ background: `var(--su-${token})` }}
-            />
-            <code>--su-{token}</code>
-            <CopyButton text={`var(--su-${token})`} label="Copy token" />
-          </div>
-        ))}
-      </div>
+      <Code
+        lang="Shell"
+        text={
+          "# From git: pin a tag or a commit\nnpm install github:HEAPTRASH/synapse-ui#v2\n\n# Or from a local checkout\nnpm run build && npm pack\nnpm install /path/to/synapse-ui-" +
+          VERSION +
+          ".tgz"
+        }
+      />
       <div className="section-heading">
-        <h2>Typography</h2>
-        <span>Geist + Martian Mono</span>
-      </div>
-      <div className="type-specimens">
-        {(
-          [
-            "largeTitle",
-            "title1",
-            "title2",
-            "title3",
-            "headline",
-            "body",
-            "footnote",
-            "caption1",
-          ] as const
-        ).map((variant) => (
-          <div key={variant}>
-            <code>{variant}</code>
-            <UI.Typography variant={variant}>
-              Every unit, accounted for.
-            </UI.Typography>
-          </div>
-        ))}
-      </div>
-      <div className="section-heading">
-        <h2>Customize with confidence</h2>
+        <h2>2. Import the stylesheet and wrap the app</h2>
+        <span>Tokens, reset, fonts and component styles in one file</span>
       </div>
       <Code
         text={
-          '<App\n  theme="light"\n  tokens={{ accent: "#1D4ED8", action: "#1D4ED8" }}\n>\n  <YourApplication />\n</App>'
+          'import { App, Button } from "synapse-ui";\nimport "synapse-ui/styles.css";\n\nexport default function MyApp() {\n  return (\n    <App theme="light" locale="ro-RO">\n      <Button variant="primary">Confirmă recepția</Button>\n    </App>\n  );\n}'
         }
       />
+      <div className="section-heading">
+        <h2>3. Share the UnoCSS theme (optional)</h2>
+        <span>bg-surface, text-ink-2, rounded-su-control and the rest</span>
+      </div>
+      <Code
+        lang="uno.config.ts"
+        text={
+          'import { defineConfig } from "unocss";\nimport synapse from "synapse-ui/uno.config";\n\nexport default defineConfig({\n  ...synapse,\n  content: { filesystem: ["src/**/*.{ts,tsx}"] },\n});'
+        }
+      />
+      <div className="section-heading">
+        <h2>4. Handheld screens</h2>
+        <span>56 and 64 controls, 17px body, 2px field borders</span>
+      </div>
+      <Code
+        text={
+          'import { ConfigProvider, HandheldTopBar, ScanField } from "synapse-ui";\n\n<ConfigProvider density="handheld">\n  <HandheldTopBar flow="Recepție" step={2} total={4} onBack={goBack} />\n  <ScanField label="Scanează locația" onScan={check} />\n</ConfigProvider>'
+        }
+      />
+      <a href="#components" className="text-link">
+        Explore all {count} components <Glyph name="arrow" size={16} />
+      </a>
     </>
   );
 }

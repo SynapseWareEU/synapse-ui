@@ -8,4 +8,6 @@ export { Typography, Title, Text, Paragraph } from "./Typography";
 export type { TypographyProps, TypographyVariant, TypographyTone } from "./Typography";
 export { FloatButton } from "./FloatButton";
 export type { FloatButtonProps, FloatButtonPlacement } from "./FloatButton";
+export { Kbd } from "./Kbd";
+export type { KbdProps } from "./Kbd";
 //# sourceMappingURL=index.d.ts.map

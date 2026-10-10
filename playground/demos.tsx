@@ -1,150 +1,166 @@
-import { useState } from "react";
-import { IconPlus, IconStar } from "@tabler/icons-react";
+import { Fragment, useState } from "react";
+import {
+  IconBuildingWarehouse,
+  IconDownload,
+  IconDots,
+  IconFilter,
+  IconPlus,
+  IconSearch,
+  IconStar,
+  IconTrash,
+} from "@tabler/icons-react";
 import * as UI from "synapse-ui";
 
 export function ButtonDemo() {
   const { message } = UI.useApp();
-  const plus = (
-    <IconPlus size={14} {...UI.iconDefaults} />
-  );
+  const [pinned, setPinned] = useState(true);
+  const plus = <IconPlus {...UI.iconDefaults} />;
   return (
-    <UI.Space vertical block size="large">
-      <UI.Space wrap>
-        <UI.Button
-          variant="primary"
-          onClick={() => message.success("Primary action")}
-        >
-          Primary
-        </UI.Button>
-        <UI.Button onClick={() => message.info("Default action")}>
-          Default
-        </UI.Button>
-        <UI.Button variant="dashed">Dashed</UI.Button>
-        <UI.Button variant="ghost">Ghost</UI.Button>
-        <UI.Button variant="text">Text</UI.Button>
-        <UI.Button variant="text" arrow href="#Button">
-          Text with arrow
-        </UI.Button>
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button variant="primary" danger>
-          Primary
-        </UI.Button>
-        <UI.Button danger>Default</UI.Button>
-        <UI.Button variant="dashed" danger>
-          Dashed
-        </UI.Button>
-        <UI.Button variant="ghost" danger>
-          Ghost
-        </UI.Button>
-        <UI.Button variant="text" danger>
-          Text
-        </UI.Button>
-      </UI.Space>
-      <UI.Space wrap align="center">
-        <UI.Button variant="primary" size="lg">
-          Large
-        </UI.Button>
-        <UI.Button variant="primary" size="md">
-          Middle
-        </UI.Button>
-        <UI.Button variant="primary" size="sm">
-          Small
-        </UI.Button>
-        <UI.Button size="lg">Large</UI.Button>
-        <UI.Button size="md">Middle</UI.Button>
-        <UI.Button size="sm">Small</UI.Button>
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button variant="primary" loading>
-          Loading
-        </UI.Button>
-        <UI.Button loading>Loading</UI.Button>
-        <UI.Button variant="dashed" loading>
-          Loading
-        </UI.Button>
-        <UI.Button variant="ghost" loading>
-          Loading
-        </UI.Button>
-        <UI.Button variant="primary" loading aria-label="Loading" />
-        <UI.Button loading aria-label="Loading" />
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button variant="primary" icon={plus}>
-          Icon
-        </UI.Button>
-        <UI.Button icon={plus}>Icon</UI.Button>
-        <UI.Button icon={plus} iconPlacement="end">
-          Icon end
-        </UI.Button>
-        <UI.Button variant="primary" icon={plus} aria-label="Add" />
-        <UI.Button icon={plus} aria-label="Add" />
-        <UI.Button size="md" icon={plus} aria-label="Add" />
-        <UI.Button size="sm" icon={plus} aria-label="Add" />
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button asChild variant="primary">
-          <a href="#Button">asChild link</a>
-        </UI.Button>
-        <UI.Button asChild>
-          <a href="#Button">asChild default</a>
-        </UI.Button>
-        <UI.Button asChild variant="text">
-          <a href="#Button">asChild text</a>
-        </UI.Button>
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button variant="primary" disabled>
-          Primary
-        </UI.Button>
-        <UI.Button disabled>Default</UI.Button>
-        <UI.Button variant="dashed" disabled>
-          Dashed
-        </UI.Button>
-        <UI.Button variant="ghost" disabled>
-          Ghost
-        </UI.Button>
-        <UI.Button variant="text" disabled>
-          Text
-        </UI.Button>
-      </UI.Space>
-      <UI.Space vertical block>
-        <UI.Button variant="primary" block>
-          Primary block
-        </UI.Button>
-        <UI.Button block>Default block</UI.Button>
-      </UI.Space>
-      <UI.Space wrap>
-        <UI.Button variant="primary" href="#Button">
-          Primary with href
-        </UI.Button>
-        <UI.Button href="#Button">Default with href</UI.Button>
-        <UI.Button variant="ghost" href="#Button">
-          Ghost with href
-        </UI.Button>
-        <UI.Button variant="text" href="#Button">
-          Text link
-        </UI.Button>
-        <UI.Button variant="text" arrow href="#Button">
-          Text link with arrow
-        </UI.Button>
-      </UI.Space>
-    </UI.Space>
+    <div className="demo-stack">
+      <div>
+        <span className="demo-caption">Variants</span>
+        <div className="demo-row">
+          <UI.Button
+            variant="primary"
+            onClick={() => message.success("Receipt confirmed")}
+          >
+            Primary
+          </UI.Button>
+          <UI.Button variant="secondary" onClick={() => message.info("Secondary action")}>
+            Secondary
+          </UI.Button>
+          <UI.Button>Default</UI.Button>
+          <UI.Button variant="ghost">Ghost</UI.Button>
+          <UI.Button variant="dashed" icon={plus}>
+            Dashed
+          </UI.Button>
+          <UI.Button variant="text">Text link</UI.Button>
+        </div>
+      </div>
+      <div>
+        <span className="demo-caption">Danger forms: primary only to confirm a destructive action</span>
+        <div className="demo-row">
+          <UI.Button variant="primary" danger>
+            Delete location
+          </UI.Button>
+          <UI.Button danger icon={<IconTrash {...UI.iconDefaults} />}>
+            Delete
+          </UI.Button>
+          <UI.Button variant="ghost" danger>
+            Revoke
+          </UI.Button>
+          <UI.Button variant="dashed" danger>
+            Dashed
+          </UI.Button>
+          <UI.Button variant="text" danger>
+            Remove
+          </UI.Button>
+        </div>
+      </div>
+      <div>
+        <span className="demo-caption">Sizes: sm 28 · md 36 (default) · lg 48</span>
+        <div className="demo-row">
+          <UI.Button variant="primary" size="sm">
+            Small
+          </UI.Button>
+          <UI.Button variant="primary">Medium</UI.Button>
+          <UI.Button variant="primary" size="lg">
+            Large
+          </UI.Button>
+          <UI.Button size="sm">Small</UI.Button>
+          <UI.Button>Medium</UI.Button>
+          <UI.Button size="lg">Large</UI.Button>
+        </div>
+      </div>
+      <div>
+        <span className="demo-caption">Icon-only buttons are square: 24 · 32 · 44</span>
+        <div className="demo-row">
+          <UI.Button variant="ghost" size="sm" icon={<IconDots {...UI.iconDefaults} />} aria-label="Row actions" />
+          <UI.Button variant="ghost" icon={<IconFilter {...UI.iconDefaults} />} aria-label="Filter" />
+          <UI.Button icon={<IconDownload {...UI.iconDefaults} />} aria-label="Export" />
+          <UI.Button variant="primary" icon={plus} aria-label="Add" />
+          <UI.Button size="lg" icon={plus} aria-label="Add (large)" />
+          <UI.Button icon={plus}>Leading icon</UI.Button>
+          <UI.Button icon={plus} iconPlacement="end">
+            Trailing icon
+          </UI.Button>
+        </div>
+      </div>
+      <div>
+        <span className="demo-caption">Tight inset, toggle, loading and disabled</span>
+        <div className="demo-row">
+          <UI.Button variant="ghost" inset="tight">
+            Clear filters
+          </UI.Button>
+          <UI.Button
+            aria-pressed={pinned}
+            icon={<IconStar {...UI.iconDefaults} />}
+            onClick={() => setPinned(!pinned)}
+          >
+            {pinned ? "Pinned" : "Pin"}
+          </UI.Button>
+          <UI.Button variant="primary" loading>
+            Saving
+          </UI.Button>
+          <UI.Button loading>Loading</UI.Button>
+          <UI.Button loading aria-label="Loading" />
+          <UI.Button variant="primary" disabled>
+            Primary
+          </UI.Button>
+          <UI.Button disabled>Default</UI.Button>
+          <UI.Button variant="ghost" disabled>
+            Ghost
+          </UI.Button>
+          <UI.Button variant="text" disabled>
+            Text
+          </UI.Button>
+        </div>
+      </div>
+      <div>
+        <span className="demo-caption">Links and blocks</span>
+        <div className="demo-row">
+          <UI.Button asChild variant="primary">
+            <a href="#Button">asChild link</a>
+          </UI.Button>
+          <UI.Button href="#Button">Default with href</UI.Button>
+          <UI.Button variant="text" href="#Button">
+            Text link
+          </UI.Button>
+          <UI.Button variant="text" arrow href="#Button">
+            Marketing link with arrow
+          </UI.Button>
+        </div>
+        <UI.Space vertical block className="mt-su3">
+          <UI.Button variant="primary" block>
+            Primary block
+          </UI.Button>
+        </UI.Space>
+      </div>
+    </div>
   );
 }
 export function FloatButtonDemo() {
   const { message } = UI.useApp();
   return (
-    <div className="relative h-60 overflow-auto su-hairline p-su4 [transform:translateZ(0)]">
+    <div className="relative h-60 w-full overflow-auto su-hairline p-su4 [transform:translateZ(0)]">
       <p className="text-footnote text-ink-2">
-        Scroll this panel — the floating action stays pinned to its corner.
+        Scroll this panel — the floating actions stay pinned to their corners.
       </p>
-      <p className="mt-su4 text-footnote text-ink-3">
-        A FloatButton is normally fixed to the viewport; here a transformed
-        ancestor scopes it to the preview.
+      <p className="mt-su4 text-footnote text-ink-2">
+        A FloatButton is normally fixed to the viewport; here a transformed ancestor scopes it
+        to the preview.
       </p>
       <div className="h-60" />
       <UI.FloatButton
+        placement="bottom-left"
+        icon={<IconSearch {...UI.iconDefaults} />}
+        aria-label="Search"
+        tooltip="Search"
+        onClick={() => message.info("Search opened")}
+      />
+      <UI.FloatButton
+        variant="primary"
+        icon={<IconPlus {...UI.iconDefaults} />}
         tooltip="Create new"
         onClick={() => message.info("New item created")}
       >
@@ -156,17 +172,19 @@ export function FloatButtonDemo() {
 export function IconDemo() {
   return (
     <UI.Space direction="vertical" size="large">
-      <UI.Space size="large">
-        {(["sm", "md", "lg"] as const).map((size) => (
+      <UI.Space size="large" align="end">
+        {(["sm", "md", "lg", 24] as const).map((size) => (
           <UI.Space key={size} direction="vertical" size="small" align="center">
             <UI.Icon size={size} label={`Add (${size})`}>
               <IconPlus />
             </UI.Icon>
-            <span className="su-label text-ink-3">{size}</span>
+            <span className="text-small text-ink-2">
+              {size === "sm" ? "sm 14" : size === "md" ? "md 16" : size === "lg" ? "lg 20" : "24"}
+            </span>
           </UI.Space>
         ))}
       </UI.Space>
-      <p className="text-subhead text-ink">
+      <p className="text-body text-ink">
         Inline in running text <UI.Icon size="inherit"><IconStar /></UI.Icon> the icon
         follows the font-size and sits on the baseline.
       </p>
@@ -183,14 +201,34 @@ export function IconDemo() {
     </UI.Space>
   );
 }
+export function KbdDemo() {
+  return (
+    <UI.Space direction="vertical" size="large">
+      <UI.Space wrap align="center">
+        <UI.Kbd>Ctrl K</UI.Kbd>
+        <UI.Kbd>Esc</UI.Kbd>
+        <UI.Kbd>Enter</UI.Kbd>
+        <UI.Kbd>↑</UI.Kbd>
+        <UI.Kbd>↓</UI.Kbd>
+        <UI.Kbd>Tab</UI.Kbd>
+      </UI.Space>
+      <p className="m-0 text-body text-ink-2">
+        Press <UI.Kbd>Ctrl K</UI.Kbd> to search, then <UI.Kbd>↑</UI.Kbd> <UI.Kbd>↓</UI.Kbd> to
+        move and <UI.Kbd>Enter</UI.Kbd> to open.
+      </p>
+      <UI.Tooltip content={<>Search <UI.Kbd>Ctrl K</UI.Kbd></>}>
+        <UI.Button icon={<IconSearch {...UI.iconDefaults} />}>Search</UI.Button>
+      </UI.Tooltip>
+    </UI.Space>
+  );
+}
 export function TypographyDemo() {
   return (
     <UI.Space direction="vertical" size="large">
-      <UI.Typography variant="largeTitle">
-        Every unit, accounted for.
-      </UI.Typography>
-      <UI.Typography variant="lede" tone="secondary" measure="lede">
-        Geist for words. Martian Mono for codes, labels and specifications.
+      <UI.Typography variant="largeTitle">{"2\u202f290 buc"}</UI.Typography>
+      <UI.Typography variant="lede" measure="lede">
+        IBM Plex Sans for words, numbers, dates and units. IBM Plex Mono only for identifiers
+        people read character by character.
       </UI.Typography>
       <div className="w-full flex flex-col">
         {(
@@ -206,38 +244,38 @@ export function TypographyDemo() {
             "caption1",
             "caption2",
             "label",
+            "id",
+            "idSecondary",
           ] as const
         ).map((variant) => (
           <div
             key={variant}
             className="w-full grid grid-cols-[minmax(0,1fr)] sm:grid-cols-[120px_minmax(0,1fr)] items-baseline gap-su2 sm:gap-su4 border-b border-rule border-solid py-su3"
           >
-            <UI.Typography variant="label" tone="secondary">
-              {variant}
-            </UI.Typography>
+            <UI.Typography variant="label">{variant}</UI.Typography>
             <UI.Typography variant={variant}>
-              Every unit, accounted for.
+              {variant === "id" || variant === "idSecondary"
+                ? "SO-2026-004417"
+                : "Every unit, accounted for."}
             </UI.Typography>
           </div>
         ))}
       </div>
       <UI.Paragraph measure>
-        Running text stays near 62 characters wide, so the eye finds the next
-        line. Bay <UI.Typography variant="code">WH1-A-12-03</UI.Typography> holds{" "}
+        Running text stays near 62 characters wide, so the eye finds the next line. Bay{" "}
+        <UI.Typography variant="code">WH1-A-12-03</UI.Typography> holds{" "}
         <UI.Text strong>48</UI.Text> units of{" "}
-        <UI.Typography variant="code">LPN 00012847</UI.Typography>, counted on the same
-        line without breaking the paragraph into blocks.
+        <UI.Typography variant="code">LPN 00012847</UI.Typography>, counted on the same line
+        without breaking the paragraph into blocks.
       </UI.Paragraph>
-      <UI.Typography variant="title2">
-        WH1A1203LPN00012847LOT24118RECEIVING
-      </UI.Typography>
+      <UI.Typography variant="title2">WH1A1203LPN00012847LOT24118RECEIVING</UI.Typography>
       <UI.Typography variant="body" lines={2} measure>
-        Clamped to two lines with the full string kept in the title attribute,
-        the way a table cell or a drawer header needs it when a description runs
-        long past the width it was given.
+        Clamped to two lines with the full string kept in the title attribute, the way a table
+        cell or a drawer header needs it when a description runs long past the width it was
+        given.
       </UI.Typography>
       <UI.Space wrap>
-        {(["secondary", "tertiary", "quaternary", "danger", "success", "warning"] as const).map(
+        {(["secondary", "tertiary", "info", "success", "warning", "danger"] as const).map(
           (tone) => (
             <UI.Typography key={tone} variant="footnote" tone={tone}>
               {tone}
@@ -250,19 +288,22 @@ export function TypographyDemo() {
 }
 export function DividerDemo() {
   return (
-    <div className="w-full text-subhead text-ink">
+    <div className="w-full text-body text-ink">
       <p>Pallet PLT-4471 staged at dock 3.</p>
       <UI.Divider decorative={false} />
       <p>Next pick wave releases at 14:20.</p>
       <UI.Divider>Receiving</UI.Divider>
-      <UI.Divider labelPlacement="start">Putaway</UI.Divider>
+      <UI.Divider labelPlacement="start">Put-away</UI.Divider>
       <UI.Divider labelPlacement="end">Dispatch</UI.Divider>
-      <div className="font-mono text-footnote text-ink-2">
-        WH1-A-12-03 <UI.Divider orientation="vertical" /> LOT 24-118{" "}
-        <UI.Divider orientation="vertical" /> 12.500 kg
+      <div className="flex items-center text-small text-ink-2">
+        <span className="su-id-2">WH1-A-12-03</span>
+        <UI.Divider orientation="vertical" />
+        <span className="su-id-2">LOT 24-118</span>
+        <UI.Divider orientation="vertical" />
+        12,5 kg
       </div>
       <UI.Divider strength="strong" spacing="compact" />
-      <p className="text-ink-2">Bay top rule, 22% weight.</p>
+      <p className="text-ink-2">A strong rule, compact spacing.</p>
     </div>
   );
 }
@@ -270,20 +311,24 @@ export function FlexDemo() {
   return (
     <UI.Flex vertical gap={4} className="w-full">
       <UI.Flex justify="space-between" align="center" gap={3} wrap className="w-full">
-        <UI.Typography variant="label" tone="secondary" className="min-w-0 truncate">
+        <UI.Typography variant="id" className="min-w-0 truncate">
           WH1-A-12-03
         </UI.Typography>
         <UI.Flex gap={2} align="center">
-          <UI.Button>Cancel</UI.Button>
           <UI.Button variant="primary">Assign</UI.Button>
+          <UI.Button>Cancel</UI.Button>
         </UI.Flex>
       </UI.Flex>
       <UI.Flex gap={2} wrap>
         <UI.Tag>Inbound</UI.Tag>
-        <UI.Tag color="accent">Staged</UI.Tag>
+        <UI.Tag color="info" dot>
+          Staged
+        </UI.Tag>
         <UI.Tag>Picked</UI.Tag>
         <UI.Tag>Packed</UI.Tag>
-        <UI.Tag>Shipped</UI.Tag>
+        <UI.Tag color="success" dot>
+          Shipped
+        </UI.Tag>
       </UI.Flex>
     </UI.Flex>
   );
@@ -293,10 +338,8 @@ export function GridDemo() {
     <UI.Row gutter={[3, 3]} className="w-full">
       {[10, 14, 8, 8, 8].map((span, i) => (
         <UI.Col key={i} span={span} className="lt-md:(basis-full max-w-full)">
-          <div className="border-t-1 border-t-solid border-t-rule-strong pt-su2 pb-su4">
-            <span className="su-label text-label-secondary">
-              {span} / 24
-            </span>
+          <div className="bg-surface-2 border border-solid border-border rounded-su-control p-su3">
+            <span className="text-small text-ink-2">{span} / 24</span>
           </div>
         </UI.Col>
       ))}
@@ -305,14 +348,21 @@ export function GridDemo() {
 }
 export function LayoutDemo() {
   return (
-    <UI.Layout style={{ width: "100%", minHeight: 200 }}>
-      <UI.Header>Header</UI.Header>
+    <UI.Layout style={{ width: "100%", minHeight: 220 }}>
+      <UI.Header>
+        <span className="inline-flex items-center gap-su2 text-body">
+          <span className="su-id">RO_BUC_01</span>
+          <span className="text-ink-2">Bucharest DC</span>
+        </span>
+      </UI.Header>
       <UI.Layout>
-        <UI.Sider style={{ width: 110 }}>
-          <div className="p-su4 font-mono text-caption-1">Navigation</div>
+        <UI.Sider style={{ width: 120 }}>
+          <div className="p-su4 text-small text-ink-2">Navigation</div>
         </UI.Sider>
         <UI.Content role="region" aria-label="Demo content">
-          Your content goes here.
+          <UI.Panel title="Receipts" count={4}>
+            Content sits on the grey ground; panels carry it.
+          </UI.Panel>
         </UI.Content>
       </UI.Layout>
       <UI.Footer>Footer</UI.Footer>
@@ -330,11 +380,11 @@ export function MasonryDemo() {
         "Reserved for the Tuesday outbound wave.",
         "Damage hold. Carrier claim filed, awaiting disposition.",
       ].map((copy, i) => (
-        <article key={i} className="border-t border-t-solid border-t-rule-strong pt-su3">
-          <UI.Typography variant="label" tone="secondary">
+        <article key={i} className="su-panel p-su3">
+          <UI.Typography variant="idSecondary">
             {`WH1-A-${String(i + 1).padStart(2, "0")}`}
           </UI.Typography>
-          <p className="mt-su2 mb-0 text-subhead text-ink">{copy}</p>
+          <p className="mt-su1 mb-0 text-body text-ink">{copy}</p>
         </article>
       ))}
     </UI.Masonry>
@@ -345,9 +395,7 @@ export function SpaceDemo() {
     <UI.Space vertical block size="large">
       {(["small", "middle", "large"] as const).map((size) => (
         <UI.Space key={size} size={size}>
-          <span className="text-footnote text-label-secondary font-mono w-16">
-            {size}
-          </span>
+          <span className="text-small text-ink-2 w-16">{size}</span>
           <UI.Button>First</UI.Button>
           <UI.Button>Second</UI.Button>
         </UI.Space>
@@ -382,7 +430,7 @@ export function AnchorDemo() {
           { href: "#anchor-allocation", title: "Allocation" },
         ]}
       />
-      <div className="flex flex-col gap-su6 text-subhead text-ink">
+      <div className="flex flex-col gap-su6 text-body text-ink">
         <section id="anchor-receiving" className="min-h-[320px]">
           <h3>Receiving</h3>
           <p>Inbound pallets are checked against ASN 24-118 at dock 3.</p>
@@ -401,87 +449,137 @@ export function AnchorDemo() {
 }
 export function BreadcrumbDemo() {
   return (
-    <UI.Breadcrumb
-      items={[
-        { label: "WH1", href: "#overview" },
-        { label: "Zone B" },
-        { label: "Aisle A · Rack 12", href: "#components" },
-        { label: <span className="font-mono">LPN 00012847</span> },
-      ]}
-    />
+    <UI.Space direction="vertical" size="large">
+      <UI.Breadcrumb
+        items={[
+          { label: "WH1", href: "#overview" },
+          { label: "Zone B" },
+          { label: "Aisle A · Rack 12", href: "#components" },
+          { label: <span className="font-mono">LPN 00012847</span> },
+        ]}
+      />
+      <UI.Breadcrumb variant="back" items={[{ label: "Receipts", href: "#Breadcrumb" }]} />
+    </UI.Space>
   );
 }
 export function DropdownDemo() {
   const { message } = UI.useApp();
+  const [columns, setColumns] = useState({ lot: true, expiry: false });
+  const [group, setGroup] = useState("product");
   return (
-    <UI.Dropdown>
-      <UI.DropdownTrigger>Actions</UI.DropdownTrigger>
-      <UI.DropdownContent>
-        <UI.DropdownLabel>Document</UI.DropdownLabel>
-        <UI.DropdownItem
-          onSelect={() => message.success("Document duplicated")}
-        >
-          Duplicate
-        </UI.DropdownItem>
-        <UI.DropdownItem
-          onSelect={() => message.info("Link copied to this demo")}
-        >
-          Share
-        </UI.DropdownItem>
-        <UI.DropdownSeparator />
-        <UI.DropdownItem danger onSelect={() => message.error("Document deleted")}>
-          Delete
-        </UI.DropdownItem>
-        <UI.DropdownItem disabled>Archive</UI.DropdownItem>
-      </UI.DropdownContent>
-    </UI.Dropdown>
+    <UI.Space wrap>
+      <UI.Dropdown>
+        <UI.DropdownTrigger>Actions</UI.DropdownTrigger>
+        <UI.DropdownContent>
+          <UI.DropdownLabel>Document</UI.DropdownLabel>
+          <UI.DropdownItem onSelect={() => message.success("Document duplicated")}>
+            Duplicate
+          </UI.DropdownItem>
+          <UI.DropdownItem onSelect={() => message.info("Link copied to this demo")}>
+            Share
+          </UI.DropdownItem>
+          <UI.DropdownSeparator />
+          <UI.DropdownItem danger onSelect={() => message.error("Document deleted")}>
+            Delete
+          </UI.DropdownItem>
+          <UI.DropdownItem disabled>Archive</UI.DropdownItem>
+        </UI.DropdownContent>
+      </UI.Dropdown>
+      <UI.Dropdown>
+        <UI.DropdownTrigger variant="ghost">View</UI.DropdownTrigger>
+        <UI.DropdownContent>
+          <UI.DropdownLabel>Columns</UI.DropdownLabel>
+          <UI.DropdownCheckboxItem
+            checked={columns.lot}
+            onCheckedChange={(lot) => setColumns({ ...columns, lot: lot === true })}
+          >
+            Lot
+          </UI.DropdownCheckboxItem>
+          <UI.DropdownCheckboxItem
+            checked={columns.expiry}
+            onCheckedChange={(expiry) => setColumns({ ...columns, expiry: expiry === true })}
+          >
+            Expiry date
+          </UI.DropdownCheckboxItem>
+          <UI.DropdownSeparator />
+          <UI.DropdownLabel>Group by</UI.DropdownLabel>
+          <UI.DropdownRadioGroup value={group} onValueChange={setGroup}>
+            <UI.DropdownRadioItem value="product">Product</UI.DropdownRadioItem>
+            <UI.DropdownRadioItem value="location">Location</UI.DropdownRadioItem>
+          </UI.DropdownRadioGroup>
+        </UI.DropdownContent>
+      </UI.Dropdown>
+    </UI.Space>
   );
 }
 export function MenuDemo() {
   const [selected, setSelected] = useState("overview");
+  const [section, setSection] = useState("receipts");
   return (
-    <UI.Menu
-      style={{ width: 260 }}
-      selectedKey={selected}
-      onSelect={setSelected}
-      items={[
-        { key: "workspace", label: "Workspace", type: "group" },
-        { key: "overview", label: "Overview" },
-        { key: "docs", label: "Documentation", href: "#Menu" },
-        {
-          key: "projects",
-          label: "Projects",
-          children: [
-            { key: "website", label: "Website" },
-            {
-              key: "mobile",
-              label: "Mobile app",
-              children: [{ key: "ios", label: "iOS release channel" }],
-            },
-          ],
-        },
-        { key: "div-1", type: "divider" },
-        { key: "settings", label: "Settings" },
-        { key: "billing", label: "Billing", disabled: true },
-        { key: "delete", label: "Delete workspace", danger: true },
-      ]}
-    />
+    <div className="flex flex-wrap items-start gap-su6">
+      <UI.Menu
+        style={{ width: 260 }}
+        selectedKey={selected}
+        onSelect={setSelected}
+        items={[
+          { key: "workspace", label: "Workspace", type: "group" },
+          { key: "overview", label: "Overview" },
+          { key: "docs", label: "Documentation", href: "#Menu" },
+          {
+            key: "projects",
+            label: "Projects",
+            children: [
+              { key: "website", label: "Website" },
+              {
+                key: "mobile",
+                label: "Mobile app",
+                children: [{ key: "ios", label: "iOS release channel" }],
+              },
+            ],
+          },
+          { key: "div-1", type: "divider" },
+          { key: "settings", label: "Settings" },
+          { key: "billing", label: "Billing", disabled: true },
+          { key: "delete", label: "Delete workspace", danger: true },
+        ]}
+      />
+      <UI.Menu
+        variant="panel"
+        aria-label="Inbound"
+        selectedKey={section}
+        onSelect={setSection}
+        items={[
+          { key: "receipts", label: "Receipts", count: 12 },
+          { key: "asn", label: "Advance notices", count: 4 },
+          { key: "returns", label: "Returns", count: 2, exception: "2 blocked" },
+          { key: "quality", label: "Quality hold" },
+        ]}
+      />
+    </div>
   );
 }
 export function PaginationDemo() {
   const [page, setPage] = useState(1);
   const [item, setItem] = useState(1);
+  const [cursor, setCursor] = useState(1);
   return (
-    <UI.Space direction="vertical">
+    <UI.Space direction="vertical" size="large">
       <UI.Pagination current={page} total={8} onChange={setPage} />
       <UI.Pagination current={item} total={1284} pageSize={20} onChange={setItem} />
+      <UI.Pagination
+        variant="keyset"
+        current={cursor}
+        pageSize={50}
+        hasNext={cursor < 3}
+        onChange={setCursor}
+      />
     </UI.Space>
   );
 }
 export function StepsDemo() {
   const [step, setStep] = useState(1);
   return (
-    <UI.Space vertical block>
+    <UI.Space vertical block size="large">
       <UI.Steps
         current={step}
         items={[
@@ -499,10 +597,18 @@ export function StepsDemo() {
           {
             title: "Preferences",
             description: "Carrier, packaging and delivery window.",
+            status: step === 1 ? "error" : undefined,
           },
           { title: "Complete", description: "Review and confirm." },
         ]}
       />
+      <div className="w-full max-w-[390px]">
+        <UI.Steps
+          type="bar"
+          current={step}
+          items={[{ title: "Location" }, { title: "Product" }, { title: "Quantity" }]}
+        />
+      </div>
     </UI.Space>
   );
 }
@@ -511,21 +617,23 @@ export function TabsDemo() {
     <UI.Tabs defaultValue="stock" className="w-full">
       <UI.TabsList>
         <UI.TabsTrigger value="stock">Stock</UI.TabsTrigger>
-        <UI.TabsTrigger value="movements">Movements</UI.TabsTrigger>
-        <UI.TabsTrigger value="cycle">Cycle counting</UI.TabsTrigger>
+        <UI.TabsTrigger value="movements" count={128}>
+          Movements
+        </UI.TabsTrigger>
+        <UI.TabsTrigger value="exceptions" count={3} countVariant="danger">
+          Exceptions
+        </UI.TabsTrigger>
         <UI.TabsTrigger value="settings">Settings</UI.TabsTrigger>
         <UI.TabsTrigger value="counts" disabled>
           Counts
         </UI.TabsTrigger>
       </UI.TabsList>
-      <UI.TabsContent value="stock">
-        12.500 kg on hand across 4 bays in WH1-A.
-      </UI.TabsContent>
+      <UI.TabsContent value="stock">12,5 kg on hand across 4 bays in WH1-A.</UI.TabsContent>
       <UI.TabsContent value="movements">
         LPN 00012847 picked 14:02, shipped 14:26.
       </UI.TabsContent>
-      <UI.TabsContent value="cycle">
-        Last count 2026-09-04. 3 bays out of tolerance.
+      <UI.TabsContent value="exceptions">
+        3 bays out of tolerance since the last count.
       </UI.TabsContent>
       <UI.TabsContent value="settings">
         Allocation rule: FEFO. Short-pick alerts on.
@@ -585,6 +693,9 @@ export function CheckboxDemo() {
       <UI.Checkbox defaultChecked>Email notifications</UI.Checkbox>
       <UI.Checkbox>Product updates</UI.Checkbox>
       <UI.Checkbox disabled>Managed by your organization</UI.Checkbox>
+      <UI.Checkbox disabled defaultChecked>
+        Required by policy
+      </UI.Checkbox>
       <UI.Checkbox checked="indeterminate">Select all (partial)</UI.Checkbox>
       <UI.Checkbox aria-label="Select row" />
     </UI.Space>
@@ -592,7 +703,7 @@ export function CheckboxDemo() {
 }
 export function ColorPickerDemo() {
   return (
-    <UI.FormItem label="Accent color">
+    <UI.FormItem label="Label colour">
       <UI.ColorPicker defaultValue="#1D4ED8" />
     </UI.FormItem>
   );
@@ -645,34 +756,55 @@ export function FormDemo() {
             placeholder="alex@example.com"
           />
         </UI.FormItem>
-        <UI.Button variant="primary" type="submit">
-          Save profile
-        </UI.Button>
+        <UI.FormItem label="Phone" optional>
+          <UI.Input name="phone" type="tel" placeholder="+40 21 000 0000" />
+        </UI.FormItem>
+        <UI.FormActions>
+          <UI.Button variant="primary" htmlType="submit">
+            Save profile
+          </UI.Button>
+          <UI.Button>Cancel</UI.Button>
+        </UI.FormActions>
       </UI.Form>
       <UI.Form
         layout="horizontal"
-        size="md"
-        labelWidth={140}
-        style={{ width: "100%", maxWidth: 460 }}
+        style={{ width: "100%" }}
         onSubmit={(e) => {
           e.preventDefault();
-          message.success("Defaults applied");
+          message.success("Product created");
         }}
       >
-        <UI.FormItem label="Warehouse" required>
-          <UI.Input name="wh" placeholder="WH1" />
-        </UI.FormItem>
-        <UI.FormItem
-          label="Preferred contact method"
-          help="Used for pick alerts."
-        >
-          <UI.Input name="contact" placeholder="Email" />
-        </UI.FormItem>
-        <UI.FormItem>
-          <UI.Button variant="primary" type="submit">
-            Apply
+        <UI.FormSection title="Identity" description="How the product is found and scanned.">
+          <UI.FormItem label="SKU" required>
+            <UI.Input name="sku" mono placeholder="SKU-004417" />
+          </UI.FormItem>
+          <UI.FormItem label="GTIN" optional>
+            <UI.Input name="gtin" mono placeholder="05941234000017" />
+          </UI.FormItem>
+          <UI.FormItem label="Name" className="col-span-2">
+            <UI.Input name="product" placeholder="Bandage roll 10cm" />
+          </UI.FormItem>
+        </UI.FormSection>
+        <UI.FormSection title="Storage" description="Used for put-away and picking.">
+          <UI.FormItem label="Unit">
+            <UI.Select
+              defaultValue="buc"
+              options={[
+                { value: "buc", label: "Pieces (buc)" },
+                { value: "kg", label: "Kilograms (kg)" },
+              ]}
+            />
+          </UI.FormItem>
+          <UI.FormItem label="Pieces per box" help="Whole boxes only.">
+            <UI.InputNumber name="perBox" defaultValue={24} min={1} suffix="buc" />
+          </UI.FormItem>
+        </UI.FormSection>
+        <UI.FormActions>
+          <UI.Button variant="primary" htmlType="submit">
+            Create product
           </UI.Button>
-        </UI.FormItem>
+          <UI.Button>Cancel</UI.Button>
+        </UI.FormActions>
       </UI.Form>
     </UI.Space>
   );
@@ -681,31 +813,35 @@ export function InputDemo() {
   return (
     <UI.Space direction="vertical" style={{ width: "100%", maxWidth: 340 }}>
       <UI.Input aria-label="Your name" placeholder="Your name" />
-      <UI.Input aria-label="Email" placeholder="Email address" type="email" />
       <UI.Input
         aria-label="Search"
         allowClear
         defaultValue="WH1-A-12-03"
-        prefix={<span aria-hidden>⌕</span>}
+        prefix={<IconSearch size={16} {...UI.iconDefaults} />}
       />
-      <UI.Input aria-label="Weight" size="sm" placeholder="Weight" suffix="kg" />
+      <UI.Input aria-label="Location" mono placeholder="A-09-01-1" />
+      <UI.Input aria-label="Weight" placeholder="Weight" suffix="kg" />
+      <UI.Input aria-label="Password" type="password" defaultValue="receiving" />
       <UI.Input aria-label="Bin" size="sm" allowClear defaultValue="A-12" />
+      <UI.Input aria-label="Large" size="lg" placeholder="Large (48)" />
       <UI.FormItem label="Lot code" error="Lot code is required.">
-        <UI.Input placeholder="LOT 24-118" />
+        <UI.Input placeholder="LOT 24-118" mono />
       </UI.FormItem>
-      <UI.Input
-        aria-label="Disabled input"
-        disabled
-        placeholder="Unavailable"
-      />
+      <UI.Input aria-label="Read-only input" readOnly defaultValue="RO_BUC_01" mono />
+      <UI.Input aria-label="Disabled input" disabled placeholder="Unavailable" />
     </UI.Space>
   );
 }
 export function InputNumberDemo() {
   return (
-    <UI.FormItem label="Quantity">
-      <UI.InputNumber defaultValue={2} min={0} max={10} name="quantity" />
-    </UI.FormItem>
+    <UI.Space direction="vertical">
+      <UI.FormItem label="Quantity">
+        <UI.InputNumber defaultValue={2} min={0} max={10} name="quantity" />
+      </UI.FormItem>
+      <UI.FormItem label="Received">
+        <UI.InputNumber defaultValue={20} min={0} suffix="buc" name="received" />
+      </UI.FormItem>
+    </UI.Space>
   );
 }
 export function MentionsDemo() {
@@ -757,26 +893,47 @@ export function RateDemo() {
 }
 export function SelectDemo() {
   return (
-    <div style={{ width: 260 }}>
+    <UI.Space direction="vertical">
+      <div style={{ width: 260 }}>
+        <UI.Select
+          placeholder="Choose a framework"
+          options={[
+            { value: "react", label: "React" },
+            { value: "vue", label: "Vue" },
+            { value: "svelte", label: "Svelte" },
+            { value: "solid", label: "Solid" },
+            { value: "qwik", label: "Qwik" },
+            { value: "angular", label: "Angular" },
+            { value: "ember", label: "Ember" },
+            { value: "preact", label: "Preact" },
+            { value: "lit", label: "Lit" },
+            {
+              value: "long",
+              label: "A very long framework name that has to truncate",
+            },
+          ]}
+        />
+      </div>
+      <div style={{ width: 260 }}>
+        <UI.Select
+          placeholder="Choose a partner"
+          options={[
+            { value: "p1", code: "P-0041", label: "Farmexim", description: "Supplier · Bucharest" },
+            { value: "p2", code: "P-0107", label: "Mediplus Exim" },
+            { value: "p3", code: "P-0233", label: "Fildas Trading" },
+          ]}
+        />
+      </div>
       <UI.Select
-        placeholder="Choose a framework"
+        prefix="Group by:"
+        defaultValue="product"
         options={[
-          { value: "react", label: "React" },
-          { value: "vue", label: "Vue" },
-          { value: "svelte", label: "Svelte" },
-          { value: "solid", label: "Solid" },
-          { value: "qwik", label: "Qwik" },
-          { value: "angular", label: "Angular" },
-          { value: "ember", label: "Ember" },
-          { value: "preact", label: "Preact" },
-          { value: "lit", label: "Lit" },
-          {
-            value: "long",
-            label: "A very long framework name that has to truncate",
-          },
+          { value: "product", label: "Product" },
+          { value: "location", label: "Location" },
+          { value: "lot", label: "Lot" },
         ]}
       />
-    </div>
+    </UI.Space>
   );
 }
 export function SliderDemo() {
@@ -796,6 +953,9 @@ export function SwitchDemo() {
       <UI.Switch defaultChecked>Notifications</UI.Switch>
       <UI.Switch>Focus mode</UI.Switch>
       <UI.Switch disabled>Managed setting</UI.Switch>
+      <UI.Switch disabled defaultChecked>
+        Required by policy
+      </UI.Switch>
       <UI.Switch loading defaultChecked>
         Saving…
       </UI.Switch>
@@ -859,60 +1019,97 @@ export function AvatarDemo() {
 }
 export function BadgeDemo() {
   return (
-    <UI.Space size={6}>
-      <UI.Badge count={3}>
-        <UI.Avatar fallback="AM" />
-      </UI.Badge>
-      <UI.Badge dot variant="success">
-        <UI.Avatar fallback="SC" />
-      </UI.Badge>
-      <UI.Badge count={128} variant="warning">
-        <UI.Avatar fallback="JL" />
-      </UI.Badge>
-      <UI.Badge count={7} variant="danger">
-        <UI.Avatar fallback="RE" />
-      </UI.Badge>
-      <UI.Badge count={12} />
+    <UI.Space direction="vertical" size="large">
+      <UI.Space size={6} align="center">
+        <UI.Badge count={3}>
+          <UI.Avatar size="lg" fallback="AM" />
+        </UI.Badge>
+        <UI.Badge dot variant="danger">
+          <UI.Avatar size="lg" fallback="SC" />
+        </UI.Badge>
+        <UI.Badge count={128} variant="warning">
+          <UI.Avatar size="lg" fallback="JL" />
+        </UI.Badge>
+        <UI.Badge count={7} variant="danger">
+          <UI.Avatar size="lg" fallback="RE" />
+        </UI.Badge>
+      </UI.Space>
+      <UI.Space wrap align="center">
+        {(["neutral", "accent", "info", "success", "warning", "danger"] as const).map(
+          (variant) => (
+            <UI.Badge key={variant} count={12} variant={variant} />
+          ),
+        )}
+        <UI.Badge count={0} showZero />
+        <UI.Badge count={1284} max={999} />
+      </UI.Space>
     </UI.Space>
   );
 }
 export function CalendarDemo() {
   return (
-    <UI.Calendar
-      fullscreen
-      defaultValue={new Date(2026, 8, 9)}
-      dateRender={(date) => (date.getDate() === 15 ? "Design review" : null)}
-      disabledDate={(date) => date.getDay() === 0}
-    />
+    <UI.Space vertical block size="large">
+      <UI.Calendar
+        fullscreen
+        defaultValue={new Date(2026, 8, 9)}
+        dateRender={(date) => (date.getDate() === 15 ? "Design review" : null)}
+        disabledDate={(date) => date.getDay() === 0}
+      />
+      <UI.Calendar defaultValue={new Date(2026, 8, 25)} />
+    </UI.Space>
   );
 }
 export function CardDemo() {
   return (
     <UI.Space vertical block>
       <UI.Card
-        code="A-01"
-        state="onhand"
-        title={
-          <a href="#Card" className="text-inherit no-underline hover:underline">
-            Receiving
-          </a>
+        code={
+          <span className="inline-flex items-center gap-su2">
+            A-01 <UI.StatusDot tone="success" label="On hand" />
+          </span>
         }
-        interactive
+        title="Receiving"
+        extra="Updated 12:27"
         style={{ width: "100%" }}
       >
-        Stock arrives against an ASN. Quantities and lots are checked before putaway.
+        Stock arrives against an ASN. Quantities and lots are checked before put-away.
       </UI.Card>
+      <div className="flex flex-wrap gap-su4">
+        {/* The overview tile: the whole card is one link, with a chevron after the title. */}
+        <UI.Card href="#Card" title="Deliveries" className="w-[208px]">
+          <span className="flex items-baseline gap-su2 h-[40px]">
+            <span className="text-[length:var(--su-text-display)] leading-[var(--su-leading-display)] font-semibold su-tabular">
+              3
+            </span>
+            <span className="text-small text-ink-2 whitespace-nowrap">to receive today</span>
+          </span>
+          <span className="flex flex-col mt-su2 text-small text-ink-2 whitespace-nowrap">
+            <span className="font-medium text-danger-text">1 late</span>
+            <span>1 receiving · 1 at 15:27</span>
+          </span>
+          <UI.Progress
+            className="mt-su4"
+            value={7}
+            max={13}
+            blocked={1}
+            aria-label="7 of 13 lines received; 1 line late"
+          />
+          <span className="block mt-su2 text-small text-ink-2 truncate">
+            <span className="text-ink">7</span> of <span className="text-ink">13</span> lines
+            received
+          </span>
+        </UI.Card>
+        <UI.Card code="A-02" title="Allocation" href="#Card" className="w-[208px]">
+          <span className="text-small text-ink-2">A link card with a code above its title.</span>
+        </UI.Card>
+      </div>
       <UI.Card
-        code="A-02"
-        state="allocated"
-        title="Allocation"
-        interactive
+        variant="panel"
+        title="Dense panel"
+        extra={<UI.Button size="sm">Edit</UI.Button>}
         style={{ width: "100%" }}
       >
-        Orders claim inventory by rule. Nothing ships that was not reserved.
-      </UI.Card>
-      <UI.Card bordered title="Dense panel" style={{ width: "100%" }}>
-        Canvas ground with a hairline box when a form needs a solid surface.
+        The panel variant: a 44 header with the section title, body padded 16.
       </UI.Card>
     </UI.Space>
   );
@@ -929,7 +1126,7 @@ export function CarouselDemo() {
           <div
             style={{
               padding: 40,
-              background: "var(--su-fill-quaternary)",
+              background: "var(--su-surface-2)",
               textAlign: "center",
             }}
           >
@@ -969,22 +1166,57 @@ export function CollapseDemo() {
 }
 export function DescriptionsDemo() {
   return (
-    <UI.Descriptions
-      title="Package"
-      extra="Edit"
-      items={[
-        { label: "Project", value: "Synapse UI" },
-        { label: "Version", value: "0.1.0" },
-        { label: "Framework", value: "React" },
-        { label: "Weight", value: "12.500 kg" },
-        { label: "Description", value: "Square corners, hairlines, no shadows.", span: 2 },
-      ]}
-    />
+    <UI.Space vertical block size="large">
+      <UI.Descriptions
+        title="Package"
+        extra={<a href="#Descriptions">Edit</a>}
+        items={[
+          { label: "Project", value: "Synapse UI" },
+          { label: "Version", value: "0.2.0" },
+          { label: "Framework", value: "React" },
+          { label: "Weight", value: "12,5 kg" },
+          {
+            label: "Description",
+            value: "White panels on a grey ground, one action blue, IBM Plex.",
+            span: 2,
+          },
+        ]}
+      />
+      {/* The read-out card: stacked items, inset 16. */}
+      <UI.Descriptions
+        bordered
+        column={1}
+        className="w-[208px]"
+        items={[
+          { label: "Supported until", value: "31.12.2026" },
+          { label: "Last movement", value: "18.09 14:05" },
+        ]}
+      />
+      <UI.Descriptions
+        layout="horizontal"
+        column={1}
+        items={[
+          { label: "Location", value: <span className="su-id">A-09-01-1</span> },
+          { label: "Received", value: "25.09.2026 12:27" },
+        ]}
+      />
+    </UI.Space>
   );
 }
 export function EmptyDemo() {
   return (
-    <UI.Empty description="Nothing here yet. Your saved items will appear here." />
+    <UI.Space vertical block size="large">
+      {/* Inside a panel, with at most one secondary button. */}
+      <UI.Panel flush className="w-full max-w-[376px]">
+        <UI.Empty
+          title="No receipts today"
+          description="Receipts appear here as soon as a truck is checked in."
+        >
+          <UI.Button>New receipt</UI.Button>
+        </UI.Empty>
+      </UI.Panel>
+      <UI.Empty compact image={false} description="No results for “A-09”." />
+    </UI.Space>
   );
 }
 const imageDemoSrc =
@@ -1008,7 +1240,7 @@ export function ImageDemo() {
 }
 export function ListDemo() {
   return (
-    <div style={{ width: "100%", display: "grid", gap: 24 }}>
+    <div style={{ width: "100%", display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 24 }}>
       <UI.List>
         <UI.ListItem
           interactive
@@ -1046,14 +1278,71 @@ export function ListyDemo() {
     </UI.Listy>
   );
 }
+export function PanelDemo() {
+  return (
+    <UI.Space vertical block size="large">
+      <UI.Panel
+        title="Exceptions"
+        count={3}
+        extra={
+          <>
+            <UI.Button size="sm" variant="ghost">
+              Export
+            </UI.Button>
+            <UI.Button size="sm">Assign</UI.Button>
+          </>
+        }
+        footer="Updated azi 16:27"
+      >
+        Three bays are out of tolerance since the last cycle count.
+      </UI.Panel>
+      <UI.Panel
+        title="To resolve now"
+        count={<UI.Badge count={5} variant="danger" aria-label="5 exceptions" />}
+        footer="Late ones first · 2 of 5 shown"
+        flush
+        className="w-full max-w-[440px]"
+      >
+        <UI.List>
+          <UI.ListItem
+            avatar={<UI.StatusDot tone="danger" label="Critical" />}
+            title={
+              <>
+                Lot <span className="font-mono text-[0.9em] font-medium">AMX-2407</span> expired on
+                20.09.2026
+              </>
+            }
+            description={
+              <>
+                80 buc still at <span className="font-mono">A-01-03-1</span>
+              </>
+            }
+            extra={<a href="#Panel">View lot</a>}
+          />
+          <UI.ListItem
+            avatar={<UI.StatusDot tone="warning" label="Attention" />}
+            title={
+              <>
+                Lot <span className="font-mono text-[0.9em] font-medium">PIP-2508</span> expires in
+                20 days
+              </>
+            }
+            description="300 buc in stock"
+            extra={<a href="#Panel">View lot</a>}
+          />
+        </UI.List>
+      </UI.Panel>
+    </UI.Space>
+  );
+}
 export function PopoverDemo() {
   return (
     <UI.Popover
       trigger={<UI.Button>Show details</UI.Button>}
       content={
-        <div>
-          <strong>A little more context</strong>
-          <p>This content stays close to its trigger.</p>
+        <div className="p-su1 text-body">
+          <strong className="font-semibold">A little more context</strong>
+          <p className="m-0 text-ink-2">This content stays close to its trigger.</p>
         </div>
       }
     />
@@ -1077,12 +1366,55 @@ export function SegmentedDemo() {
   );
 }
 export function StatisticDemo() {
-  return <UI.Statistic title="Available storage" value={128} suffix="GB" />;
+  return (
+    <UI.Space wrap size="large" align="start">
+      <UI.Statistic title="Lines received" value={"2\u202f290"} suffix="buc" />
+      <UI.Statistic title="Open exceptions" value={3} description="2 since yesterday" />
+      <UI.Statistic compact title="Pick rate" value="118" suffix="/h" />
+    </UI.Space>
+  );
 }
+export function StatusDotDemo() {
+  return (
+    <UI.Space direction="vertical">
+      {(
+        [
+          ["neutral", "Draft"],
+          ["info", "In progress"],
+          ["success", "Accepted"],
+          ["warning", "Short pick"],
+          ["danger", "Refused"],
+        ] as const
+      ).map(([tone, word]) => (
+        <span key={tone} className="inline-flex items-center gap-su2 text-body">
+          <UI.StatusDot tone={tone} />
+          {word}
+        </span>
+      ))}
+      <span className="inline-flex items-center gap-su2 text-body">
+        <UI.StatusDot pending />
+        Not started
+      </span>
+      <span className="inline-flex items-center gap-su2 text-small text-ink-2">
+        <UI.StatusDot size={6} tone="danger" label="Late" />
+        Size 6, with its own label
+      </span>
+    </UI.Space>
+  );
+}
+// U+202F narrow no-break space between thousands ("1 200"), as the v2 formatting rules ask.
+const groupThousands = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+const stock = [
+  { id: "A-01-01-1", sku: "SKU-004417", name: "Bandage roll 10cm", qty: 240, unit: "buc", lot: "LOT 24-118" },
+  { id: "A-01-02-1", sku: "SKU-004418", name: "Gauze pad 5×5", qty: 1200, unit: "buc", lot: "LOT 24-122" },
+  { id: "A-02-01-3", sku: "SKU-007702", name: "Saline 0,9% 500ml", qty: 36, unit: "buc", lot: null },
+];
 export function TableDemo() {
-  const [sort, setSort] = useState(false);
+  const [sort, setSort] = useState<"ascending" | "descending">("ascending");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [open, setOpen] = useState(true);
+  const [detail, setDetail] = useState<string | null>("A-01-01-1");
   const rows = [
     "Design system",
     "Component library",
@@ -1092,70 +1424,258 @@ export function TableDemo() {
     "Documentation",
   ]
     .filter((x) => x.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => (sort ? b.localeCompare(a) : a.localeCompare(b)));
+    .sort((a, b) => (sort === "descending" ? b.localeCompare(a) : a.localeCompare(b)));
+  const pages = Math.max(1, Math.ceil(rows.length / 3));
   return (
-    <div style={{ width: "100%" }}>
-      <UI.Input
-        aria-label="Filter projects"
-        placeholder="Filter projects…"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setPage(1);
-        }}
-      />
-      <UI.Table>
+    <div className="demo-stack">
+      <div className="flex flex-col gap-su3">
+        <div className="w-full max-w-[280px]">
+          <UI.Input
+            aria-label="Filter projects"
+            placeholder="Filter projects…"
+            prefix={<IconSearch size={16} {...UI.iconDefaults} />}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
+        <UI.Table
+          aria-label="Projects"
+          empty={
+            rows.length ? null : (
+              <UI.Empty compact description="No matching projects" />
+            )
+          }
+          footer={
+            <UI.Pagination
+              variant="keyset"
+              current={page}
+              pageSize={3}
+              hasNext={page < pages}
+              onChange={setPage}
+            />
+          }
+        >
+          <UI.Table.Head>
+            <UI.Table.Row>
+              <UI.Table.Th
+                sort={sort}
+                onSort={() => setSort(sort === "ascending" ? "descending" : "ascending")}
+              >
+                Project
+              </UI.Table.Th>
+              <UI.Table.Th>Status</UI.Table.Th>
+            </UI.Table.Row>
+          </UI.Table.Head>
+          <UI.Table.Body>
+            {rows.slice((page - 1) * 3, page * 3).map((name) => (
+              <UI.Table.Row key={name}>
+                <UI.Table.Td>{name}</UI.Table.Td>
+                <UI.Table.Td>
+                  <UI.Tag color="success" dot>
+                    Active
+                  </UI.Tag>
+                </UI.Table.Td>
+              </UI.Table.Row>
+            ))}
+          </UI.Table.Body>
+        </UI.Table>
+      </div>
+      <UI.Table aria-label="Stock by location">
         <UI.Table.Head>
           <UI.Table.Row>
-            <UI.Table.Th aria-sort={sort ? "descending" : "ascending"}>
-              <UI.Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSort(!sort)}
-              >
-                Project {sort ? "↓" : "↑"}
-              </UI.Button>
+            <UI.Table.Th>
+              <span className="sr-only">Details</span>
             </UI.Table.Th>
-            <UI.Table.Th>Status</UI.Table.Th>
+            <UI.Table.Th facet={<UI.Table.Facet count={2} aria-label="Zone filter, 2 chosen" />}>
+              Location
+            </UI.Table.Th>
+            <UI.Table.Th>Product</UI.Table.Th>
+            <UI.Table.Th numeric>Quantity</UI.Table.Th>
+            <UI.Table.Th facet={<UI.Table.Facet aria-label="Lot filter" />}>Lot</UI.Table.Th>
+            <UI.Table.Th>
+              <span className="sr-only">Actions</span>
+            </UI.Table.Th>
           </UI.Table.Row>
         </UI.Table.Head>
         <UI.Table.Body>
-          {rows.slice((page - 1) * 3, page * 3).map((name) => (
-            <UI.Table.Row key={name}>
-              <UI.Table.Td>{name}</UI.Table.Td>
-              <UI.Table.Td>
-                <UI.Tag color="success">Active</UI.Tag>
-              </UI.Table.Td>
-            </UI.Table.Row>
-          ))}
+          <UI.Table.GroupRow>
+            <UI.Table.Td kind="control">
+              <UI.Table.Disclosure
+                expanded={open}
+                aria-label="Show zone A"
+                onClick={() => setOpen(!open)}
+              />
+            </UI.Table.Td>
+            <UI.Table.Td colSpan={2}>
+              <span className="flex items-center gap-su2 min-w-0 whitespace-nowrap">
+                <UI.StatusDot tone="warning" />
+                <span className="font-mono shrink-0">ZONE-A</span>
+                <span className="min-w-0 truncate">Picking</span>
+                <span className="shrink-0 font-normal text-ink-2">3 locations</span>
+              </span>
+            </UI.Table.Td>
+            <UI.Table.Td kind="number" className="font-normal text-ink-2">
+              {groupThousands(stock.reduce((sum, row) => sum + row.qty, 0))}
+            </UI.Table.Td>
+            <UI.Table.Td colSpan={2} />
+          </UI.Table.GroupRow>
+          {open &&
+            stock.map((row) => {
+              const detailId = `pallets-${row.id}`;
+              const isOpen = detail === row.id;
+              return (
+                <Fragment key={row.id}>
+                  <UI.Table.Row
+                    selected={row.id === "A-01-02-1"}
+                    expanded={isOpen}
+                    meta={
+                      row.lot ? undefined : (
+                        <UI.Table.Meta
+                          tone="warning"
+                          lead="Count to approve:"
+                          action={<a href="#Table">Review</a>}
+                        >
+                          the lot was not scanned at receipt.
+                        </UI.Table.Meta>
+                      )
+                    }
+                  >
+                    <UI.Table.Td kind="control">
+                      <UI.Table.Disclosure
+                        expanded={isOpen}
+                        aria-controls={isOpen ? detailId : undefined}
+                        aria-label={`${isOpen ? "Hide" : "Show"} pallets in ${row.id}`}
+                        onClick={() => setDetail(isOpen ? null : row.id)}
+                      />
+                    </UI.Table.Td>
+                    <UI.Table.Td kind="id">{row.id}</UI.Table.Td>
+                    <UI.Table.Td>
+                      <span className="inline-flex items-baseline gap-su2 min-w-0">
+                        <span className="su-id">{row.sku}</span>
+                        <span className="text-ink-2 truncate">{row.name}</span>
+                      </span>
+                    </UI.Table.Td>
+                    <UI.Table.Td kind="number">
+                      {groupThousands(row.qty)}{" "}
+                      <span className="text-small text-ink-2">{row.unit}</span>
+                    </UI.Table.Td>
+                    {row.lot ? (
+                      <UI.Table.Td kind="idSecondary">{row.lot}</UI.Table.Td>
+                    ) : (
+                      <UI.Table.Td kind="empty" aria-label="No lot scanned" />
+                    )}
+                    <UI.Table.Td kind="actions">
+                      <UI.Button
+                        variant="ghost"
+                        icon={<IconDots {...UI.iconDefaults} />}
+                        aria-label={`Actions for ${row.id}`}
+                      />
+                    </UI.Table.Td>
+                  </UI.Table.Row>
+                  {isOpen ? (
+                    <UI.Table.Detail colSpan={6} id={detailId}>
+                      <UI.Table size="nested" aria-label={`Pallets in ${row.id}`}>
+                        <UI.Table.Head>
+                          <UI.Table.Row>
+                            <UI.Table.Th>Pallet</UI.Table.Th>
+                            <UI.Table.Th numeric>Quantity</UI.Table.Th>
+                            <UI.Table.Th numeric>Reserved</UI.Table.Th>
+                            <UI.Table.Th>For</UI.Table.Th>
+                            <UI.Table.Th>Received</UI.Table.Th>
+                          </UI.Table.Row>
+                        </UI.Table.Head>
+                        <UI.Table.Body>
+                          <UI.Table.Row>
+                            <UI.Table.Td className="font-mono whitespace-nowrap">3594 0000 0000 0000 29</UI.Table.Td>
+                            <UI.Table.Td kind="number">160</UI.Table.Td>
+                            <UI.Table.Td kind="number">20</UI.Table.Td>
+                            <UI.Table.Td kind="idSecondary">SO-2026-1187</UI.Table.Td>
+                            <UI.Table.Td kind="secondary">12.09.2026</UI.Table.Td>
+                          </UI.Table.Row>
+                          <UI.Table.Row>
+                            <UI.Table.Td className="font-mono whitespace-nowrap">3594 0000 0000 0000 36</UI.Table.Td>
+                            <UI.Table.Td kind="number">80</UI.Table.Td>
+                            <UI.Table.Td kind="empty" numeric aria-label="Nothing reserved" />
+                            <UI.Table.Td kind="empty" aria-label="No order" />
+                            <UI.Table.Td kind="secondary">12.09.2026</UI.Table.Td>
+                          </UI.Table.Row>
+                        </UI.Table.Body>
+                      </UI.Table>
+                    </UI.Table.Detail>
+                  ) : null}
+                </Fragment>
+              );
+            })}
+          <UI.Table.FoldRow colSpan={6} startColumn={2} action={<a href="#Table">Show them</a>}>
+            11 more locations in zone A
+          </UI.Table.FoldRow>
         </UI.Table.Body>
       </UI.Table>
-      {!rows.length && <UI.Empty description="No matching projects" />}
-      <UI.Pagination
-        current={page}
-        total={Math.ceil(rows.length / 3)}
-        onChange={setPage}
-      />
+      <UI.Table aria-label="Loading" loading>
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th>Order</UI.Table.Th>
+            <UI.Table.Th>Partner</UI.Table.Th>
+            <UI.Table.Th numeric>Lines</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          <UI.Table.SkeletonRow columns={3} />
+          <UI.Table.SkeletonRow columns={3} />
+        </UI.Table.Body>
+      </UI.Table>
     </div>
   );
 }
 export function TagDemo() {
-  const [tags, setTags] = useState(["Removable", "Needs review"]);
+  const [filters, setFilters] = useState([
+    { key: "zone", label: "Zone:", value: "A, B" },
+    { key: "status", label: "Status:", value: "Short pick" },
+  ]);
   return (
-    <UI.Space wrap>
-      <UI.Tag>Design</UI.Tag>
-      <UI.Tag color="accent">In progress</UI.Tag>
-      <UI.Tag color="success">Published</UI.Tag>
-      {tags.map((tag, i) => (
-        <UI.Tag
-          key={tag}
-          color={i === 1 ? "warning" : "default"}
-          closable
-          onClose={() => setTags((prev) => prev.filter((t) => t !== tag))}
-        >
-          {tag}
+    <UI.Space direction="vertical" size="large">
+      <UI.Space wrap>
+        <UI.Tag>Default</UI.Tag>
+        <UI.Tag color="neutral">Draft</UI.Tag>
+        <UI.Tag color="info">In progress</UI.Tag>
+        <UI.Tag color="success">Accepted</UI.Tag>
+        <UI.Tag color="warning">Short pick</UI.Tag>
+        <UI.Tag color="danger">Refused</UI.Tag>
+        <UI.Tag color="accent">Selected</UI.Tag>
+      </UI.Space>
+      <UI.Space wrap>
+        <UI.Tag color="neutral" dot>
+          Draft
         </UI.Tag>
-      ))}
+        <UI.Tag color="info" dot>
+          In progress
+        </UI.Tag>
+        <UI.Tag color="success" dot>
+          Production
+        </UI.Tag>
+        <UI.Tag color="warning" dot>
+          Short pick
+        </UI.Tag>
+        <UI.Tag color="danger" dot>
+          Refused
+        </UI.Tag>
+      </UI.Space>
+      <UI.Space wrap>
+        {filters.map((f) => (
+          <UI.Tag
+            key={f.key}
+            closable
+            filterLabel={f.label}
+            closeLabel={`Remove the ${f.label.replace(":", "")} filter`}
+            onClose={() => setFilters((prev) => prev.filter((x) => x.key !== f.key))}
+          >
+            {f.value}
+          </UI.Tag>
+        ))}
+      </UI.Space>
     </UI.Space>
   );
 }
@@ -1163,8 +1683,8 @@ export function TimelineDemo() {
   return (
     <UI.Timeline
       items={[
-        { title: "Project created", description: "9:00 AM" },
-        { title: "Design reviewed", description: "10:30 AM" },
+        { title: "Project created", description: "9:00" },
+        { title: "Design reviewed", description: "10:30" },
         { title: "Ready to build", description: "Now", color: "accent" },
       ]}
     />
@@ -1172,9 +1692,20 @@ export function TimelineDemo() {
 }
 export function TooltipDemo() {
   return (
-    <UI.Tooltip content="Save your changes">
-      <UI.Button>Hover or focus me</UI.Button>
-    </UI.Tooltip>
+    <UI.Space>
+      <UI.Tooltip content="Save your changes">
+        <UI.Button>Hover or focus me</UI.Button>
+      </UI.Tooltip>
+      <UI.Tooltip
+        content={
+          <>
+            Search <UI.Kbd>Ctrl K</UI.Kbd>
+          </>
+        }
+      >
+        <UI.Button icon={<IconSearch {...UI.iconDefaults} />} aria-label="Search" />
+      </UI.Tooltip>
+    </UI.Space>
   );
 }
 export function TourDemo() {
@@ -1228,11 +1759,23 @@ export function TreeDemo() {
 export function AlertDemo() {
   return (
     <UI.Space vertical block>
-      <UI.Alert type="info" title="A little heads-up">
+      <UI.Alert showIcon title="Signed in on a shared terminal">
+        Sign out when you leave the dock.
+      </UI.Alert>
+      <UI.Alert type="info" showIcon title="A little heads-up">
         Your changes are saved automatically.
       </UI.Alert>
       <UI.Alert type="success" showIcon title="All up to date">
         You are using the latest version.
+      </UI.Alert>
+      <UI.Alert
+        type="warning"
+        showIcon
+        compact
+        title="3 bays out of tolerance"
+        action={<UI.Button variant="text">Review</UI.Button>}
+      >
+        Counted since the last cycle count.
       </UI.Alert>
       <UI.Alert type="error" showIcon closable title="Sync failed">
         https://warehouse.example.com/api/v1/shipments/LPN-0000-9182-3345-AAAA
@@ -1250,15 +1793,14 @@ export function DrawerDemo() {
         trigger={<UI.Button>Open drawer</UI.Button>}
         footer={
           <>
-            <UI.Button size="sm">Cancel</UI.Button>
-            <UI.Button size="sm" variant="primary">
-              Save
-            </UI.Button>
+            <UI.Button variant="primary">Save</UI.Button>
+            <UI.Button>Cancel</UI.Button>
           </>
         }
       >
-        <p>A little extra space for a focused task.</p>
-        <UI.Input aria-label="Project name" placeholder="Project name" />
+        <UI.FormItem label="Project name">
+          <UI.Input defaultValue="Synapse UI" />
+        </UI.FormItem>
         <UI.FormItem label="Status">
           <UI.Select
             placeholder="Choose a status"
@@ -1269,6 +1811,9 @@ export function DrawerDemo() {
             ]}
           />
         </UI.FormItem>
+        <p className="mt-auto mb-0 text-small text-ink-2">
+          Only the name and status change; members keep their access.
+        </p>
       </UI.Drawer>
       {/* Controlled and trigger-less, the way an application opens one from its own button.
           closeLabel names the close button; an application passes one in its own language. */}
@@ -1288,15 +1833,26 @@ export function MessageDemo() {
   const { message } = UI.useApp();
   return (
     <UI.Space wrap>
-      <UI.Button
-        onClick={() =>
-          message.open({ content: "Changes saved", type: "success", icon: "✓" })
-        }
-      >
+      <UI.Button onClick={() => message.open({ content: "Changes saved", type: "success" })}>
         Success message
       </UI.Button>
       <UI.Button onClick={() => message.error("Could not save. Try again.")}>
         Error message
+      </UI.Button>
+      <UI.Button
+        onClick={() =>
+          message.open({
+            content: (
+              <>
+                Location <span className="font-mono text-[0.9em]">A-09-01-1</span> deleted
+              </>
+            ),
+            type: "info",
+            action: <UI.Button variant="text">Undo</UI.Button>,
+          })
+        }
+      >
+        Message with action
       </UI.Button>
     </UI.Space>
   );
@@ -1314,10 +1870,10 @@ export function ModalDemo() {
         showDescription
         footer={
           <>
-            <UI.Button onClick={() => setOpen(false)}>Cancel</UI.Button>
             <UI.Button variant="primary" onClick={() => setOpen(false)}>
               Save changes
             </UI.Button>
+            <UI.Button onClick={() => setOpen(false)}>Cancel</UI.Button>
           </>
         }
       >
@@ -1333,6 +1889,7 @@ export function NotificationDemo() {
       title="Your export is ready"
       type="success"
       onClose={() => setVisible(false)}
+      action={<UI.Button size="sm">Download</UI.Button>}
     >
       All your design tokens have been exported successfully.
     </UI.Notification>
@@ -1362,6 +1919,33 @@ export function ProgressDemo() {
   return (
     <UI.Space vertical block>
       <UI.Progress value={value} showInfo />
+      <UI.Progress value={100} showInfo />
+      <UI.Progress value={40} showInfo status="error" />
+      {/* Inline meters in a row: 48 wide, the count beside them (partial, complete, late). */}
+      <div className="flex flex-wrap items-center gap-su4">
+        <UI.Progress inline value={2} max={3} format={(_, v, m) => `${v}/${m}`} aria-label="2 of 3 lines" />
+        <UI.Progress inline value={3} max={3} format={(_, v, m) => `${v}/${m}`} aria-label="3 of 3 lines" />
+        <UI.Progress
+          inline
+          value={1}
+          max={3}
+          blocked={1}
+          format={(_, v, m) => `${v}/${m}`}
+          aria-label="1 of 3 lines, 1 blocked"
+        />
+        <UI.Progress
+          inline
+          value={2}
+          max={3}
+          steps={3}
+          format={() => (
+            <>
+              2/3 <span className="text-ink-2">picked</span>
+            </>
+          )}
+          aria-label="Reserved and picked; not shipped yet"
+        />
+      </div>
       <UI.Progress value={value} type="circle" showInfo />
       <UI.Progress value={null} />
       <UI.Progress value={null} type="circle" />
@@ -1397,15 +1981,7 @@ export function SpinDemo() {
     <UI.Space vertical block>
       <UI.Spin tip="Receiving" />
       <UI.Spin tip="Allocating" spinning>
-        <div
-          style={{
-            padding: 24,
-            borderTop: "1px solid var(--su-rule-strong)",
-            minHeight: 96,
-          }}
-        >
-          Bay A-01 inventory is updating.
-        </div>
+        <div className="su-panel p-su6 min-h-[96px]">Bay A-01 inventory is updating.</div>
       </UI.Spin>
     </UI.Space>
   );
@@ -1418,6 +1994,194 @@ export function WatermarkDemo() {
     >
       A protected document preview.
     </UI.Watermark>
+  );
+}
+export function HandheldTopBarDemo() {
+  const { message } = UI.useApp();
+  return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.HandheldTopBar
+          flow="Receiving"
+          step={2}
+          total={4}
+          onBack={() => message.info("Back to the menu")}
+          site="RO_BUC_01"
+          user="Ioana P."
+          onSessionClick={() => message.info("Session menu")}
+          sessionAriaLabel="Session: RO_BUC_01, Ioana P."
+        />
+      </UI.ConfigProvider>
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.HandheldTopBar
+          flow="Menu"
+          brand="Terminal"
+          brandIcon={<IconBuildingWarehouse size={22} {...UI.iconDefaults} />}
+          site="RO_BUC_01"
+          user="Ioana P."
+        />
+      </UI.ConfigProvider>
+    </div>
+  );
+}
+export function DocketDemo() {
+  const { message } = UI.useApp();
+  return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.Docket aria-label="Answers given. Tap one to scan it again.">
+          <UI.DocketRow
+            label="Location"
+            value="A-09-01-1"
+            onClick={() => message.info("Scan the location again")}
+          />
+          <UI.DocketRow
+            label="Product"
+            value="SKU-004417"
+            sub="Bandage roll 10cm"
+            onClick={() => message.info("Scan the product again")}
+          />
+          <UI.DocketRow label="Quantity" value="20 buc" mono={false} disabled />
+        </UI.Docket>
+        <div className="hh-body">
+          <UI.ScanField label="Scan the location" placeholder="Scan the location" />
+        </div>
+      </UI.ConfigProvider>
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.Docket readOnly aria-label="Receipt">
+          <UI.DocketRow label="Location" value="A-09-01-1" />
+          <UI.DocketRow label="Quantity" value="20 buc" mono={false} />
+        </UI.Docket>
+        <div className="hh-body">
+          <UI.Button variant="primary" size="lg">
+            Next receipt
+          </UI.Button>
+        </div>
+      </UI.ConfigProvider>
+    </div>
+  );
+}
+export function ScanFieldDemo() {
+  const [last, setLast] = useState<string | null>(null);
+  return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.ScanField
+            label="Scan the location"
+            placeholder="Scan or type"
+            onScan={setLast}
+          />
+          <span className="text-hh-body text-ink-2" aria-live="polite">
+            {last ? `Read: ${last}` : "Type a code and press Enter."}
+          </span>
+        </div>
+      </UI.ConfigProvider>
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.ScanField
+            label="Scan the location"
+            defaultValue="PAL-0042"
+            error={
+              <>
+                Last scan refused: <code>PAL-0042</code> is a pallet, not a shelf.
+              </>
+            }
+          />
+        </div>
+      </UI.ConfigProvider>
+    </div>
+  );
+}
+export function QuantityStepperDemo() {
+  const [qty, setQty] = useState<number | null>(20);
+  return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.QuantityStepper
+            label="How many pieces?"
+            value={qty}
+            onChange={setQty}
+            unit="buc"
+            max={500}
+          />
+        </div>
+      </UI.ConfigProvider>
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.QuantityStepper
+            variant="output"
+            aria-label="Pieces counted"
+            value={qty}
+            onChange={setQty}
+            unit="buc"
+          />
+        </div>
+      </UI.ConfigProvider>
+    </div>
+  );
+}
+export function KeypadDemo() {
+  const [digits, setDigits] = useState("20");
+  return (
+    <UI.ConfigProvider density="handheld" className="hh-frame">
+      <div className="hh-body">
+        <UI.QuantityStepper
+          label="How many pieces?"
+          value={digits === "" ? null : Number(digits)}
+          onChange={(v) => setDigits(v == null ? "" : String(v))}
+          unit="buc"
+        />
+        {/* Quick answers (handheld secondaries, 2 columns; the pressed one filled the field),
+            the keypad 8 below them, then the primary 12 below and the secondary 8 below that. */}
+        <div className="flex flex-col gap-su2">
+          <div role="group" aria-label="Quick answers" className="grid grid-cols-2 gap-su2">
+            {[
+              ["The rest · 300", "300"],
+              ["One case · 24", "24"],
+            ].map(([text, value]) => (
+              <UI.Button
+                key={value}
+                block
+                aria-pressed={digits === value}
+                onClick={() => setDigits(value)}
+              >
+                {text}
+              </UI.Button>
+            ))}
+          </div>
+          <UI.Keypad onKey={(key) => setDigits((d) => UI.applyKeypadKey(d, key))} />
+        </div>
+        <div className="flex flex-col gap-su2">
+          <UI.Button variant="primary" size="lg">
+            Confirm {digits || "0"} buc
+          </UI.Button>
+          <UI.Button block>Cancel receipt</UI.Button>
+        </div>
+      </div>
+    </UI.ConfigProvider>
+  );
+}
+export function ResultBandDemo() {
+  return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.ResultBand title="Accepted" signal="1 beep · short vibration">
+          <code>A-09-01-1</code> · 20 buc put away.
+        </UI.ResultBand>
+      </UI.ConfigProvider>
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <UI.ResultBand
+          tone="danger"
+          title="Refused"
+          signal="2 beeps · long vibration"
+          instruction="Scan the shelf label, not the pallet's."
+        >
+          <code>PAL-0042</code> is a pallet label.
+        </UI.ResultBand>
+      </UI.ConfigProvider>
+    </div>
   );
 }
 export function AffixDemo() {
@@ -1461,14 +2225,33 @@ export function AppDemo() {
       >
         Confirm action
       </UI.Button>
+      <UI.Button
+        danger
+        onClick={() =>
+          modal.confirm({
+            title: "Delete location A-09-01-1?",
+            content: "The location must be empty. This cannot be undone.",
+            okText: "Delete location",
+            danger: true,
+          })
+        }
+      >
+        Destructive confirm
+      </UI.Button>
     </UI.Space>
   );
 }
 export function BorderBeamDemo() {
   return (
-    <UI.BorderBeam duration={2.4} style={{ width: "100%" }}>
-      A scan highlight for a focused bay or instrument panel.
-    </UI.BorderBeam>
+    <UI.Space vertical block>
+      <UI.Alert type="warning" showIcon title="Deprecated in v2">
+        No v2 surface uses BorderBeam. The export stays so existing imports compile; it is
+        removed in the next major.
+      </UI.Alert>
+      <UI.BorderBeam duration={2.4} style={{ width: "100%" }}>
+        A moving highlight around a featured element.
+      </UI.BorderBeam>
+    </UI.Space>
   );
 }
 export function ConfigProviderDemo() {
@@ -1477,19 +2260,22 @@ export function ConfigProviderDemo() {
     <UI.Space direction="vertical">
       <UI.Typography>Current theme: {theme}</UI.Typography>
       <UI.Typography variant="footnote" tone="secondary">
-        Use the appearance control in the toolbar to change every component
-        together.
+        Use the appearance control in the toolbar to change every component together.
       </UI.Typography>
       <UI.Typography variant="footnote" tone="secondary">
-        Nested provider below scopes a token override and flips direction to
-        rtl.
+        A nested provider scopes a token override and flips direction to rtl.
       </UI.Typography>
-      <UI.ConfigProvider
-        tokens={{ action: "#17429f" }}
-        direction="rtl"
-        locale="ar-EG"
-      >
+      <UI.ConfigProvider tokens={{ action: "#1e3a8a" }} direction="rtl" locale="ar-EG">
         <UI.Button variant="primary">Scoped action colour</UI.Button>
+      </UI.ConfigProvider>
+      <UI.Typography variant="footnote" tone="secondary">
+        density=&quot;handheld&quot; re-sizes the generic controls inside it.
+      </UI.Typography>
+      <UI.ConfigProvider density="handheld">
+        <UI.Space wrap>
+          <UI.Button variant="primary">Confirm</UI.Button>
+          <UI.Button>Skip</UI.Button>
+        </UI.Space>
       </UI.ConfigProvider>
     </UI.Space>
   );
@@ -1502,22 +2288,34 @@ const glassGround =
 export function GlassDemo() {
   return (
     <UI.Space vertical block size="large">
+      <div className="relative h-[220px] w-full overflow-auto su-panel">
+        <UI.Header material="glass" className="sticky top-0 z-1">
+          <span className="text-body font-medium">Header material=&quot;glass&quot;</span>
+        </UI.Header>
+        <div className="p-su4 flex flex-col gap-su2">
+          {Array.from({ length: 12 }, (_, i) => (
+            <div key={i} className="su-panel p-su3 text-body">
+              Row {i + 1}: content scrolls under the sticky header.
+            </div>
+          ))}
+        </div>
+      </div>
       <div className={`${glassGround} sm:grid-cols-2`}>
         <UI.Glass className="p-su4">
           <span className="su-label">regular</span>
-          <p className="m-0 mt-su2 text-subhead">Blurred backdrop, hairline base.</p>
+          <p className="m-0 mt-su2 text-body">Blurred backdrop, hairline base.</p>
         </UI.Glass>
         <UI.Glass elevated className="p-su4">
           <span className="su-label">regular · elevated</span>
-          <p className="m-0 mt-su2 text-subhead">A denser fill, never a shadow.</p>
+          <p className="m-0 mt-su2 text-body">A denser fill, never a shadow.</p>
         </UI.Glass>
         <UI.Glass variant="clear" className="p-su4">
           <span className="su-label">clear</span>
-          <p className="m-0 mt-su2 text-subhead">Lets the light field through.</p>
+          <p className="m-0 mt-su2 text-body">Lets the backdrop through.</p>
         </UI.Glass>
         <UI.Glass variant="clear" dim className="p-su4">
           <span className="su-label">clear · dim</span>
-          <p className="m-0 mt-su2 text-subhead">Dimmed for legibility over media.</p>
+          <p className="m-0 mt-su2 text-body">Dimmed for legibility over media.</p>
         </UI.Glass>
       </div>
       <div className={`${glassGround} grid-cols-2 sm:grid-cols-4`}>
@@ -1526,15 +2324,6 @@ export function GlassDemo() {
             <span className="su-label">chrome {chrome}</span>
           </UI.Glass>
         ))}
-      </div>
-      <div className={glassGround}>
-        <UI.Glass
-          as="button"
-          chrome="default"
-          className="su-focus-ring h-su12 px-su4 text-callout"
-        >
-          Focusable glass — tab to see the ring
-        </UI.Glass>
       </div>
     </UI.Space>
   );

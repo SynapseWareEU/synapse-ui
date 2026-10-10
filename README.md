@@ -1,90 +1,144 @@
 # Synapse UI
 
-A SynapseWare brand React component library with Radix primitives, UnoCSS (migrating from CSS Modules), `border-beam`, Paper Shaders (brand-locked), and semantic `--su-*` design tokens from the brand guide.
+The React component library for SynapseWare apps, including Lattice. Version 0.2 carries **Lattice UI v2**: white panels on a grey ground, one action blue, five opaque status tones, 6px controls, IBM Plex Sans and IBM Plex Mono, and a handheld density for the 390-wide warehouse terminal.
 
-## Develop
+It is built on Radix UI primitives and styled with UnoCSS utilities over semantic `--su-*` CSS variables. The design language is in [DESIGN.md](./DESIGN.md), what changed in 0.2 is in [CHANGELOG.md](./CHANGELOG.md), and the product brief is in [PRODUCT.md](./PRODUCT.md).
+
+## Install
+
+`dist/` is committed, so a git dependency installs without a build toolchain. Pin a tag or a commit:
 
 ```sh
-npm install
-npm run dev
+npm install github:HEAPTRASH/synapse-ui#<tag-or-commit>
 ```
 
-The workbench at http://localhost:5173 includes searchable component navigation, live examples, copyable source, theme switching, design tokens, and local installation instructions. Use Command/Ctrl+K to search. Each component has a shareable hash route, such as `/#Button`.
-
-## Use in a React application
-
-Build and package this checkout:
+Or pack a local checkout:
 
 ```sh
 npm run build
 npm pack
+# then, in your application
+npm install /path/to/synapse-ui-0.2.0.tgz
 ```
 
-Install the resulting tarball from your application:
+React and React DOM 18 or 19 are peer dependencies. The package ships ESM, CommonJS and TypeScript declarations.
 
-```sh
-npm install /path/to/synapse-ui-0.1.0.tgz
-```
+## Use
+
+Import the stylesheet once, at the root, and wrap the app in `App`:
 
 ```tsx
-import { App, Button } from 'synapse-ui';
-import 'synapse-ui/styles.css';
+import { App, Button } from "synapse-ui";
+import "synapse-ui/styles.css";
 
 export default function MyApp() {
   return (
-    <App theme="light" locale="en-US">
-      <Button variant="primary">Save changes</Button>
+    <App theme="light" locale="ro-RO">
+      <Button variant="primary">Confirmă recepția</Button>
     </App>
   );
 }
 ```
 
-The exported stylesheet includes both design tokens and all component styles. React and React DOM are peer dependencies. The package exports ESM, CommonJS, and TypeScript declarations.
+`synapse-ui/styles.css` is the whole visual layer in one file: the IBM Plex `@font-face` rules, the tokens (light, dark, handheld, increased contrast, forced colours, reduced motion), a small reset, and every component utility. The JavaScript bundle does not import it, so import it yourself, once.
+
+`App` is `ConfigProvider` plus the shared feedback APIs: `useApp().message`, `useApp().notification` and `useApp().modal`.
+
+## Fonts ship with the library
+
+IBM Plex Sans (variable, weights 400–700) and IBM Plex Mono (400, 500, 600 and 700) are self-hosted as woff2, in latin and latin-ext subsets. The latin-ext subset carries the Romanian ș, ț, ă, â and î. Nothing loads from a font CDN, because installations are on-prem.
+
+- The `@font-face` rules are inside `styles.css`. Their URLs are relative (`../fonts/…`) and resolve from `dist/assets/styles.css` to `dist/fonts/`. Vite, webpack and other bundlers follow them and emit the files with the rest of your assets. There is nothing else to configure.
+- The files are also exported as `synapse-ui/fonts/*`, for example to preload the faces the first screen needs (Vite):
+
+  ```ts
+  import plexSans from "synapse-ui/fonts/IBMPlexSans-Variable-latin.woff2?url";
+  ```
+
+- The licence is `dist/fonts/IBM-Plex-OFL.txt` (SIL Open Font License 1.1).
+
+## Share the UnoCSS theme (optional)
+
+Components need nothing beyond `styles.css`. If your application also uses UnoCSS and wants the same utilities (`bg-surface`, `text-ink-2`, `border-border`, `rounded-su-control`, `shadow-su-overlay`, `su-panel`, `su-label`, `su-id`…), spread the library's config into yours and scan your own sources:
+
+```ts
+// uno.config.ts
+import { defineConfig } from "unocss";
+import synapse from "synapse-ui/uno.config";
+
+export default defineConfig({
+  ...synapse,
+  content: { filesystem: ["src/**/*.{ts,tsx}"] },
+});
+```
+
+The v1 keys (`bg-paper`, `border-rule`, `text-label`, `text-accent`…) still work: they resolve through token aliases to the v2 values. Prefer the v2 names in new code. The `rounded-*` steps now round (`rounded-md` is 6, `rounded-lg` is 8); `rounded-none` stays 0.
+
+## Theme, density and tokens
+
+```tsx
+<App theme="dark">…</App>                             // "light" (default) or "dark"
+<ConfigProvider density="handheld">…</ConfigProvider> // 56 / 64 controls, 17px body
+<App tokens={{ action: "#1d4ed8" }}>…</App>           // any --su-* token, with or without the prefix
+```
+
+- `theme` sets `data-theme` on `<html>` (root provider) or on a wrapper `<div>` (nested provider).
+- `density="handheld"` sets `data-density="handheld"`. Generic controls re-size through the tokens. The handheld components (`HandheldTopBar`, `Docket`, `ScanField`, `QuantityStepper`, `Keypad`, `ResultBand`) always keep their terminal size. Without React, put the attribute on any element.
+- Portalled UI (Modal, Drawer, Popconfirm, Select lists, Dropdown, toasts) mounts under `document.body` and follows the **root** provider, not a nested one.
+- The raw token file is exported as `synapse-ui/tokens.css` for tools that need the variables without the components.
 
 ## Catalog
 
 | Category | Components |
 | --- | --- |
-| General | Button, FloatButton, Icon, Typography |
+| General | Button, FloatButton, Icon / SvgIcon, **Kbd**, Typography (Title, Text, Paragraph) |
 | Layout | Divider, Flex, Grid (Row / Col), Layout (Header / Sider / Content / Footer), Masonry, Space, Splitter |
 | Navigation | Anchor, Breadcrumb, Dropdown, Menu, Pagination, Steps, Tabs |
-| Data Entry | AutoComplete, Cascader, Checkbox, ColorPicker, DatePicker, Form, Input, InputNumber, Mentions, Radio, Rate, Select, Slider, Switch, TimePicker, Transfer, TreeSelect, Upload |
-| Data Display | Avatar, Badge, Calendar, Card, Carousel, Collapse, Descriptions, Empty, Image, List, Listy, Popover, QRCode, Segmented, Statistic, Table, Tag, Timeline, Tooltip, Tour, Tree |
+| Data Entry | AutoComplete, Cascader, Checkbox, ColorPicker, DatePicker / DateRangePicker, Form (FormItem, FormLabel, **FormSection**, **FormActions**), Input, InputNumber, Mentions, Radio, Rate, Select, Slider, Switch, TimePicker, Transfer, TreeSelect, Upload |
+| Data Display | Avatar, Badge, Calendar, Card, Carousel, Collapse, Descriptions, Empty, Image, List, Listy, **Panel**, Popover, QRCode, Segmented, Statistic, **StatusDot**, Table (Head, Body, Row, Th, Td, **GroupRow**, **Disclosure**, **Facet**, **Detail**, **FoldRow**, **Meta**, **SkeletonRow**), Tag, Timeline, Tooltip, Tour, Tree |
 | Feedback | Alert, Drawer, Message, Modal, Notification, Popconfirm, Progress, Result, Skeleton, Spin, Watermark |
-| Other | Affix, App, BorderBeam, ConfigProvider |
-| Shaders | PaperTexture, Dithering, DotGrid, MeshGradient, NeuroNoise, PulsingBorder, Warp (via `@paper-design/shaders-react`, Synapse palette); LightField (the brand light field, generated WebGL2 module, `variant` dither / pure / grain / halftone) |
+| Handheld | **HandheldTopBar**, **Docket** / DocketRow, **ScanField**, **QuantityStepper**, **Keypad** (with `applyKeypadKey`), **ResultBand** |
+| Materials | Glass (opt-in header material), Chrome, Surface |
+| Other | Affix, App, BorderBeam (deprecated), ConfigProvider |
+| Shaders | PaperTexture, Dithering, DotGrid, MeshGradient, NeuroNoise, PulsingBorder, Warp, LightField. Brand and marketing surfaces, unchanged in v2 |
 
-## Useful conventions
+Entries in bold are new in 0.2.
 
-- `App` combines theme configuration with `useApp().message`, `useApp().notification`, and `useApp().modal`.
-- `ConfigProvider` supports `theme`, `locale`, `direction`, and token overrides. Nested providers inherit omitted settings and scope `data-theme` / token overrides to their wrapper. **Portaled UI** (Modal, Drawer, Popconfirm, Select menus, Dropdown, toasts) mounts under `document.body` and therefore follows the **root** `ConfigProvider` on `document.documentElement` — not a nested island theme. For differently themed overlays, set theme at the root (or pass an explicit `target` that owns `:root`-level CSS variables).
-- `Form` uses native submission and validation; `FormItem` connects labels and error/help descriptions. Set `htmlType="submit"` (or `type="submit"`) on submission buttons. Read submitted values with `FormData`.
-- `Button`: `variant` `primary` (scan) / `default` (frame + pixel ripple) / `ghost` / `dashed`; also `loading`, `danger`, `icon`, `iconPlacement`, `href`, `block`. `FloatButton` is a fixed-corner FAB for a persistent action while scrolling — not a restyle of an in-flow button.
-- Icons: use **Tabler** (`@tabler/icons-react`) with `iconDefaults` (`stroke={1.5}`, square caps, miter joins). Avoid rounded consumer packs (Phosphor, Material, Hugeicons rounded).
-- `Table` exposes composable `Head`, `Body`, `Row`, `Th`, and `Td` parts. The Table example includes sorting, filtering, paging, and an empty state; adapt that state logic to your data source.
-- `Pagination.total` is the number of pages.
-- `Grid` uses 24 columns. `gutter` and spacing props refer to the token scale.
-- `Listy` virtualizes fixed-height rows (`itemHeight`, default 48px), with configurable `overscan`. Use `virtual={false}` for variable-height children.
-- `DatePicker.RangePicker` supports controlled ranges and named presets. Date/time fields use the browser's native picker.
-- `Calendar fullscreen` includes month/year views and a `dateRender` callback for event content.
-- `Slider` renders a thumb for each value, supporting ranges.
-- `Progress type="circle"` enables circular progress.
-- `Image preview` enables an accessible preview dialog, with fallback handling for missing or failed images.
-- `QRCode` uses a real encoder with a four-module quiet zone. It defaults to dark modules on a white background for scanning.
-- `Upload` collects files and supports validation callbacks. Connect `onChange` to your application's upload service.
-- `Splitter` supports pointer dragging and keyboard arrows, Home, and End.
+## Conventions
 
-## Validation
+- **One primary per screen.** `Button variant="primary"` is the one action. `secondary` (an alias of `default`), `ghost`, `dashed` and `text` carry the rest. `danger` gives each a destructive form, and `primary danger` is only for confirming a destructive action. Sizes are `sm` 28, `md` 36 (default) and `lg` 48. `aria-pressed` makes any variant a toggle.
+- **Mono is for identifiers only**: SKUs, order numbers, bins, lots, partner and site codes. Numbers, dates, units and counts are sans. Use `Typography variant="id"` or `"idSecondary"`, `Input mono`, `Table.Td kind="id"`, `SelectOption.code`, or the `su-id` and `su-id-2` utilities.
+- **Status is never colour alone.** A `StatusDot` or a Tag dot always sits next to a word, because the warning and success solids are below 3:1.
+- **Forms**: labels above fields, help or error below. There is no required asterisk; mark the optional fields with `FormItem optional` instead. `Form layout="horizontal"` is the page form: `FormSection`s in one panel, ended by `FormActions` (primary first, left-packed).
+- **Tables** are always a panel: `Table.Th sort / onSort / facet / numeric`, `Table.Td kind`, `Table.Row selected / expanded / meta`, and `footer` for keyset paging (`Pagination variant="keyset"`).
+- Icons are Tabler (`@tabler/icons-react`) with `iconDefaults` (stroke 1.75, round caps and joins). `Icon size` is `sm` 14, `md` 16, `lg` 20, or a number of pixels.
+- `Form` uses native submission and validation; read values with `FormData`. Set `htmlType="submit"` on the submit button.
+- `Pagination.total` is a page count unless you pass `pageSize`, in which case it is an item count.
+- `Listy` virtualises fixed-height rows (`itemHeight`, default 48).
+
+## Develop
+
+```sh
+npm install
+npm run dev          # the workbench, on http://localhost:5173
+```
+
+The workbench has a page per component (hash routes such as `/#Button`), copyable demo source, a live **Design tokens** page, a light/dark toggle, and a **Desk / Handheld** toggle that renders the previews inside `data-density="handheld"`. Command/Ctrl+K searches.
+
+UnoCSS scans both `src/` and `playground/`, so a class used only in the workbench also lands in `styles.css`. Keep workbench-only styling in `playground/workbench.css` where you can.
+
+## Validate
 
 ```sh
 npm run typecheck
-npm run build
-npm run test:browser
+npm run build        # rewrites dist/; dist is committed, so commit it with the source
+npm run test:browser # needs Google Chrome and a running dev server
 ```
 
-The browser checks use installed Google Chrome and the running server on port 5173. They cover all 72 component routes, key interactions, theme persistence, and overflow at 390px, 820px, and 1440px.
+`test:browser` targets `http://localhost:5173` by default. Point it at another server with `SU_BASE_URL=http://localhost:5720 npm run test:browser` or `npm run test:browser -- --base=http://localhost:5720`.
 
-## Design references
-
-- [DESIGN.md](./DESIGN.md): design language and material rules.
-- [PRODUCT.md](./PRODUCT.md): original product brief.
+The suite:
+- renders every component route;
+- drives the key interactions: dialogs, selects, transfer, splitter, virtualisation, table filtering, uploads, tour, search and theme persistence;
+- checks the v2 look: 36px default controls, 6px radius, sans sentence-case labels, IBM Plex loaded, drawer 480, modal at 96, and 44px touch targets under `(hover: none)`;
+- checks for horizontal overflow at 390, 820 and 1440 px.

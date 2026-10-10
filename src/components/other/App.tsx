@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ConfigProvider, type ConfigProviderProps } from "../../ConfigProvider";
+import { ConfigProvider, useConfig, type ConfigProviderProps } from "../../ConfigProvider";
 import {
   MessageProvider,
   useMessage,
@@ -61,6 +61,7 @@ let notificationId = 0;
 
 function AppInner({ children }: { children: ReactNode }) {
   const msg = useMessage();
+  const { direction } = useConfig();
   const [notifications, setNotifications] = useState<
     Array<AppNotificationOptions & { key: number }>
   >([]);
@@ -112,8 +113,9 @@ function AppInner({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       {/* Radix Toast owns the auto-dismiss timer, so notifications pause on
-          hover/focus (WCAG 2.2.1) and cancel cleanly on unmount. */}
-      <Toast.Provider swipeDirection="right">
+          hover/focus (WCAG 2.2.1) and cancel cleanly on unmount. They sit in the toast
+          stack: bottom-start, on the page padding, rising with 8 between. */}
+      <Toast.Provider swipeDirection={direction === "rtl" ? "right" : "left"}>
         {children}
         {notifications.map(({ key, duration, type, onClose, ...props }) => (
           <Toast.Root
@@ -139,19 +141,17 @@ function AppInner({ children }: { children: ReactNode }) {
             />
           </Toast.Root>
         ))}
-        <Toast.Viewport className="fixed top-su4 right-su4 z-[var(--su-z-toast)] m-0 p-0 list-none flex flex-col gap-su3 w-[min(360px,calc(100vw-var(--su-space-8)))] outline-none" />
+        <Toast.Viewport className="fixed bottom-[var(--su-page-pad-phone)] start-[var(--su-page-pad-phone)] md:bottom-[var(--su-page-pad-y)] md:start-[var(--su-page-pad-x)] z-[var(--su-z-toast)] m-0 p-0 list-none flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-space-8)))] outline-none" />
       </Toast.Provider>
+      {/* The sm (400) modal. Footer: primary then secondary, left-packed; a destructive
+          confirm is danger-primary. */}
       <Modal
         open={modal.open}
         onOpenChange={(open) => !open && cancelModal()}
         title={modal.title}
+        width={400}
         footer={
           <>
-            {modal.kind === "confirm" ? (
-              <Button onClick={cancelModal}>
-                {modal.cancelText ?? "Cancel"}
-              </Button>
-            ) : null}
             <Button
               variant="primary"
               danger={modal.danger}
@@ -162,6 +162,11 @@ function AppInner({ children }: { children: ReactNode }) {
             >
               {modal.okText ?? "OK"}
             </Button>
+            {modal.kind === "confirm" ? (
+              <Button onClick={cancelModal}>
+                {modal.cancelText ?? "Cancel"}
+              </Button>
+            ) : null}
           </>
         }
       >

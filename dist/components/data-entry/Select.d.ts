@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
+import { selectTriggerClass, selectTriggerSizeClass } from "./Input";
 import type { InputSize, SelectOption } from "./types";
+/** Shared combobox trigger surface: Select, Cascader, TreeSelect (defined beside the field in Input). */
+export { selectTriggerClass, selectTriggerSizeClass };
 export interface SelectProps {
     value?: string;
     defaultValue?: string;
@@ -9,9 +12,21 @@ export interface SelectProps {
     options?: SelectOption[];
     className?: string;
     children?: ReactNode;
+    /**
+     * Toolbar form ("Grupează: Produs"): a lead-in drawn in ink-2 before the value, which stays ink.
+     * The trigger then sizes to its content instead of filling the row.
+     */
+    prefix?: ReactNode;
     onValueChange?: (value: string) => void;
 }
-/** Shared combobox trigger surface — Select, TreeSelect */
-export declare const selectTriggerClass = "inline-flex items-center justify-between gap-su2 w-full min-w-0 min-h-[var(--su-control-lg)] px-su3 border border-solid border-rule rounded-none bg-paper text-label font-sans text-body text-start cursor-pointer su-focus-ring transition-[border-color,background] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] focus-visible:(border-accent shadow-none) data-[state=open]:border-accent aria-invalid:border-danger disabled:(opacity-45 cursor-not-allowed)";
-export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, onValueChange, }: SelectProps): import("react").JSX.Element;
+/**
+ * An option's main line. With a `code` it is the reference pair (§2.2): the code in mono 500,
+ * 8 apart and baseline-aligned, then the name in ink-2 with an ellipsis. `label` overrides the
+ * rendered name (AutoComplete passes the match-highlighted one).
+ */
+export declare function SelectOptionLabel({ option, label }: {
+    option: SelectOption;
+    label?: ReactNode;
+}): import("react").JSX.Element;
+export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, prefix, onValueChange, }: SelectProps): import("react").JSX.Element;
 //# sourceMappingURL=Select.d.ts.map

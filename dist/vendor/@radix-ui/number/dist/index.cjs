@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});var n=Object.defineProperty,c=(e,a)=>n(e,"name",{value:a,configurable:!0});function r(e,[a,t]){return Math.min(t,Math.max(a,e))}c(r,"clamp");exports.clamp=r;

@@ -1,7 +1,13 @@
 import type { HTMLAttributes, ReactNode } from "react";
 /**
+ * v2 presets, in scale steps: `small` 8 · `middle` 16 · `large` 24. Shared with `Flex`.
+ * (Supersedes `SIZE_PRESET` in utils/space.ts, which still holds the v1 2/3/4.)
+ */
+export declare const SPACE_PRESET: Record<string, number>;
+/**
  * A gap: a space-scale STEP as a number (`3` → `--su-space-3` → 12px), one of
- * the three presets, or a raw CSS length string (`"1.5rem"`, `"clamp(…)"`).
+ * the three presets (`small` 8, `middle` 16, `large` 24), or a raw CSS length
+ * string (`"1.5rem"`, `"clamp(…)"`).
  */
 export type SpaceSize = number | "small" | "middle" | "large" | (string & {});
 export interface SpaceProps extends HTMLAttributes<HTMLDivElement> {

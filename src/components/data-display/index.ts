@@ -31,6 +31,9 @@ export type { ListProps, ListItemProps } from "./List";
 export { Listy, ListyItem } from "./Listy";
 export type { ListyProps, ListyItemProps } from "./Listy";
 
+export { Panel } from "./Panel";
+export type { PanelProps } from "./Panel";
+
 export { Popover } from "./Popover";
 export type { PopoverProps } from "./Popover";
 
@@ -43,8 +46,39 @@ export type { SegmentedProps, SegmentedOption } from "./Segmented";
 export { Statistic } from "./Statistic";
 export type { StatisticProps } from "./Statistic";
 
-export { Table } from "./Table";
-export type { TableProps } from "./Table";
+export { StatusDot } from "./StatusDot";
+export type { StatusDotProps, StatusDotTone } from "./StatusDot";
+
+export {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableTh,
+  TableTd,
+  TableGroupRow,
+  TableDisclosure,
+  TableFacet,
+  TableDetail,
+  TableFoldRow,
+  TableMeta,
+  TableSkeletonRow,
+} from "./Table";
+export type {
+  TableProps,
+  TableSize,
+  TableSort,
+  TableCellKind,
+  TableRowProps,
+  TableThProps,
+  TableTdProps,
+  TableDisclosureProps,
+  TableFacetProps,
+  TableDetailProps,
+  TableFoldRowProps,
+  TableMetaProps,
+  TableSkeletonRowProps,
+} from "./Table";
 
 export { Tag } from "./Tag";
 export type { TagProps, TagColor } from "./Tag";

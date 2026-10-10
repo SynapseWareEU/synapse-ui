@@ -29,12 +29,22 @@ export interface AutoCompleteProps {
     onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
     onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
 }
-/** Anchored suggestion surface. The parent must be `relative`. */
-export declare const comboboxPanelClass = "absolute top-full left-0 right-0 z-[var(--su-z-dropdown)] overflow-y-auto overscroll-contain max-h-[min(var(--su-dropdown-max-h),50vh)] mt-su1 p-su1 border border-solid border-rule-strong contrast-more:border-2 rounded-none bg-paper shadow-none animate-su-dropdown-in motion-reduce:animate-none";
-/** Empty / busy row — the brand's mono label recipe. */
-export declare const comboboxNoticeClass = "px-su3 py-su3 su-label text-ink-2 text-start";
-/** One suggestion: 44px to press, accent rail on the keyboard-active row. */
-export declare const comboboxOptionClass = "flex items-center w-full min-h-[var(--su-hit-target)] [@media(hover:none)]:min-h-[var(--su-control-lg)] px-su3 py-su2 rounded-none bg-transparent text-ink text-body text-start [overflow-wrap:anywhere] cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:bg-fill-secondary data-[active]:(bg-fill-secondary shadow-[inset_2px_0_0_var(--su-accent)]) contrast-more:data-[active]:(bg-accent text-on-action) data-[disabled]:(text-ink-3 opacity-45 pointer-events-none cursor-not-allowed)";
+/** Anchored suggestion surface: `su-popover`, 4 below the field, as wide as it, 280 max. The parent must be `relative`. */
+export declare const comboboxPanelClass = "su-popover absolute top-full inset-x-0 mt-su1 overflow-y-auto overscroll-contain max-h-[min(var(--su-dropdown-max-h),50vh)] animate-su-dropdown-in motion-reduce:animate-none";
+/** Empty / busy row: 13/18 ink-2, padding 8. Sentence case, not mono. */
+export declare const comboboxNoticeClass = "p-su2 text-small text-ink-2 text-start";
+/**
+ * One suggestion (§4.2 AutoComplete, D): 32 tall, padding 0 8, radius 4, 14/20 ink.
+ * The active descendant (what Enter will pick) is action-subtle, as the palette does; pointer
+ * hover is surface-hover, or action-subtle-hover on the active row. Disabled: ink-3.
+ * Under prefers-contrast / forced colours the active row also gets an inset outline.
+ */
+export declare const comboboxOptionClass = "flex items-center gap-su2 w-full min-h-[var(--su-row-overlay)] [@media(hover:none)]:min-h-[var(--su-hit-target)] px-su2 py-[6px] rounded-su-tag bg-transparent font-sans text-body text-ink text-start [overflow-wrap:anywhere] cursor-pointer outline-none transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none data-[active]:bg-action-subtle [@media(hover:hover)]:[&:hover:not([data-active]):not([data-disabled])]:bg-surface-hover [@media(hover:hover)]:data-[active]:hover:bg-action-subtle-hover data-[disabled]:text-ink-3 data-[disabled]:cursor-not-allowed contrast-more:data-[active]:outline-2 contrast-more:data-[active]:outline-solid contrast-more:data-[active]:outline-ink contrast-more:data-[active]:-outline-offset-2 forced-colors:data-[active]:outline-2 forced-colors:data-[active]:outline-solid forced-colors:data-[active]:-outline-offset-2";
+/** A suggestion's content: the label (or code + name pair) with the match in 500, then the description line. */
+export declare function ComboboxOptionContent({ option, query }: {
+    option: SelectOption;
+    query?: string | null;
+}): import("react").JSX.Element;
 /** Default empty-state copy, shared so both components say the same thing. */
 export declare const NO_MATCHES = "No matches";
 export declare function AutoComplete({ value: valueProp, defaultValue, placeholder, disabled, size, options, filterOption, className, id, name, allowClear, loading, notFoundContent, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, onChange, onSelect, onClear, onFocus, onBlur, }: AutoCompleteProps): import("react").JSX.Element;

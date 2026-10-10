@@ -1,0 +1,8 @@
+var n = Object.defineProperty, t = (e, a) => n(e, "name", { value: a, configurable: !0 });
+function m(e, [a, r]) {
+  return Math.min(r, Math.max(a, e));
+}
+t(m, "clamp");
+export {
+  m as clamp
+};

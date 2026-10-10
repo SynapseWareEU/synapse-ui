@@ -1,7 +1,7 @@
 {
   "name": "synapse-ui",
-  "version": "0.1.0",
-  "description": "SynapseWare brand React UI library \u2014 UnoCSS + Radix primitives",
+  "version": "0.2.0",
+  "description": "Lattice UI v2 React component library for SynapseWare \u2014 UnoCSS + Radix primitives, set in IBM Plex Sans and IBM Plex Mono (self-hosted)",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,12 +14,12 @@
     },
     "./styles.css": "./dist/assets/styles.css",
     "./tokens.css": "./src/styles/tokens.css",
-    "./uno.config": "./uno.config.ts"
+    "./uno.config": "./uno.config.ts",
+    "./fonts/*": "./dist/fonts/*"
   },
   "files": [
     "dist",
     "src/styles",
-    "src/materials/*.css",
     "uno.config.ts"
   ],
   "sideEffects": [

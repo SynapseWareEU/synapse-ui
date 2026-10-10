@@ -19,7 +19,7 @@ export interface FlexProps extends HTMLAttributes<HTMLDivElement> {
     /**
      * Gap between items. A number is a SPACE-SCALE STEP, not pixels:
      * `gap={3}` → `--su-space-3` → 12px, and `gap={16}` → 96px.
-     * `"small" | "middle" | "large"` map to steps 2/3/4, as in `Space`.
+     * `"small" | "middle" | "large"` map to 8/16/24 (steps 2/4/6), as in `Space`.
      * Pass a string for raw CSS: `gap="12px"`, `gap="4px 16px"`.
      */
     gap?: number | string;

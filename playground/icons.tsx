@@ -6,11 +6,14 @@ import {
   IconChevronRight,
   IconCode,
   IconCopy,
+  IconDeviceDesktop,
+  IconDeviceMobile,
   IconDownload,
   IconHeart,
   IconLayoutGrid,
   IconMenu2,
   IconMoon,
+  IconPalette,
   IconPlus,
   IconSearch,
   IconSettings,
@@ -19,13 +22,10 @@ import {
   IconX,
   type Icon as TablerIconComponent,
 } from "@tabler/icons-react";
+import { iconDefaults } from "synapse-ui";
 
-/** SynapseWare instrument defaults — hairline stroke, square joins */
-export const glyphProps = {
-  stroke: 1.5,
-  strokeLinejoin: "miter" as const,
-  strokeLinecap: "square" as const,
-};
+/** Workbench glyphs use the library's own icon defaults: stroke 1.75, round caps and joins. */
+export const glyphProps = iconDefaults;
 
 const catalog: Record<string, TablerIconComponent> = {
   search: IconSearch,
@@ -42,14 +42,17 @@ const catalog: Record<string, TablerIconComponent> = {
   close: IconX,
   menu: IconMenu2,
   settings: IconSettings,
+  palette: IconPalette,
   heart: IconHeart,
   download: IconDownload,
   bell: IconBell,
+  handheld: IconDeviceMobile,
+  desk: IconDeviceDesktop,
 };
 
 export function Glyph({
   name,
-  size = 18,
+  size = 16,
   style,
 }: {
   name: string;

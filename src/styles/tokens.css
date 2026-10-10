@@ -1,154 +1,238 @@
 /**
- * Synapse UI design tokens
- * Source of truth: SynapseWare brand guide (synapseware-web/DESIGN.md, edition 2.1).
- * Semantic roles use the --su-* prefix. Values are exact brand tokens.
+ * Synapse UI design tokens: Lattice UI v2.
+ * Values are exact; nothing is tuned per page. Every v1 `--su-*` name is kept: the ones v2 renames
+ * live on as aliases in the "Theme-independent scalars + aliases" block below.
+ *
+ * Structure:
+ * 1. Light theme values (`:root`, `[data-theme="light"]`)
+ * 2. Scalars + aliases (`:root`, `[data-theme]`). An alias such as `--su-paper: var(--su-surface)`
+ *    resolves on the element that declares it, so it is re-declared on every themed element; a
+ *    nested `<ConfigProvider theme="dark">` then gets a dark `--su-paper`, not the root's white one.
+ * 3. Dark theme values (`[data-theme="dark"]`), repeated verbatim for OS dark with no explicit theme.
+ * 4. Handheld density scope (`[data-density="handheld"]`).
+ * 5. prefers-contrast, forced-colors, reduced motion.
  */
 
 :root,
 [data-theme="light"] {
   color-scheme: light;
 
-  /* ——— Brand ramp ——— */
+  /* ——— Brand ramp: unchanged; shaders and marketing only, never product chrome ——— */
   --su-navy: #0f2971;
   --su-blue-deep: #1d4ed8;
   --su-blue: #3b82f6;
   --su-cyan: #22c1e0;
   --su-teal: #2dd4bf;
   --su-mint: #5eead4;
-
-  /* ——— Paper / canvas / ink ——— */
-  --su-paper: #ffffff;
-  --su-canvas: #f5f5f7;
-  --su-ink: #1d1d1f;
-  --su-ink-2: #6e6e73;
-  --su-ink-3: #86868b;
-  --su-rule: rgba(29, 29, 31, 0.1);
-  --su-rule-strong: rgba(29, 29, 31, 0.22);
-  --su-grid: rgba(29, 29, 31, 0.045);
-
-  /* ——— Action / accent ——— */
-  --su-accent: #1d4ed8;
-  --su-accent-hover: #17429f;
-  --su-accent-active: #17429f;
-  --su-accent-soft: rgba(29, 78, 216, 0.12);
-  --su-action: #1d4ed8;
-  --su-action-edge: #1d4ed8;
-  --su-action-press: #17429f;
-  --su-on-action: #ffffff;
   --su-beam: #5eead4;
-  --su-material: rgba(255, 255, 255, 0.72);
-
-  /* ——— Slot states ——— */
-  --su-s-free: rgba(29, 29, 31, 0.07);
+  --su-grid: rgba(17, 20, 24, 0.045);
+  --su-s-free: rgba(17, 20, 24, 0.07);
   --su-s-receiving: var(--su-cyan);
   --su-s-onhand: var(--su-navy);
   --su-s-allocated: var(--su-blue-deep);
   --su-s-picking: var(--su-blue);
   --su-s-counted: var(--su-teal);
 
-  /* ——— Grey ramp (derived from ink / canvas for legacy consumers) ——— */
-  --su-gray: #6e6e73;
-  --su-gray-2: #86868b;
-  --su-gray-3: #aeaeae;
-  --su-gray-4: #d2d2d7;
-  --su-gray-5: #f5f5f7;
-  --su-gray-6: #f5f5f7;
+  /* ——— Neutrals ——— */
+  --su-bg: #f4f5f7; /* app ground */
+  --su-surface: #ffffff; /* panels, inputs, secondary buttons */
+  --su-surface-2: #f8f9fb; /* table header, group/expanded rows, subtle fill */
+  --su-surface-hover: #f8f9fb; /* row / menu-item hover */
+  --su-surface-overlay: #ffffff; /* popover, menu, modal, drawer, toast */
+  --su-fill: #eef0f3; /* chips, segmented track, key hints, keypad, meter track */
+  --su-border: #e3e6ea; /* hairlines, row separators, panel outline */
+  --su-border-strong: #cdd2d9; /* inputs, secondary buttons */
+  --su-border-control: #8a919d; /* unchecked checkbox and radio: 3.17:1 on surface (WCAG 1.4.11) */
+  --su-ink: #111418;
+  --su-ink-2: #525866;
+  --su-ink-3: #6f7684; /* icons, placeholders, key-hint glyphs, disabled, "—" (only on surface) */
+  --su-control-raised: #ffffff; /* segmented thumb */
+  --su-inverse-surface: #111418; /* tooltip */
+  --su-inverse-ink: #ffffff;
 
-  --su-control-raised: #ffffff;
+  /* ——— Action ——— */
+  --su-action: #1d4ed8;
+  --su-action-hover: #1e40af;
+  --su-action-press: #1e3a8a;
+  --su-action-subtle: #eef4ff;
+  --su-action-subtle-hover: #dde8ff;
+  --su-action-text: #1d4ed8;
+  --su-action-text-hover: #1e40af;
+  --su-on-action: #ffffff;
+  --su-focus: #1d4ed8;
 
-  /* ——— Labels (ink roles) ——— */
+  /* ——— Status: text · tint · line · solid · strong (white text on it) ——— */
+  --su-danger-text: #b42318;
+  --su-danger-tint: #fef3f2;
+  --su-danger-line: #fecdca;
+  --su-danger: #d92d20;
+  --su-danger-strong: #b42318;
+  --su-danger-strong-hover: #912018;
+  --su-danger-strong-press: #7a271a;
+  --su-warning-text: #b54708;
+  --su-warning-tint: #fffaeb;
+  --su-warning-line: #fedf89;
+  --su-warning: #f79009;
+  --su-warning-strong: #b54708;
+  --su-success-text: #067647;
+  --su-success-tint: #ecfdf3;
+  --su-success-line: #abefc6;
+  --su-success: #17b26a;
+  --su-success-strong: #067647;
+  --su-info-text: #175cd3;
+  --su-info-tint: #eff8ff;
+  --su-info-line: #b2ddff;
+  --su-info: #2e90fa;
+  --su-info-strong: #175cd3;
+  --su-neutral-text: #525866;
+  --su-neutral-tint: #f2f4f7;
+  --su-neutral-line: #e3e6ea;
+  --su-neutral: #6f7684;
+
+  /* ——— Overlays ——— */
+  --su-scrim: rgba(17, 20, 24, 0.4);
+  --su-scrim-strong: rgba(17, 20, 24, 0.88); /* image lightbox only */
+  --su-shadow-overlay: 0 1px 2px rgba(16, 24, 40, 0.05), 0 12px 32px -4px rgba(16, 24, 40, 0.16);
+
+  /* ——— Optional glass header material ——— */
+  --su-material: rgba(255, 255, 255, 0.72);
+  --su-glass-bg-elevated: rgba(255, 255, 255, 0.82);
+  --su-glass-clear-bg: rgba(255, 255, 255, 0.42);
+  --su-glass-clear-dim: rgba(0, 0, 0, 0.22);
+  --su-glass-solid: #ffffff;
+  --su-glass-clear-solid: #ffffff;
+}
+
+/* ——— Theme-independent scalars + aliases (re-resolve on every themed element) ——— */
+:root,
+[data-theme] {
+  /* Legacy aliases: v1 names, v2 values */
+  --su-paper: var(--su-surface);
+  --su-canvas: var(--su-bg);
+  --su-rule: var(--su-border);
+  --su-rule-strong: var(--su-border-strong);
+  --su-separator: var(--su-border);
+  --su-separator-opaque: var(--su-border);
   --su-label: var(--su-ink);
   --su-label-secondary: var(--su-ink-2);
   --su-label-tertiary: var(--su-ink-3);
-  --su-label-quaternary: rgba(29, 29, 31, 0.28);
-
-  /* ——— Fills ——— */
-  --su-fill: rgba(29, 29, 31, 0.08);
-  --su-fill-secondary: rgba(29, 29, 31, 0.06);
-  --su-fill-tertiary: rgba(29, 29, 31, 0.04);
-  --su-fill-quaternary: rgba(29, 29, 31, 0.03);
-
-  /* ——— Backgrounds ——— */
-  --su-bg: var(--su-paper);
-  --su-bg-secondary: var(--su-canvas);
-  --su-bg-tertiary: var(--su-paper);
-
-  --su-bg-grouped: var(--su-canvas);
-  --su-bg-grouped-secondary: var(--su-paper);
-  --su-bg-grouped-tertiary: var(--su-canvas);
-
-  /* ——— Separators (rules) ——— */
-  --su-separator: var(--su-rule);
-  --su-separator-opaque: #d2d2d7;
-
-  /* ——— Status (product UI; brand guide keeps these off marketing chrome) ——— */
-  --su-success: #52c41a;
-  --su-warning: #faad14;
-  --su-danger: #ff4d4f;
-  --su-info: var(--su-blue);
-  /* Text-grade and fill-grade status: --su-danger is 3.3:1 as text on paper; these pass 4.5:1,
-     and the strong fills carry white text at ≥ 5.6:1. */
-  --su-danger-text: #c62828;
-  --su-danger-strong: #8c2a2b;
-  --su-success-strong: #2d6c0e;
-  --su-warning-strong: #8a5f0b;
-
-  /* ——— Material (nav / floating chrome only) ——— */
+  --su-label-quaternary: var(--su-border-strong); /* decorative only, never text */
+  --su-fill-secondary: var(--su-fill);
+  --su-fill-tertiary: var(--su-surface-2);
+  --su-fill-quaternary: var(--su-surface-2);
+  --su-accent: var(--su-action-text);
+  --su-accent-hover: var(--su-action-text-hover);
+  --su-accent-active: var(--su-action-press);
+  --su-accent-soft: var(--su-action-subtle);
+  --su-action-edge: var(--su-action); /* deprecated: there is no inset edge any more */
+  --su-bg-secondary: var(--su-surface);
+  --su-bg-tertiary: var(--su-surface-2);
+  --su-bg-grouped: var(--su-bg);
+  --su-bg-grouped-secondary: var(--su-surface);
+  --su-bg-grouped-tertiary: var(--su-surface-2);
+  /* Deprecated grey ramp */
+  --su-gray: var(--su-ink-2);
+  --su-gray-2: var(--su-ink-3);
+  --su-gray-3: var(--su-border-strong);
+  --su-gray-4: var(--su-border);
+  --su-gray-5: var(--su-bg);
+  --su-gray-6: var(--su-fill);
+  /* Glass + chrome (optional header material) */
   --su-glass-bg: var(--su-material);
-  --su-glass-bg-elevated: rgba(255, 255, 255, 0.82);
   --su-glass-blur: 20px;
   --su-glass-saturate: 1.8;
   --su-glass-shadow: none;
   --su-glass-shadow-strong: none;
-
-  --su-glass-clear-bg: rgba(255, 255, 255, 0.42);
-  --su-glass-clear-dim: rgba(0, 0, 0, 0.22);
-
-  /* ——— Chrome = hairline rules (no specular rim) ——— */
-  --su-chrome-border: var(--su-rule);
-  --su-chrome-border-outer: var(--su-rule-strong);
+  --su-chrome-border: var(--su-border);
+  --su-chrome-border-outer: var(--su-border-strong);
   --su-chrome-rim-ring: transparent;
   --su-chrome-rim-glow: transparent;
   --su-chrome-rim-top: transparent;
   --su-chrome-rim-bottom: transparent;
 
-  --su-glass-solid: rgba(245, 245, 247, 0.96);
-  --su-glass-clear-solid: rgba(245, 245, 247, 0.94);
+  /* ——— Type: IBM Plex Sans for everything, IBM Plex Mono for identifiers only ——— */
+  --su-font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --su-font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --su-font-display: var(--su-font-sans);
+  --su-weight-regular: 400;
+  --su-weight-medium: 500;
+  --su-weight-semibold: 600;
 
-  /* ——— Typography ——— */
-  --su-font-sans: "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue",
-    "Segoe UI", Roboto, system-ui, sans-serif;
-  --su-font-mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-
-  /* Brand scale mapped onto existing role names */
-  --su-text-large-title: 48px;
-  --su-text-title-1: 32px;
+  /* Desk scale: size / line-height pairs in px */
+  --su-text-display: 32px;
+  --su-leading-display: 40px;
+  --su-text-title: 24px;
+  --su-leading-title: 32px;
+  --su-text-title-phone: 22px;
+  --su-leading-title-phone: 28px;
+  --su-text-section: 16px;
+  --su-leading-section: 24px;
+  --su-text-empty-title: 15px;
+  --su-leading-empty-title: 22px;
+  --su-text-body: 14px;
+  --su-leading-body: 20px;
+  --su-text-small: 13px;
+  --su-leading-small-px: 18px;
+  --su-text-micro: 12px;
+  --su-leading-micro: 16px;
+  --su-text-label: 13px;
+  --su-leading-label-px: 18px;
+  --su-text-control: 14px;
+  --su-leading-control: 20px;
+  --su-text-control-sm: 13px;
+  --su-leading-control-sm: 18px;
+  /* Legacy size names → v2 roles */
+  --su-text-large-title: 32px;
+  --su-text-title-1: 24px;
   --su-text-title-2: 22px;
-  --su-text-title-3: 19px;
-  --su-text-headline: 17px;
-  --su-text-body: 17px;
-  --su-text-callout: 15px;
-  --su-text-subhead: 15px;
+  --su-text-title-3: 16px;
+  --su-text-headline: 15px;
+  --su-text-callout: 14px;
+  --su-text-subhead: 14px;
   --su-text-footnote: 13px;
   --su-text-caption-1: 13px;
-  --su-text-caption-2: 11px;
-  --su-text-control: 15px;
-  --su-text-label: 11px;
-
-  --su-leading-tight: 0.95;
-  --su-leading-snug: 1.06;
-  --su-leading-normal: 1.25;
-  --su-leading-relaxed: 1.6;
-  --su-leading-small: 1.5; /* 13–15px: navigation, buttons, captions */
-  --su-leading-label: 1.4; /* 11px mono labels */
-
-  --su-tracking-display: -0.035em;
-  --su-tracking-tight: -0.02em;
+  --su-text-caption-2: 12px;
+  /* Legacy unitless leading ratios: deprecated; kept so old utilities do not break */
+  --su-leading-tight: 1.25;
+  --su-leading-snug: 1.25;
+  --su-leading-normal: 1.4286;
+  --su-leading-relaxed: 1.4286;
+  --su-leading-small: 1.3846;
+  --su-leading-label: 1.3846;
+  --su-tracking-display: -0.01em;
+  --su-tracking-tight: -0.01em;
   --su-tracking-normal: 0;
-  --su-tracking-wide: 0.04em;
-  --su-tracking-label: 0.04em;
+  --su-tracking-wide: 0;
+  --su-tracking-label: 0;
 
-  /* ——— Space (4px base) ——— */
+  /* Handheld type (390 wide) */
+  --su-hh-text-flow: 20px;
+  --su-hh-leading-flow: 26px;
+  --su-hh-text-step: 17px;
+  --su-hh-leading-step: 24px;
+  --su-hh-text-key: 18px;
+  --su-hh-leading-key: 24px;
+  --su-hh-text-value: 24px;
+  --su-hh-leading-value: 30px;
+  --su-hh-text-question: 28px;
+  --su-hh-leading-question: 34px;
+  --su-hh-text-body: 17px; /* the floor on handheld */
+  --su-hh-leading-body: 24px;
+  --su-hh-text-hint: 18px;
+  --su-hh-leading-hint: 26px;
+  --su-hh-text-band-line: 17px;
+  --su-hh-leading-band-line: 22px;
+  --su-hh-text-big: 64px;
+  --su-hh-leading-big: 64px;
+  --su-hh-text-primary: 22px;
+  --su-hh-leading-primary: 28px;
+  --su-hh-text-secondary: 20px;
+  --su-hh-leading-secondary: 28px;
+  --su-hh-text-keypad: 28px;
+  --su-hh-leading-keypad: 34px;
+
+  /* ——— Space (4px base, unchanged) + page rhythm ——— */
   --su-space-0: 0;
   --su-space-1: 4px;
   --su-space-2: 8px;
@@ -163,46 +247,101 @@
   --su-space-11: 56px;
   --su-space-12: 64px;
   --su-space-16: 96px;
+  --su-page-pad-y: 24px;
+  --su-page-pad-x: 32px;
+  --su-page-pad-phone: 16px;
+  --su-gap-block: 16px; /* between page blocks */
+  --su-gap-group: 8px; /* inside a toolbar group */
+  --su-gap-toolbar: 16px; /* between toolbar groups */
+  --su-inset: 16px; /* panel and card inset, row padding-inline */
+  --su-inset-lg: 24px; /* drawer / modal body */
 
-  /* ——— Radius: square everywhere (names kept for consumers) ——— */
-  --su-radius-xs: 0;
-  --su-radius-sm: 0;
-  --su-radius-md: 0;
-  --su-radius-lg: 0;
-  --su-radius-xl: 0;
-  --su-radius-2xl: 0;
-  --su-radius-full: 0;
+  /* ——— Shape ——— */
+  --su-radius-row: 0;
+  --su-radius-bar: 2px; /* meters, step segments */
+  --su-radius-tag: 4px; /* tags, chips, key hints, checkbox, rows inside overlays, 24px icon buttons, segmented item */
+  --su-radius-control: 6px; /* buttons, inputs, selects, segmented track, search */
+  --su-radius-surface: 8px; /* panels, cards, popovers, modal, toasts, rail items, all handheld controls */
+  --su-radius-pill: 9999px; /* count pills, switch */
+  --su-radius-round: 50%; /* avatars, dots */
+  --su-radius-xs: 2px;
+  --su-radius-sm: 4px;
+  --su-radius-md: 6px;
+  --su-radius-lg: 8px;
+  --su-radius-xl: 8px;
+  --su-radius-2xl: 8px;
+  --su-radius-full: 9999px;
 
-  /* ——— Control sizes ——— */
-  --su-control-xs: 28px;
-  --su-control-sm: 32px;
-  --su-control-md: 36px;
-  --su-control-lg: 48px;
-  --su-button-height: 48px;
-  --su-hit-target: 44px;
-  --su-nav-height: 52px;
-  --su-tick: 8px;
-  --su-container: 1200px;
-  --su-dropdown-max-h: 280px;
-
-  /* ——— Elevation: none (depth from hairlines / material) ——— */
+  /* ——— Elevation: overlays only; content stays flat ——— */
   --su-elevation-0: none;
   --su-elevation-1: none;
-  --su-elevation-2: none;
-  --su-elevation-3: none;
+  --su-elevation-2: var(--su-shadow-overlay);
+  --su-elevation-3: var(--su-shadow-overlay);
 
-  /* ——— Motion ——— */
+  /* ——— Sizes: desk ——— */
+  --su-control-mini: 24px; /* disclosure chevron, facet funnel */
+  --su-control-xs: 28px; /* in-row buttons */
+  --su-control-sm: 32px; /* icon buttons, overlay search, overlay rows */
+  --su-control-md: 36px; /* default control */
+  --su-control-lg: 48px; /* rare large desk control */
+  --su-button-height: 36px;
+  --su-hit-target: 44px;
+  --su-nav-height: 56px; /* app header */
+  --su-rail-width: 64px;
+  --su-tab-height: 40px;
+  --su-row: 40px;
+  --su-row-header: 36px;
+  --su-row-group: 36px;
+  --su-row-meta: 60px;
+  --su-row-nested: 32px;
+  --su-row-nested-header: 28px;
+  --su-row-overlay: 32px;
+  --su-row-palette: 40px;
+  --su-row-exception: 48px;
+  --su-panel-header: 44px;
+  --su-panel-footer: 44px;
+  --su-drawer-width: 480px;
+  --su-drawer-header: 56px;
+  --su-drawer-footer: 64px;
+  --su-modal-width: 480px;
+  --su-palette-width: 640px;
+  --su-modal-top: 96px;
+  --su-popover-width: 260px;
+  --su-menu-width: 220px;
+  --su-toast-width: 360px;
+  --su-search-width: 280px;
+  --su-header-search-width: 320px;
+  --su-dropdown-max-h: 280px;
+  --su-container: 1200px;
+  --su-tick: 8px; /* deprecated */
+
+  /* ——— Sizes: handheld ——— */
+  --su-hh-control-md: 56px; /* secondary, keypad key, one-line docket row */
+  --su-hh-control-lg: 64px; /* primary, scan field, stepper, two-line docket row */
+  --su-hh-menu-row: 72px;
+  --su-hh-top: 112px;
+  --su-hh-radius: 8px;
+  --su-hh-pad: 16px;
+  --su-hh-field-border: 2px;
+
+  /* ——— Focus: 2px outline, 2px offset, follows the element's radius ——— */
+  --su-focus-ring-width: 2px;
+  --su-focus-ring-offset: 2px;
+  --su-focus-ring: 0 0 0 2px var(--su-focus);
+  --su-focus-ring-contrast: 0 0 0 2px var(--su-surface), 0 0 0 4px var(--su-focus);
+
+  /* ——— Motion (scan / enter / step are brand-only) ——— */
   --su-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --su-ease-scan: cubic-bezier(0.45, 0, 0.55, 1);
   --su-ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
   --su-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --su-ease-scan: cubic-bezier(0.45, 0, 0.55, 1);
   --su-ease-step: steps(4);
   --su-duration-fast: 150ms;
   --su-duration-normal: 240ms;
   --su-duration-base: 240ms;
+  --su-duration-slow: 320ms;
   --su-duration-scan: 600ms;
   --su-duration-enter: 1100ms;
-  --su-duration-slow: 320ms;
 
   /* ——— Z-index ——— */
   --su-z-base: 0;
@@ -213,194 +352,288 @@
   --su-z-modal: 400;
   --su-z-toast: 500;
   --su-z-max: 9999;
-
-  /* ——— Focus: square accent outline ——— */
-  --su-focus-ring: 0 0 0 2px var(--su-accent);
-  --su-focus-ring-offset: 3px;
-  --su-focus-ring-contrast: 0 0 0 2px var(--su-bg), 0 0 0 4px var(--su-accent);
 }
 
+/* ——— Dark: defined for v2 (not drawn); every text pair verified ≥ 4.5:1 ———
+   Keep this block and the OS-dark copy below identical. */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --su-paper: #0a0c12;
-  --su-canvas: #1c1c1e;
-  --su-ink: #f5f5f7;
-  --su-ink-2: #9c9ca0;
-  --su-ink-3: #808084;
-  --su-rule: rgba(245, 245, 247, 0.12);
-  --su-rule-strong: rgba(245, 245, 247, 0.24);
-  --su-grid: rgba(245, 245, 247, 0.04);
-
-  --su-accent: #3b82f6;
-  --su-accent-hover: #60a5fa;
-  --su-accent-active: #2563eb;
-  --su-accent-soft: rgba(59, 130, 246, 0.22);
-  --su-action: #1d4ed8;
-  --su-action-edge: #3b82f6;
-  --su-action-press: #17429f;
-  --su-on-action: #ffffff;
-  --su-beam: #5eead4;
-  --su-material: rgba(10, 12, 18, 0.72);
-
-  --su-s-free: rgba(245, 245, 247, 0.07);
+  --su-grid: rgba(236, 238, 241, 0.04);
+  --su-s-free: rgba(236, 238, 241, 0.07);
   --su-s-receiving: var(--su-mint);
   --su-s-onhand: var(--su-blue-deep);
   --su-s-allocated: var(--su-blue);
   --su-s-picking: var(--su-cyan);
   --su-s-counted: var(--su-teal);
 
-  --su-gray: #9c9ca0;
-  --su-gray-2: #808084;
-  --su-gray-3: #48484a;
-  --su-gray-4: #3a3a3c;
-  --su-gray-5: #1c1c1e;
-  --su-gray-6: #1c1c1e;
+  --su-bg: #0e1013;
+  --su-surface: #16191d;
+  --su-surface-2: #1f2328;
+  --su-surface-hover: #262a30;
+  --su-surface-overlay: #1c1f24;
+  --su-fill: #2a2e35;
+  --su-border: #2f343b;
+  --su-border-strong: #4a515b;
+  --su-border-control: #6f7684;
+  --su-ink: #eceef1;
+  --su-ink-2: #aeb4be;
+  --su-ink-3: #8b929d;
+  --su-control-raised: #353a42;
+  --su-inverse-surface: #eceef1;
+  --su-inverse-ink: #111418;
 
-  --su-control-raised: #1c1c1e;
+  --su-action: #2563eb;
+  --su-action-hover: #2e6bf0;
+  --su-action-press: #1d4ed8;
+  --su-action-subtle: #172a4d;
+  --su-action-subtle-hover: #1e3563;
+  --su-action-text: #8fb3ff;
+  --su-action-text-hover: #b0c8ff;
+  --su-on-action: #ffffff;
+  --su-focus: #8fb3ff;
 
-  --su-label: var(--su-ink);
-  --su-label-secondary: var(--su-ink-2);
-  --su-label-tertiary: var(--su-ink-3);
-  --su-label-quaternary: rgba(245, 245, 247, 0.28);
+  --su-danger-text: #ff9b91;
+  --su-danger-tint: #3a1715;
+  --su-danger-line: #7a2a22;
+  --su-danger: #f04438;
+  --su-danger-strong: #b42318;
+  --su-danger-strong-hover: #912018;
+  --su-danger-strong-press: #7a271a;
+  --su-warning-text: #f8b84e;
+  --su-warning-tint: #33240b;
+  --su-warning-line: #704a0f;
+  --su-warning: #f79009;
+  --su-warning-strong: #b54708;
+  --su-success-text: #5ad69a;
+  --su-success-tint: #0c2b1d;
+  --su-success-line: #16603e;
+  --su-success: #17b26a;
+  --su-success-strong: #067647;
+  --su-info-text: #84c1ff;
+  --su-info-tint: #10233d;
+  --su-info-line: #1f4f86;
+  --su-info: #2e90fa;
+  --su-info-strong: #175cd3;
+  --su-neutral-text: #aeb4be;
+  --su-neutral-tint: #23272d;
+  --su-neutral-line: #2f343b;
+  --su-neutral: #8b929d;
 
-  --su-fill: rgba(245, 245, 247, 0.12);
-  --su-fill-secondary: rgba(245, 245, 247, 0.1);
-  --su-fill-tertiary: rgba(245, 245, 247, 0.08);
-  --su-fill-quaternary: rgba(245, 245, 247, 0.05);
+  --su-scrim: rgba(0, 0, 0, 0.6);
+  --su-scrim-strong: rgba(0, 0, 0, 0.9);
+  --su-shadow-overlay: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -4px rgba(0, 0, 0, 0.6);
 
-  --su-bg: var(--su-paper);
-  --su-bg-secondary: var(--su-canvas);
-  --su-bg-tertiary: #2c2c2e;
-
-  --su-bg-grouped: var(--su-paper);
-  --su-bg-grouped-secondary: var(--su-canvas);
-  --su-bg-grouped-tertiary: #2c2c2e;
-
-  --su-separator: var(--su-rule);
-  --su-separator-opaque: #38383a;
-
-  --su-success: #52c41a;
-  --su-warning: #faad14;
-  --su-danger: #ff4d4f;
-  --su-info: var(--su-blue);
-  --su-danger-text: #ff6b6d;
-  --su-danger-strong: #8c2a2b;
-  --su-success-strong: #2d6c0e;
-  --su-warning-strong: #8a5f0b;
-
-  --su-glass-bg: var(--su-material);
-  --su-glass-bg-elevated: rgba(10, 12, 18, 0.82);
-  --su-glass-clear-bg: rgba(10, 12, 18, 0.45);
+  --su-material: rgba(22, 25, 29, 0.72);
+  --su-glass-bg-elevated: rgba(22, 25, 29, 0.82);
+  --su-glass-clear-bg: rgba(22, 25, 29, 0.45);
   --su-glass-clear-dim: rgba(0, 0, 0, 0.35);
-
-  --su-chrome-border: var(--su-rule);
-  --su-chrome-border-outer: var(--su-rule-strong);
-
-  --su-glass-solid: rgba(28, 28, 30, 0.98);
-  --su-glass-clear-solid: rgba(28, 28, 30, 0.96);
+  --su-glass-solid: #16191d;
+  --su-glass-clear-solid: #16191d;
 }
 
+/* Same values, verbatim, for OS dark with no explicit theme */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --su-paper: #0a0c12;
-    --su-canvas: #1c1c1e;
-    --su-ink: #f5f5f7;
-    --su-ink-2: #9c9ca0;
-    --su-ink-3: #808084;
-    --su-rule: rgba(245, 245, 247, 0.12);
-    --su-rule-strong: rgba(245, 245, 247, 0.24);
-    --su-grid: rgba(245, 245, 247, 0.04);
-
-    --su-accent: #3b82f6;
-    --su-accent-hover: #60a5fa;
-    --su-accent-active: #2563eb;
-    --su-accent-soft: rgba(59, 130, 246, 0.22);
-    --su-action: #1d4ed8;
-    --su-action-edge: #3b82f6;
-    --su-action-press: #17429f;
-    --su-material: rgba(10, 12, 18, 0.72);
-
-    --su-s-free: rgba(245, 245, 247, 0.07);
+    --su-grid: rgba(236, 238, 241, 0.04);
+    --su-s-free: rgba(236, 238, 241, 0.07);
     --su-s-receiving: var(--su-mint);
     --su-s-onhand: var(--su-blue-deep);
     --su-s-allocated: var(--su-blue);
     --su-s-picking: var(--su-cyan);
+    --su-s-counted: var(--su-teal);
 
-    --su-gray: #9c9ca0;
-    --su-gray-2: #808084;
-    --su-gray-3: #48484a;
-    --su-gray-4: #3a3a3c;
-    --su-gray-5: #1c1c1e;
-    --su-gray-6: #1c1c1e;
+    --su-bg: #0e1013;
+    --su-surface: #16191d;
+    --su-surface-2: #1f2328;
+    --su-surface-hover: #262a30;
+    --su-surface-overlay: #1c1f24;
+    --su-fill: #2a2e35;
+    --su-border: #2f343b;
+    --su-border-strong: #4a515b;
+    --su-border-control: #6f7684;
+    --su-ink: #eceef1;
+    --su-ink-2: #aeb4be;
+    --su-ink-3: #8b929d;
+    --su-control-raised: #353a42;
+    --su-inverse-surface: #eceef1;
+    --su-inverse-ink: #111418;
 
-    --su-control-raised: #1c1c1e;
+    --su-action: #2563eb;
+    --su-action-hover: #2e6bf0;
+    --su-action-press: #1d4ed8;
+    --su-action-subtle: #172a4d;
+    --su-action-subtle-hover: #1e3563;
+    --su-action-text: #8fb3ff;
+    --su-action-text-hover: #b0c8ff;
+    --su-on-action: #ffffff;
+    --su-focus: #8fb3ff;
 
-    --su-label: var(--su-ink);
-    --su-label-secondary: var(--su-ink-2);
-    --su-label-tertiary: var(--su-ink-3);
-    --su-label-quaternary: rgba(245, 245, 247, 0.28);
+    --su-danger-text: #ff9b91;
+    --su-danger-tint: #3a1715;
+    --su-danger-line: #7a2a22;
+    --su-danger: #f04438;
+    --su-danger-strong: #b42318;
+    --su-danger-strong-hover: #912018;
+    --su-danger-strong-press: #7a271a;
+    --su-warning-text: #f8b84e;
+    --su-warning-tint: #33240b;
+    --su-warning-line: #704a0f;
+    --su-warning: #f79009;
+    --su-warning-strong: #b54708;
+    --su-success-text: #5ad69a;
+    --su-success-tint: #0c2b1d;
+    --su-success-line: #16603e;
+    --su-success: #17b26a;
+    --su-success-strong: #067647;
+    --su-info-text: #84c1ff;
+    --su-info-tint: #10233d;
+    --su-info-line: #1f4f86;
+    --su-info: #2e90fa;
+    --su-info-strong: #175cd3;
+    --su-neutral-text: #aeb4be;
+    --su-neutral-tint: #23272d;
+    --su-neutral-line: #2f343b;
+    --su-neutral: #8b929d;
 
-    --su-fill: rgba(245, 245, 247, 0.12);
-    --su-fill-secondary: rgba(245, 245, 247, 0.1);
-    --su-fill-tertiary: rgba(245, 245, 247, 0.08);
-    --su-fill-quaternary: rgba(245, 245, 247, 0.05);
+    --su-scrim: rgba(0, 0, 0, 0.6);
+    --su-scrim-strong: rgba(0, 0, 0, 0.9);
+    --su-shadow-overlay: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -4px rgba(0, 0, 0, 0.6);
 
-    --su-bg: var(--su-paper);
-    --su-bg-secondary: var(--su-canvas);
-    --su-bg-tertiary: #2c2c2e;
-
-    --su-bg-grouped: var(--su-paper);
-    --su-bg-grouped-secondary: var(--su-canvas);
-    --su-bg-grouped-tertiary: #2c2c2e;
-
-    --su-separator: var(--su-rule);
-    --su-separator-opaque: #38383a;
-
-    --su-danger-text: #ff6b6d;
-
-    --su-glass-bg: var(--su-material);
-    --su-glass-bg-elevated: rgba(10, 12, 18, 0.82);
-    --su-glass-clear-bg: rgba(10, 12, 18, 0.45);
+    --su-material: rgba(22, 25, 29, 0.72);
+    --su-glass-bg-elevated: rgba(22, 25, 29, 0.82);
+    --su-glass-clear-bg: rgba(22, 25, 29, 0.45);
     --su-glass-clear-dim: rgba(0, 0, 0, 0.35);
-
-    --su-chrome-border: var(--su-rule);
-    --su-chrome-border-outer: var(--su-rule-strong);
-
-    --su-glass-solid: rgba(28, 28, 30, 0.98);
-    --su-glass-clear-solid: rgba(28, 28, 30, 0.96);
+    --su-glass-solid: #16191d;
+    --su-glass-clear-solid: #16191d;
   }
 }
 
+/* ——— Handheld density scope ———
+   Generic controls re-size; handheld-only components read --su-hh-* directly. Same specificity as
+   `[data-theme]` and later in the file, so it wins when both sit on one element (ConfigProvider
+   stamps both on its wrapper and passes `handheld` down to nested providers). */
+[data-density="handheld"] {
+  --su-control-md: var(--su-hh-control-md);
+  --su-control-lg: var(--su-hh-control-lg);
+  --su-button-height: var(--su-hh-control-lg);
+  --su-radius-control: var(--su-hh-radius);
+  --su-text-control: var(--su-hh-text-secondary);
+  --su-leading-control: var(--su-hh-leading-secondary);
+  --su-text-body: var(--su-hh-text-body);
+  --su-leading-body: var(--su-hh-leading-body);
+  --su-text-label: var(--su-hh-text-key);
+  --su-leading-label-px: var(--su-hh-leading-key);
+  --su-inset: var(--su-hh-pad);
+}
+
+/* ——— Increased contrast ——— */
 @media (prefers-contrast: more) {
   :root,
-  [data-theme="light"],
-  [data-theme="dark"] {
-    --su-chrome-border-outer: currentColor;
-    --su-separator: var(--su-label-secondary);
-    --su-rule: var(--su-label-secondary);
-    --su-rule-strong: var(--su-label);
+  [data-theme] {
+    --su-border: var(--su-ink-3);
+    --su-border-strong: var(--su-ink-2);
+    --su-border-control: var(--su-ink-2);
   }
 
+  :root,
   [data-theme="light"] {
-    --su-label: #000000;
-    --su-label-secondary: rgba(0, 0, 0, 0.72);
-    --su-label-tertiary: rgba(0, 0, 0, 0.72);
-    --su-label-quaternary: rgba(0, 0, 0, 0.6);
+    --su-ink-2: #3d4350;
+    --su-ink-3: #525866;
   }
 
   [data-theme="dark"] {
-    --su-label: #ffffff;
-    --su-label-secondary: rgba(255, 255, 255, 0.8);
-    --su-label-tertiary: rgba(255, 255, 255, 0.8);
-    --su-label-quaternary: rgba(255, 255, 255, 0.7);
+    --su-ink-2: #cfd4db;
+    --su-ink-3: #aeb4be;
+  }
+}
+
+/* OS dark with no explicit theme: the OS-dark copy above outranks the plain `:root` rules. */
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --su-ink-2: #cfd4db;
+    --su-ink-3: #aeb4be;
+    --su-border: var(--su-ink-3);
+    --su-border-strong: var(--su-ink-2);
+    --su-border-control: var(--su-ink-2);
+  }
+}
+
+/* ——— Forced colours (Windows High Contrast) ———
+   The browser already forces colour, background and border properties. These values matter for
+   what it does not reach: elements that opt out with `forced-color-adjust: none` (dots, meters,
+   switch tracks) and colours painted through custom properties. Listed after every theme block so
+   it wins at equal specificity; `:root:not([data-theme="light"])` outranks the OS-dark copy. */
+@media (forced-colors: active) {
+  :root,
+  :root:not([data-theme="light"]),
+  [data-theme] {
+    --su-bg: Canvas;
+    --su-surface: Canvas;
+    --su-surface-2: Canvas;
+    --su-surface-hover: Canvas;
+    --su-surface-overlay: Canvas;
+    --su-fill: Canvas;
+    --su-control-raised: Canvas;
+    --su-border: CanvasText;
+    --su-border-strong: CanvasText;
+    --su-border-control: CanvasText;
+    --su-ink: CanvasText;
+    --su-ink-2: CanvasText;
+    --su-ink-3: GrayText;
+    --su-inverse-surface: Canvas;
+    --su-inverse-ink: CanvasText;
+
+    --su-action: Highlight;
+    --su-action-hover: Highlight;
+    --su-action-press: Highlight;
+    --su-action-subtle: Canvas;
+    --su-action-subtle-hover: Canvas;
+    --su-action-text: LinkText;
+    --su-action-text-hover: LinkText;
+    --su-on-action: HighlightText;
+    --su-focus: Highlight;
+
+    --su-danger-text: CanvasText;
+    --su-danger-tint: Canvas;
+    --su-danger-line: CanvasText;
+    --su-danger: CanvasText;
+    --su-danger-strong: Highlight;
+    --su-danger-strong-hover: Highlight;
+    --su-danger-strong-press: Highlight;
+    --su-warning-text: CanvasText;
+    --su-warning-tint: Canvas;
+    --su-warning-line: CanvasText;
+    --su-warning: CanvasText;
+    --su-warning-strong: Highlight;
+    --su-success-text: CanvasText;
+    --su-success-tint: Canvas;
+    --su-success-line: CanvasText;
+    --su-success: CanvasText;
+    --su-success-strong: Highlight;
+    --su-info-text: CanvasText;
+    --su-info-tint: Canvas;
+    --su-info-line: CanvasText;
+    --su-info: CanvasText;
+    --su-info-strong: Highlight;
+    --su-neutral-text: CanvasText;
+    --su-neutral-tint: Canvas;
+    --su-neutral-line: CanvasText;
+    --su-neutral: CanvasText;
+
+    --su-material: Canvas;
+    --su-glass-bg-elevated: Canvas;
+    --su-glass-clear-bg: Canvas;
+    --su-glass-solid: Canvas;
+    --su-glass-clear-solid: Canvas;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  [data-theme] {
     --su-duration-fast: 0ms;
     --su-duration-normal: 0ms;
     --su-duration-base: 0ms;

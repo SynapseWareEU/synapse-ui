@@ -1,0 +1,28 @@
+const a = /* @__PURE__ */ new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 16]), e = (s) => a.has(s) ? `var(--su-space-${s}, ${s * 4}px)` : `${s}px`, t = {
+  0: "gap-0",
+  1: "gap-su1",
+  2: "gap-su2",
+  3: "gap-su3",
+  4: "gap-su4",
+  5: "gap-su5",
+  6: "gap-su6",
+  7: "gap-[var(--su-space-7)]",
+  8: "gap-su8",
+  9: "gap-[var(--su-space-9)]",
+  10: "gap-[var(--su-space-10)]",
+  12: "gap-[var(--su-space-12)]",
+  16: "gap-[var(--su-space-16)]"
+}, p = {
+  start: "items-start",
+  "flex-start": "items-start",
+  center: "items-center",
+  end: "items-end",
+  "flex-end": "items-end",
+  baseline: "items-baseline",
+  stretch: "items-stretch"
+};
+export {
+  p as ALIGN_CLASS,
+  t as GAP_CLASS,
+  e as space
+};

@@ -16,14 +16,19 @@ export type TypographyVariant =
   | "caption1"
   | "caption2"
   | "label"
-  | "code";
+  | "code"
+  /** Row identity (SKU, SO number, bin): mono 14/20 500 ink. */
+  | "id"
+  /** Supporting identifier: mono 13/18 400 ink-2. */
+  | "idSecondary";
 
 /**
  * Ink roles carry text; status tones encode real product state (never decoration).
- * - `primary` / `secondary` — body and supporting copy.
- * - `tertiary` — placeholders and 19px+ only; ink-3 is 3.62:1 on light and fails 4.5:1.
- * - `quaternary` — decorative / disabled, never body copy (~2:1).
- * There is deliberately no `accent` tone: deep blue is the action colour and nothing else borrows it.
+ * - `primary` ink / `secondary` ink-2 — body and supporting copy.
+ * - `tertiary` ink-3 — only on white, and only for placeholders, disabled text and the empty "—".
+ * - `quaternary` — deprecated for text (border-strong, decorative only).
+ * - `danger` / `warning` / `success` / `info` — the `*-text` tokens.
+ * There is deliberately no `accent` tone: links are `<a>` (or `Button variant="text"`).
  */
 export type TypographyTone =
   | "primary"
@@ -32,10 +37,15 @@ export type TypographyTone =
   | "quaternary"
   | "danger"
   | "success"
-  | "warning";
+  | "warning"
+  | "info";
 
 export interface TypographyProps extends HTMLAttributes<HTMLElement> {
   variant?: TypographyVariant;
+  /**
+   * Text colour. Defaults to `primary`, except `lede`, `label` and `idSecondary` (ink-2) and
+   * `code` (inherits the surrounding colour).
+   */
   tone?: TypographyTone;
   /**
    * Visual role and document element are independent — use `as` to keep the
@@ -56,57 +66,73 @@ export interface TypographyProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode;
 }
 
+/* Size + line-height (+ tracking where the scale has it) per variant (v2 §2.5). The weight is
+   picked separately so `strong` never layers a second font-weight utility on top. */
 const variantClass: Record<TypographyVariant, string> = {
-  // Brand Heading role: clamp(32px, 3.6vw, 48px) / 500 / 1.06 / -0.02em.
-  largeTitle:
-    "text-[length:clamp(var(--su-text-title-1),3.6vw,var(--su-text-large-title))] font-medium leading-[var(--su-leading-snug)] tracking-[var(--su-tracking-tight)] text-balance",
-  // `text-*` carries the scale's own leading and tracking (see uno.config fontSize).
-  title1: "text-title-1 font-medium text-balance",
-  // Brand Subhead role: 22px / 500 / 1.25 / -0.01em.
-  title2: "text-title-2 font-medium text-balance",
-  title3: "text-title-3 font-medium tracking-[-0.01em] text-balance",
-  // Emphasized body, not a section heading — hence weight 600 and a <p> default.
-  headline:
-    "text-[length:var(--su-text-headline)] font-semibold leading-[var(--su-leading-normal)]",
-  // Brand Lede role: 19px / 400 / 1.55. Pairs with tone="secondary" measure="lede".
-  lede: "text-[length:var(--su-text-title-3)] font-normal leading-[1.55]",
-  body: "text-body font-normal",
-  // 15px at the body's 1.6, not the scale's 1.5 — Callout is running copy here.
-  callout:
-    "text-[length:var(--su-text-callout)] leading-[var(--su-leading-relaxed)]",
-  subhead: "text-subhead",
-  footnote: "text-footnote",
-  caption1: "text-caption-1",
-  // Legacy 11px sans — prefer variant="label" for 11px chrome.
-  caption2: "text-caption-2",
-  label: "su-label [font-variant-numeric:tabular-nums]",
-  code: "text-[0.88em] [font-stretch:87.5%] [font-variant-numeric:tabular-nums]",
+  largeTitle: "font-sans text-display text-balance", // 32/40, −0.01em
+  title1: "font-sans text-title text-balance", // 24/32, −0.01em
+  title2: "font-sans text-title-phone text-balance", // 22/28
+  title3: "font-sans text-section text-balance", // 16/24
+  headline: "font-sans text-empty-title", // 15/22
+  lede: "font-sans text-body", // 14/20, page description
+  body: "font-sans text-body",
+  callout: "font-sans text-body",
+  subhead: "font-sans text-body",
+  footnote: "font-sans text-small", // 13/18
+  caption1: "font-sans text-small",
+  caption2: "font-sans text-micro", // 12/16
+  label: "font-sans text-label-type", // 13/18, sentence case
+  // Identifier inside prose: 0.9em, colour, weight and leading from the surroundings.
+  code: "font-mono text-[0.9em]",
+  id: "font-mono text-body", // 14/20
+  idSecondary: "font-mono text-small", // 13/18
 };
 
-const monoVariant: Partial<Record<TypographyVariant, true>> = {
-  label: true,
-  code: true,
+const weightClass: Record<TypographyVariant, string | undefined> = {
+  largeTitle: "font-semibold",
+  title1: "font-semibold",
+  title2: "font-semibold",
+  title3: "font-semibold",
+  headline: "font-semibold",
+  lede: "font-normal",
+  body: "font-normal",
+  callout: "font-normal",
+  subhead: "font-semibold",
+  footnote: "font-normal",
+  caption1: "font-normal",
+  caption2: "font-normal",
+  label: "font-medium",
+  code: undefined, // inherits
+  id: "font-medium",
+  idSecondary: "font-normal",
 };
 
 const toneClass: Record<TypographyTone, string> = {
-  primary: "text-label",
-  secondary: "text-label-secondary",
-  // tertiary/quaternary fail WCAG text contrast; lift them for prefers-contrast users.
-  tertiary: "text-label-tertiary contrast-more:text-label-secondary",
-  quaternary: "text-label-quaternary contrast-more:text-label-secondary",
-  // Raw status fills fail 4.5:1 as text. danger-text is themed; success/warning have no
-  // text-grade token (the -strong fills are ~3:1 on dark paper), so pull them toward ink.
+  primary: "text-ink",
+  secondary: "text-ink-2",
+  tertiary: "text-ink-3",
+  // Deprecated for text; lifted to ink-2 for prefers-contrast users.
+  quaternary: "text-border-strong contrast-more:text-ink-2",
   danger: "text-danger-text",
-  success: "text-[color-mix(in_srgb,var(--su-success)_50%,var(--su-label))]",
-  warning: "text-[color-mix(in_srgb,var(--su-warning)_50%,var(--su-label))]",
+  success: "text-success-text",
+  warning: "text-warning-text",
+  info: "text-info-text",
+};
+
+/** Tone when none is passed: ink-2 for descriptions, labels and supporting ids; code inherits. */
+const defaultTone: Partial<Record<TypographyVariant, TypographyTone | null>> = {
+  lede: "secondary",
+  label: "secondary",
+  idSecondary: "secondary",
+  code: null,
 };
 
 const defaultTag: Record<TypographyVariant, ElementType> = {
   largeTitle: "h1",
-  title1: "h2",
-  title2: "h2",
-  title3: "h3",
-  headline: "p",
+  title1: "h1",
+  title2: "h1",
+  title3: "h2",
+  headline: "h3",
   lede: "p",
   body: "p",
   callout: "p",
@@ -116,13 +142,15 @@ const defaultTag: Record<TypographyVariant, ElementType> = {
   caption2: "span",
   label: "span",
   code: "code",
+  id: "span",
+  idSecondary: "span",
 };
 
 export const Typography = forwardRef<HTMLElement, TypographyProps>(
   function Typography(
     {
       variant = "body",
-      tone = "primary",
+      tone,
       as,
       strong = false,
       lines,
@@ -137,15 +165,16 @@ export const Typography = forwardRef<HTMLElement, TypographyProps>(
     const tag = as ?? defaultTag[variant] ?? "p";
     const Comp = strong && tag === "span" ? "strong" : tag;
     const clamped = lines !== undefined && lines > 1;
+    const resolvedTone =
+      tone ?? (variant in defaultTone ? defaultTone[variant] : "primary");
     return (
       <Comp
         ref={ref}
         className={cn(
           "m-0 [overflow-wrap:anywhere]",
-          monoVariant[variant] ? "font-mono" : "font-sans",
           variantClass[variant],
-          toneClass[tone],
-          strong && "font-semibold",
+          strong ? "font-semibold" : weightClass[variant],
+          resolvedTone && toneClass[resolvedTone],
           measure && (measure === "lede" ? "max-w-[44ch]" : "max-w-[62ch]"),
           lines === 1 && "truncate",
           clamped &&

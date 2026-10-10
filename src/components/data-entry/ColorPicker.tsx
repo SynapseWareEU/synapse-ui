@@ -17,11 +17,33 @@ export interface ColorPickerProps
   onChange?: (value: string) => void;
 }
 
-const swatchSizeClass: Record<InputSize, string> = {
-  sm: "size-[var(--su-control-sm)]",
-  md: "size-[var(--su-control-md)]",
-  lg: "size-[var(--su-control-lg)]",
+/* Select-like trigger: 32 / 36 / 48 tall, surface, 1px border-strong, radius 6. */
+const triggerHeightClass: Record<InputSize, string> = {
+  sm: "h-[var(--su-control-sm)]",
+  md: "h-[var(--su-control-md)]",
+  lg: "h-[var(--su-control-lg)]",
 };
+
+/** Without the hex text the trigger is square. */
+const triggerSquareClass: Record<InputSize, string> = {
+  sm: "w-[var(--su-control-sm)]",
+  md: "w-[var(--su-control-md)]",
+  lg: "w-[var(--su-control-lg)]",
+};
+
+/* Swatch: 20 (24 at lg), radius 4, 1px hairline so white and near-surface colours keep an edge. */
+const swatchSizeClass: Record<InputSize, string> = {
+  sm: "size-[20px]",
+  md: "size-[20px]",
+  lg: "size-[24px]",
+};
+
+const triggerBaseClass = [
+  "relative inline-flex shrink-0 items-center gap-su2 rounded-su-control border border-solid font-sans",
+  "transition-[background-color,border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  // The native input inside takes focus; the ring goes on the whole trigger, keyboard only.
+  "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-solid has-[:focus-visible]:outline-focus has-[:focus-visible]:outline-offset-[var(--su-focus-ring-offset)]",
+].join(" ");
 
 /** `<input type="color">` only accepts 7-char hex; anything else silently renders black. */
 const toHex = (v: string) => (/^#[0-9a-fA-F]{6}$/.test(v) ? v : "#000000");
@@ -52,37 +74,49 @@ export function ColorPicker({
     [isControlled, onChange],
   );
 
+  const invalid = Boolean(item?.error);
+
   return (
-    <div className={cn("inline-flex items-center gap-su3", className)}>
-      <div
+    <div
+      className={cn(
+        triggerBaseClass,
+        triggerHeightClass[size],
+        showText ? "ps-su2 pe-su3" : cn("justify-center", triggerSquareClass[size]),
+        isDisabled
+          ? "bg-surface-2 border-border cursor-not-allowed"
+          : cn(
+              "bg-surface cursor-pointer [@media(hover:hover)]:hover:bg-surface-2",
+              invalid ? "border-danger" : "border-border-strong",
+            ),
+        className,
+      )}
+    >
+      <span
+        aria-hidden="true"
+        // The swatch is the value: keep its colour in High Contrast.
         className={cn(
-          "relative border border-solid border-separator rounded-none overflow-hidden cursor-pointer",
-          "transition-[border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
-          "hover:border-rule-strong [@media(hover:none)]:hover:border-separator",
-          // outline-solid is required: outline-2 only sets the width, style stays `none`
-          "focus-within:(outline-solid outline-2 outline-accent outline-offset-[var(--su-focus-ring-offset)])",
+          "shrink-0 rounded-su-tag border border-solid border-border forced-colors:[forced-color-adjust:none]",
           swatchSizeClass[size],
-          isDisabled && "opacity-45 cursor-not-allowed hover:border-separator",
         )}
         style={{ backgroundColor: value }}
-      >
-        <input
-          type="color"
-          id={idProp ?? item?.id}
-          value={value}
-          disabled={isDisabled}
-          className="absolute inset-0 size-full appearance-none p-0 border-none bg-transparent outline-none cursor-pointer disabled:cursor-not-allowed [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-moz-color-swatch]:border-none"
-          onChange={(e) => emit(e.target.value)}
-          {...rest}
-          aria-describedby={item?.descriptionId}
-          aria-invalid={item?.error ? true : undefined}
-        />
-      </div>
+      />
       {showText && (
-        <span className="font-mono text-footnote text-label-secondary">
+        <span className={cn("su-id-2 whitespace-nowrap", isDisabled && "text-ink-3")}>
           {value.toUpperCase()}
         </span>
       )}
+      {/* The native picker opens from anywhere on the trigger. */}
+      <input
+        type="color"
+        id={idProp ?? item?.id}
+        value={value}
+        disabled={isDisabled}
+        className="absolute inset-0 size-full m-0 p-0 appearance-none border-none bg-transparent opacity-0 outline-none cursor-pointer disabled:cursor-not-allowed"
+        onChange={(e) => emit(e.target.value)}
+        {...rest}
+        aria-describedby={item?.descriptionId}
+        aria-invalid={item?.error ? true : undefined}
+      />
     </div>
   );
 }

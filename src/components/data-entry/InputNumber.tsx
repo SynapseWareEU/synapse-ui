@@ -5,10 +5,10 @@ import {
   type FocusEvent,
   type InputHTMLAttributes,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 import { cn } from "../../utils/cn";
-import { useFieldState, useFormItemContext } from "./Form";
-import { inputClass, inputSizeClass } from "./Input";
+import { Input } from "./Input";
 import type { InputSize } from "./types";
 
 export interface InputNumberProps
@@ -23,7 +23,10 @@ export interface InputNumberProps
   step?: number;
   disabled?: boolean;
   size?: InputSize;
+  /** Classes for the outer box: 160 wide (a short numeric field), never wider than its container. */
   className?: string;
+  /** Unit inside the field, after the value ("buc", "zile"): ink-2, 8 after it. It never moves. */
+  suffix?: ReactNode;
   onChange?: (value: number | undefined) => void;
 }
 
@@ -46,11 +49,12 @@ function normalize(value: number, min: number | undefined, max: number | undefin
   return Number(clamp(value, min, max).toFixed(stepDecimals(step)));
 }
 
-const stepperClass =
-  // 44px floor, never below the hit target, whatever `size` the input uses (same
-  // tradeoff Segmented makes). Inset ring: the segment is fused to its neighbours.
-  "inline-flex items-center justify-center min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] px-[var(--su-space-2)] py-0 border border-solid border-rule rounded-none bg-canvas text-ink text-body cursor-pointer transition-[background] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none hover:not-disabled:bg-fill focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[calc(var(--su-focus-ring-offset)*-1)] disabled:opacity-45 disabled:cursor-not-allowed";
-
+/**
+ * Desk number field (§4.2): an Input with an optional unit suffix, left-aligned tabular figures,
+ * no stepper buttons and no native spinners, 160 wide. ArrowUp / ArrowDown still step by `step`
+ * (native `type="number"` behaviour); min / max are applied on blur and Enter. Handheld quantity
+ * entry is a separate pattern.
+ */
 export function InputNumber({
   value: valueProp,
   defaultValue,
@@ -58,17 +62,15 @@ export function InputNumber({
   max,
   step = 1,
   disabled,
-  size: sizeProp,
+  size,
   className,
+  suffix,
   onChange,
-  id: idProp,
+  id,
   onBlur,
   onKeyDown,
   ...rest
 }: InputNumberProps) {
-  const item = useFormItemContext();
-  const { size, disabled: isDisabled } = useFieldState(sizeProp, disabled);
-
   const [internal, setInternal] = useState<number | undefined>(defaultValue);
   // Raw text while the user is mid-typing; cleared (and clamped) on commit.
   const [draft, setDraft] = useState<string | null>(null);
@@ -104,26 +106,15 @@ export function InputNumber({
     }
   };
 
-  const stepBy = (delta: number) => {
-    setDraft(null);
-    emit(normalize((value ?? min ?? 0) + delta, min, max, step));
-  };
-
   return (
-    <div className={cn("inline-flex items-stretch w-full max-w-[200px]", className)}>
-      <button
-        type="button"
-        className={stepperClass}
-        disabled={isDisabled || (min != null && (value ?? min) <= min)}
-        onClick={() => stepBy(-step)}
-        aria-label="Decrease"
-      >
-        −
-      </button>
-      <input
+    <div className={cn("w-[160px] max-w-full", className)}>
+      <Input
+        {...rest}
         type="number"
-        id={idProp ?? item?.id}
-        disabled={isDisabled}
+        id={id}
+        size={size}
+        disabled={disabled}
+        suffix={suffix}
         value={draft ?? value ?? ""}
         min={min}
         max={max}
@@ -145,31 +136,7 @@ export function InputNumber({
           }
           onKeyDown?.(event);
         }}
-        className={cn(
-          inputClass,
-          inputSizeClass[size],
-          "flex-1 min-w-0 text-center rounded-none border-l-0 border-r-0",
-          // Contained ring: the segment is fused to the steppers, so the standard
-          // 3px offset would bleed over them.
-          "focus:outline-offset-[calc(var(--su-focus-ring-offset)*-1)]",
-          "disabled:opacity-45 disabled:cursor-not-allowed",
-          // Native chevrons are a rounded second stepper next to ours.
-          "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:(appearance-none m-0)",
-        )}
-        required={item?.required}
-        {...rest}
-        aria-describedby={item?.descriptionId}
-        aria-invalid={item?.error ? true : undefined}
       />
-      <button
-        type="button"
-        className={stepperClass}
-        disabled={isDisabled || (max != null && (value ?? max) >= max)}
-        onClick={() => stepBy(step)}
-        aria-label="Increase"
-      >
-        +
-      </button>
     </div>
   );
 }

@@ -7,9 +7,9 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useConfig } from "../../ConfigProvider";
 import { cn } from "../../utils/cn";
-import { SvgIcon } from "../general/Icon";
 import { Segmented } from "./Segmented";
 
 export interface CalendarProps extends Omit<
@@ -26,12 +26,10 @@ export interface CalendarProps extends Omit<
   onChange?: (date: Date) => void;
 }
 
+/** Chevrons point along reading order, so RTL mirrors them. */
 function Chevron({ back }: { back?: boolean }) {
-  return (
-    <SvgIcon size="sm">
-      <path d={back ? "M15 4 7 12l8 8" : "M9 4l8 8-8 8"} />
-    </SvgIcon>
-  );
+  const Glyph = back ? IconChevronLeft : IconChevronRight;
+  return <Glyph size={16} stroke={1.75} aria-hidden className="rtl:-scale-x-100" />;
 }
 
 function sameDay(a: Date, b: Date) {
@@ -67,8 +65,18 @@ function weekStart(locale: string) {
   }
 }
 
+/**
+ * 28 ghost icon button (prev/next): ink-2 chevron; hover fill + ink; press border colour.
+ * Under (hover: none) a transparent ::after lifts the target to 44.
+ */
 const navButtonClass =
-  "inline-flex items-center justify-center min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] rounded-none bg-transparent text-label-secondary cursor-pointer transition-[background,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:(bg-fill-quaternary text-label) su-focus-ring";
+  "relative inline-flex shrink-0 items-center justify-center size-[var(--su-control-xs)] rounded-su-control bg-transparent text-ink-2 cursor-pointer " +
+  "transition-[background-color,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] " +
+  "[@media(hover:hover)]:[&:hover:not(:active)]:bg-fill [@media(hover:hover)]:hover:text-ink active:bg-border su-focus-ring " +
+  "[@media(hover:none)]:after:content-empty [@media(hover:none)]:after:absolute [@media(hover:none)]:after:-inset-[8px]";
+
+/** 40 wide day columns in the compact calendar (DatePicker cells, grown to 40×40). */
+const compactColumns = "grid-cols-[repeat(7,40px)]";
 
 const ARROW_DELTA: Record<string, number> = {
   ArrowLeft: -1,
@@ -171,22 +179,29 @@ export function Calendar({
     year: "numeric",
   });
 
+  const today = new Date();
+
   return (
     <div
       className={cn(
-        "w-[280px] p-su3 rounded-none bg-paper border-t border-solid border-rule-strong",
-        fullscreen && "w-full p-su4",
+        // Panel: surface, 1px border, radius 8. Not `su-panel`: that clips, and the day cells'
+        // focus rings sit in the 12/16 padding.
+        "bg-surface border border-solid border-border rounded-su-surface font-sans text-ink",
+        fullscreen ? "w-full p-su4" : "w-max p-su3",
         className,
       )}
       {...rest}
     >
-      <div className="flex flex-wrap items-center justify-between gap-su2 mb-su3">
+      <div
+        className={cn(
+          "flex flex-wrap items-center justify-between gap-su2",
+          fullscreen ? "mb-su3" : "min-h-[var(--su-control-sm)] mb-su2",
+        )}
+      >
         <span
           className={cn(
-            "font-semibold text-label tabular-nums",
-            fullscreen
-              ? "text-title-3"
-              : "text-subhead",
+            "font-semibold text-ink su-tabular",
+            fullscreen ? "text-section" : "text-body",
           )}
         >
           {mode === "year" ? view.getFullYear() : monthLabel}
@@ -202,7 +217,7 @@ export function Calendar({
               ]}
             />
           )}
-          <div className="inline-flex items-center">
+          <div className="inline-flex items-center gap-su1">
             <button
               type="button"
               className={navButtonClass}
@@ -224,42 +239,43 @@ export function Calendar({
       </div>
       {mode === "year" ? (
         <div className="grid grid-cols-3 gap-su2">
-          {Array.from({ length: 12 }, (_, month) => (
-            <button
-              type="button"
-              key={month}
-              aria-current={month === view.getMonth() ? "true" : undefined}
-              className={cn(
-                "min-h-[72px] border border-solid border-rule rounded-none bg-canvas text-label text-subhead cursor-pointer transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:bg-fill-tertiary su-focus-ring",
-                month === view.getMonth() && "bg-accent-soft text-accent font-semibold",
-              )}
-              onClick={() => {
-                setView(new Date(view.getFullYear(), month, 1));
-                setMode("month");
-              }}
-            >
-              {new Intl.DateTimeFormat(locale, { month: "long" }).format(
-                new Date(view.getFullYear(), month, 1),
-              )}
-            </button>
-          ))}
+          {Array.from({ length: 12 }, (_, month) => {
+            const isCurrent = month === view.getMonth();
+            return (
+              <button
+                type="button"
+                key={month}
+                aria-current={isCurrent ? "true" : undefined}
+                className={cn(
+                  "min-h-[72px] border border-solid rounded-su-control text-body cursor-pointer transition-[background-color,border-color,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] su-focus-ring",
+                  // Current month: the v2 selection (action-subtle + action-text), weight unchanged.
+                  isCurrent
+                    ? "border-action-subtle bg-action-subtle text-action-text [@media(hover:hover)]:hover:bg-action-subtle-hover [@media(hover:hover)]:hover:border-action-subtle-hover"
+                    : "border-border bg-surface text-ink [@media(hover:hover)]:hover:bg-surface-2",
+                )}
+                onClick={() => {
+                  setView(new Date(view.getFullYear(), month, 1));
+                  setMode("month");
+                }}
+              >
+                {new Intl.DateTimeFormat(locale, { month: "long" }).format(
+                  new Date(view.getFullYear(), month, 1),
+                )}
+              </button>
+            );
+          })}
         </div>
       ) : (
         <>
-          <div
-            className={cn(
-              "grid grid-cols-7",
-              fullscreen ? "gap-0" : "gap-su1",
-            )}
-          >
+          <div className={cn("grid", fullscreen ? "grid-cols-7" : compactColumns)}>
             {weekdays.map((d) => (
               <span
                 key={d}
                 className={cn(
-                  "font-semibold text-label-tertiary text-caption-1",
+                  "h-[24px] text-micro font-medium text-ink-2",
                   fullscreen
-                    ? "px-su2 pb-su2 text-start"
-                    : "pb-su1 text-center",
+                    ? "flex items-center px-su2 text-start"
+                    : "grid place-items-center",
                 )}
               >
                 {d}
@@ -268,10 +284,7 @@ export function Calendar({
           </div>
           <div
             ref={gridRef}
-            className={cn(
-              "grid grid-cols-7",
-              fullscreen ? "gap-0" : "gap-su1",
-            )}
+            className={cn("grid", fullscreen ? "grid-cols-7" : compactColumns)}
           >
             {days.map((date, i) => {
               if (!date) {
@@ -280,10 +293,10 @@ export function Calendar({
                     key={`empty-${i}`}
                     className={cn(
                       fullscreen
-                        ? "aspect-auto min-h-[92px] max-md:min-h-14 border-t border-solid border-rule"
+                        ? "min-h-[92px] max-md:min-h-14 border-t border-solid border-border"
                         : dateRender
-                          ? "min-h-13"
-                          : "aspect-square",
+                          ? "min-h-[52px]"
+                          : "h-[40px]",
                     )}
                   />
                 );
@@ -291,6 +304,15 @@ export function Calendar({
               const isSelected = sameDay(date, selected);
               // aria-disabled, not `disabled`: a blocked day stays in the roving focus path.
               const isDisabled = disabledDate?.(date) ?? false;
+              const isToday = !isSelected && !isDisabled && sameDay(date, today);
+              // One text colour + weight per state, so no two utilities ever compete.
+              const numberTone = isSelected
+                ? "text-on-action font-medium"
+                : isDisabled
+                  ? "text-ink-3"
+                  : isToday
+                    ? "text-action-text font-semibold"
+                    : "text-ink";
               return (
                 <button
                   key={date.toISOString()}
@@ -300,20 +322,29 @@ export function Calendar({
                   className={cn(
                     // Alignment and padding live only in the branches: `cn()` is a plain join, so a
                     // base `place-items-center` would beat the fullscreen `place-items-start`.
-                    "group grid rounded-none bg-transparent text-footnote cursor-pointer su-focus-ring",
+                    "group grid text-small su-tabular su-focus-ring transition-[background-color,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
+                    isDisabled ? "cursor-not-allowed" : "cursor-pointer",
                     fullscreen
-                      ? "aspect-auto min-h-[92px] max-md:min-h-14 border-t border-solid border-rule place-items-start content-start gap-su1 p-su2 max-md:p-su1 text-start"
-                      : dateRender
-                        ? "place-items-center min-h-13 content-center gap-su1 px-0 py-su1"
-                        : "place-items-center p-0 aspect-square",
-                    fullscreen && isSelected && "bg-accent-soft",
-                    fullscreen &&
-                      !isSelected &&
-                      !isDisabled &&
-                      "hover:bg-fill-quaternary",
-                    isDisabled
-                      ? "text-label-tertiary cursor-not-allowed"
-                      : "text-label",
+                      ? cn(
+                          // A top-ruled cell stays square: a radius would leave arc stubs at every join.
+                          "min-h-[92px] max-md:min-h-14 rounded-su-row border-t border-solid border-border place-items-start content-start gap-su1 p-su2 max-md:p-su1 text-start",
+                          isSelected
+                            ? "bg-action-subtle [@media(hover:hover)]:hover:bg-action-subtle-hover"
+                            : isDisabled
+                              ? "bg-transparent"
+                              : "bg-transparent [@media(hover:hover)]:hover:bg-surface-hover",
+                        )
+                      : cn(
+                          // Compact: the whole 40×40 cell is the DatePicker day chip (radius 6).
+                          "w-[40px] place-items-center rounded-su-control",
+                          dateRender ? "min-h-[52px] content-center gap-0 px-0 py-su1" : "h-[40px] p-0",
+                          numberTone,
+                          isSelected
+                            ? "bg-action [@media(hover:hover)]:hover:bg-action-hover"
+                            : isDisabled
+                              ? "bg-transparent"
+                              : "bg-transparent [@media(hover:hover)]:hover:bg-surface-hover",
+                        ),
                   )}
                   aria-label={date.toLocaleDateString(locale, {
                     dateStyle: "full",
@@ -325,20 +356,14 @@ export function Calendar({
                 >
                   <span
                     className={cn(
-                      "grid place-items-center h-[var(--su-control-xs)] rounded-none tabular-nums transition-[background,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
-                      fullscreen
-                        ? "min-w-0 px-su2"
-                        : "min-w-[var(--su-control-xs)] px-su1",
-                      isSelected
-                        ? "bg-accent text-on-action font-semibold group-hover:bg-[var(--su-accent-hover)]"
-                        : cn(
-                            !isDisabled &&
-                              sameDay(date, new Date()) &&
-                              "text-accent font-semibold",
-                            !fullscreen &&
-                              !isDisabled &&
-                              "group-hover:bg-fill-quaternary",
-                          ),
+                      "grid place-items-center",
+                      // Fullscreen: the number is its own chip; selected fills it with action.
+                      fullscreen &&
+                        cn(
+                          "h-[var(--su-control-xs)] min-w-0 px-su2 rounded-su-control",
+                          numberTone,
+                          isSelected ? "bg-action" : undefined,
+                        ),
                     )}
                   >
                     {date.getDate()}
@@ -346,7 +371,8 @@ export function Calendar({
                   {dateRender && (
                     <span
                       className={cn(
-                        "block max-w-full overflow-hidden text-label-secondary text-caption-2 text-ellipsis whitespace-nowrap",
+                        "block max-w-full overflow-hidden text-micro text-ellipsis whitespace-nowrap",
+                        !fullscreen && isSelected ? "text-on-action" : "text-ink-2",
                         fullscreen && "ps-su2",
                       )}
                     >

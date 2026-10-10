@@ -13,6 +13,10 @@ export interface PopoverProps
   container?: HTMLElement | null;
 }
 
+/**
+ * v2 overlay: surface-overlay, 1px border, radius 8, overlay shadow, padding 8, 4 from the
+ * trigger, no arrow. Fades in with a 4px drift (150ms).
+ */
 export function Popover({
   trigger,
   content,
@@ -31,15 +35,17 @@ export function Popover({
         <RadixPopover.Content
           side={side}
           align={align}
-          sideOffset={8}
+          sideOffset={4}
           className={cn(
-            "z-[var(--su-z-dropdown)] p-su3 border border-solid border-rule-strong rounded-none bg-paper text-label text-subhead su-focus-ring animate-su-pop-in motion-reduce:animate-none",
+            "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",
+            "font-sans text-body text-ink su-focus-ring",
+            // `data-side` holds exactly one value, so only one of these animations ever applies.
+            "data-[side=bottom]:animate-su-dropdown-in data-[side=left]:animate-su-dropdown-in data-[side=right]:animate-su-dropdown-in data-[side=top]:animate-su-scale-in",
             contentClassName,
           )}
         >
-          {/* No arrow: a filled triangle breaks the border-rule-strong hairline where it
-              meets the box. Tooltip drops it for the same reason — keep the two in step. */}
-          <div className="max-h-[calc(var(--radix-popover-content-available-height)-2*var(--su-space-3))] overflow-y-auto">
+          {/* No arrow (v2): the overlay shadow and the 4px offset already tie it to its trigger. */}
+          <div className="max-h-[calc(var(--radix-popover-content-available-height)-2*var(--su-space-2)-2px)] overflow-y-auto">
             {content}
           </div>
         </RadixPopover.Content>

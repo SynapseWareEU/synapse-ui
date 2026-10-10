@@ -13,13 +13,24 @@ export interface RateProps {
   onChange?: (value: number) => void;
 }
 
-// 44x44 invisible hit box around a 22px glyph — the guide's "small visible control,
-// full-size hit area" pattern. The boxes themselves provide the spacing, so gap-0.
+// Star 16 in a 20 box (radius 4, so the focus ring has room); the boxes touch, so stars sit 4 apart.
+// On desk the visual box is the target; touch gets the old 44 box back.
 const starButtonClass = [
-  "inline-flex items-center justify-center size-[var(--su-hit-target)] p-0 bg-transparent cursor-pointer",
-  "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
+  "inline-flex shrink-0 items-center justify-center size-[20px] p-0 rounded-su-tag bg-transparent",
+  "[@media(hover:none)]:size-[var(--su-hit-target)]",
+  "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  // High Contrast: on and off would both be forced to one text colour; keep them apart.
+  "forced-colors:[forced-color-adjust:none]",
   "su-focus-ring",
 ].join(" ");
+
+/* Off: border-strong. On: warning solid. Disabled: on turns ink-3, no opacity. */
+const starToneClass = {
+  on: "text-warning forced-colors:text-[CanvasText]",
+  off: "text-border-strong forced-colors:text-[GrayText]",
+  disabledOn: "text-ink-3 forced-colors:text-[GrayText]",
+  disabledOff: "text-border-strong forced-colors:text-[GrayText]",
+};
 
 export function Rate({
   value: valueProp,
@@ -67,10 +78,14 @@ export function Rate({
             disabled={isDisabled}
             className={cn(
               starButtonClass,
-              starValue <= display
-                ? "text-ink"
-                : "text-[var(--su-gray-4)] contrast-more:text-[var(--su-label)]",
-              isDisabled && "opacity-45 cursor-not-allowed",
+              isDisabled
+                ? starValue <= display
+                  ? starToneClass.disabledOn
+                  : starToneClass.disabledOff
+                : starValue <= display
+                  ? starToneClass.on
+                  : starToneClass.off,
+              isDisabled ? "cursor-not-allowed" : "cursor-pointer",
             )}
             aria-label={`${starValue} star${starValue > 1 ? "s" : ""}`}
             aria-pressed={starValue === value}
@@ -84,14 +99,14 @@ export function Rate({
               onChange?.(next);
             }}
           >
-            <svg viewBox="0 0 24 24" className="size-[22px]" fill="currentColor" aria-hidden="true">
+            <svg viewBox="0 0 24 24" className="size-[16px]" fill="currentColor" aria-hidden="true">
               <path d="M12 2.5 15.09 8.76 22 9.77l-5 4.87 1.18 6.86L12 18.26l-6.18 3.24L7 14.64l-5-4.87 6.91-1.01z" />
             </svg>
           </button>
         );
       })}
       {display > 0 && (
-        <span className="ml-su1 text-footnote text-label-secondary">
+        <span className="ms-su2 text-small text-ink-2 su-tabular">
           {display}/{count}
         </span>
       )}

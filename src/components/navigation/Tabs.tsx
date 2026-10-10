@@ -11,7 +11,7 @@ export function Tabs({ className, dir, ...rest }: TabsProps) {
     <TabsPrimitive.Root
       dir={dir ?? direction}
       className={cn(
-        "font-sans data-[orientation=vertical]:(flex items-start gap-su4)",
+        "font-sans data-[orientation=vertical]:(flex items-start gap-su6)",
         className,
       )}
       {...rest}
@@ -24,11 +24,11 @@ export interface TabsListProps extends TabsPrimitive.TabsListProps {
   extra?: ReactNode;
 }
 
-// ponytail: the scroller's `py/-my` buys 5px so the trigger's 3px-offset focus ring
-// survives the overflow clip; the first/last tab's ring can still clip on the
-// horizontal axis. Upgrade path is an inset ring, which is off-spec for the guide.
+// The scroller clips on both axes (overflow-x: auto forces overflow-y too) and a tab has no
+// padding, so a 2px ring at a 2px offset would be cut on every side. `p/-m` buys it 5px of
+// room without moving the row.
 const listScrollClass =
-  "min-w-0 flex-1 overflow-x-auto py-[5px] -my-[5px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
+  "min-w-0 flex-1 overflow-x-auto p-[5px] -m-[5px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 export function TabsList({ className, extra, ...rest }: TabsListProps) {
   return (
@@ -36,8 +36,10 @@ export function TabsList({ className, extra, ...rest }: TabsListProps) {
       <div className={listScrollClass}>
         <TabsPrimitive.List
           className={cn(
-            "flex w-max min-w-full gap-su4 border-b border-b-solid border-b-rule",
-            "data-[orientation=vertical]:(w-auto min-w-0 flex-col border-b-0 border-r border-r-solid border-r-rule)",
+            // 40 tall (each trigger pulls 1px down over the hairline), 24 between tabs.
+            "flex w-max min-w-full gap-su6 border-b border-b-solid border-b-border",
+            // Vertical: page-nav rows (as in Menu), 2 apart, no rule.
+            "data-[orientation=vertical]:(w-auto min-w-0 flex-col gap-[2px] border-b-0)",
             className,
           )}
           {...rest}
@@ -50,26 +52,72 @@ export function TabsList({ className, extra, ...rest }: TabsListProps) {
   );
 }
 
-export type TabsTriggerProps = TabsPrimitive.TabsTriggerProps;
+export interface TabsTriggerProps extends TabsPrimitive.TabsTriggerProps {
+  /**
+   * Count pill after the label (18 tall, 12/16 500 sans, tabular). Neutral at rest,
+   * action-subtle while its tab is selected. Omit it for no pill; `0` renders "0".
+   */
+  count?: ReactNode;
+  /** `"danger"` keeps the pill red in every state, for counts that are alerts (late, blocked). */
+  countVariant?: "neutral" | "danger";
+}
 
-export function TabsTrigger({ className, ...rest }: TabsTriggerProps) {
+/**
+ * Horizontal tab: 40 tall, no padding, 14/20 500 in every state (the weight never changes, so
+ * nothing shifts), and a static 2px action underline on the selected tab. The others carry a
+ * transparent 2px border so every label sits on the same line. 44 tall on touch screens.
+ */
+const triggerClass = cn(
+  "relative inline-flex shrink-0 items-center justify-center gap-[6px] whitespace-nowrap",
+  "h-[var(--su-tab-height)] [@media(hover:none)]:h-[var(--su-hit-target)] p-0 -mb-px [appearance:none]",
+  "border-b-2 border-solid border-b-transparent bg-transparent",
+  "font-sans text-body font-medium text-ink-2 cursor-pointer su-focus-ring",
+  "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  "[@media(hover:hover)]:[&:not([data-state=active]):enabled:hover]:text-ink",
+  "disabled:text-ink-3 disabled:cursor-not-allowed",
+  "data-[state=active]:text-ink data-[state=active]:border-b-action",
+  "forced-colors:data-[state=active]:border-b-[Highlight]",
+  // Vertical: a page-nav row (36, padding 0 12, radius 6); selection is a fill, not a rule.
+  "data-[orientation=vertical]:(w-full h-[var(--su-control-md)] justify-between mb-0 px-su3 border-b-0 rounded-su-control)",
+  "[&[data-orientation=vertical]:not([data-state=active]):enabled]:text-ink",
+  "[@media(hover:hover)]:data-[orientation=vertical]:hover:not-disabled:bg-surface-hover",
+  "data-[orientation=vertical]:data-[state=active]:bg-action-subtle",
+  "data-[orientation=vertical]:data-[state=active]:text-action-text",
+  "[@media(hover:hover)]:data-[orientation=vertical]:data-[state=active]:hover:bg-action-subtle-hover",
+);
+
+/**
+ * The Badge count pill, drawn here so it can follow its own tab's state. In a vertical list it
+ * is the page-nav count instead: plain 13/18 400, ink-2 (action-text on the selected row).
+ */
+const countClass = cn(
+  "inline-flex shrink-0 items-center justify-center h-[18px] min-w-[18px] px-[6px] rounded-su-pill font-sans text-micro font-medium su-tabular",
+  "[[data-orientation=vertical]>&]:h-auto [[data-orientation=vertical]>&]:min-w-0 [[data-orientation=vertical]>&]:px-0",
+  "[[data-orientation=vertical]>&]:text-small [[data-orientation=vertical]>&]:font-normal",
+  "[[data-orientation=vertical][data-state]>&]:bg-transparent",
+);
+
+const countVariantClass = {
+  neutral:
+    "bg-fill text-ink-2 [[data-state=active]>&]:bg-action-subtle [[data-state=active]>&]:text-action-text",
+  danger: "bg-danger-tint text-danger-text",
+} as const;
+
+export function TabsTrigger({
+  className,
+  children,
+  count,
+  countVariant = "neutral",
+  ...rest
+}: TabsTriggerProps) {
+  const hasCount = count !== undefined && count !== null && count !== false;
   return (
-    <TabsPrimitive.Trigger
-      className={cn(
-        "relative inline-flex shrink-0 items-center justify-center gap-su2 whitespace-nowrap min-h-[var(--su-hit-target)] min-w-[var(--su-hit-target)] px-su2 [appearance:none] rounded-none bg-transparent text-label-secondary font-sans text-subhead font-medium cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
-        "[@media(hover:hover)]:hover:text-label",
-        "disabled:(text-label-tertiary cursor-not-allowed)",
-        "data-[state=active]:text-label",
-        // Indicator is always present so it can draw in instead of popping.
-        "after:(content-[''] absolute inset-x-0 bottom-[-1px] h-[2px] bg-accent origin-left scale-x-0 transition-transform duration-[var(--su-duration-base)] ease-[var(--su-ease-out)])",
-        "data-[state=active]:after:scale-x-100",
-        "contrast-more:data-[state=active]:after:h-[3px]",
-        "data-[orientation=vertical]:(w-full justify-start)",
-        "data-[orientation=vertical]:after:(inset-y-0 inset-x-auto right-[-1px] w-[2px] h-auto)",
-        className,
-      )}
-      {...rest}
-    />
+    <TabsPrimitive.Trigger className={cn(triggerClass, className)} {...rest}>
+      {children}
+      {hasCount ? (
+        <span className={cn(countClass, countVariantClass[countVariant])}>{count}</span>
+      ) : null}
+    </TabsPrimitive.Trigger>
   );
 }
 
@@ -79,7 +127,7 @@ export function TabsContent({ className, ...rest }: TabsContentProps) {
   return (
     <TabsPrimitive.Content
       className={cn(
-        "mt-su4 su-focus-ring text-label text-body",
+        "mt-su4 su-focus-ring text-ink text-body",
         "data-[state=active]:animate-su-fade-in motion-reduce:animate-none",
         "data-[orientation=vertical]:(mt-0 flex-1 min-w-0)",
         className,

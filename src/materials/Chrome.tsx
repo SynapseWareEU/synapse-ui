@@ -15,8 +15,8 @@ export interface ChromeProps extends HTMLAttributes<HTMLElement> {
  * Strength -> rim class. Exported so Glass (and any other surface with a
  * `chrome` prop) uses one source of truth instead of re-declaring the map.
  *
- * "subtle" intentionally equals "default": the brand defines two rule weights
- * (--su-rule / --su-rule-strong), not three. Don't invent a third.
+ * "subtle" intentionally equals "default": the system has two hairline weights
+ * (--su-border / --su-border-strong), not three. Don't invent a third.
  */
 export const chromeRimClass: Record<ChromeStrength, string> = {
   subtle: "su-chrome",
@@ -25,13 +25,12 @@ export const chromeRimClass: Record<ChromeStrength, string> = {
 };
 
 /**
- * Draws a 1px hairline edge (--su-rule / --su-rule-strong, via box-shadow so it
+ * Draws a 1px hairline edge (--su-border / --su-border-strong, via box-shadow so it
  * adds nothing to layout) around a surface someone else sizes — usually Glass.
  *
- * Not a material tier and not a gloss: the brand guide's Materials section says
- * "No specular chrome rims" and "Shadow: none. Depth comes from the light field
- * and from hairlines." Keep this a flat hairline; no gradients, no glow, no
- * radius (corner shape is always square and belongs to the host).
+ * Not a material tier and not a gloss: no specular rims, no gradients, no glow.
+ * The ring is a box-shadow, so it follows whatever radius the host sets; Chrome
+ * sets none of its own.
  */
 export function Chrome({
   as: Comp = "div",

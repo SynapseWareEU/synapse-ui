@@ -49,8 +49,9 @@ export function Segmented({
         onValueChange?.(next);
       }}
       className={cn(
-        "inline-flex p-0 gap-0 border border-solid border-rule-strong rounded-none bg-canvas",
-        block && "flex w-full",
+        // Track: 36 high, padding 3, gap 2, radius 6, fill. `block` is a grid of equal columns.
+        "h-[36px] p-[3px] gap-[2px] items-center rounded-su-control bg-fill font-sans",
+        block ? "grid grid-flow-col auto-cols-fr w-full" : "inline-flex",
         className,
       )}
       {...rest}
@@ -61,13 +62,16 @@ export function Segmented({
           value={opt.value}
           disabled={opt.disabled}
           className={cn(
-            "flex-1 min-h-[var(--su-hit-target)] px-su3 rounded-none bg-transparent text-label-secondary font-sans text-footnote font-medium cursor-pointer",
-            "transition-[background,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
-            "not-first:border-s not-first:border-s-solid not-first:border-s-rule",
+            // Item: 30 high, padding 0 12, radius 4, 1px border, 14/20 500; icon 16 with gap 8.
+            "inline-flex items-center justify-center gap-su2 min-w-0 h-[30px] px-su3 rounded-su-tag border border-solid font-sans text-[14px] leading-[20px] font-medium whitespace-nowrap cursor-pointer",
+            "transition-[background-color,border-color,color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
             "su-focus-ring",
-            "data-[state=off]:not-disabled:hover:(bg-fill-quaternary text-label)",
-            "data-[state=on]:bg-ink data-[state=on]:text-paper",
-            "disabled:opacity-45 disabled:cursor-not-allowed",
+            // Selected: raised thumb with a hairline, ink text. No shadow.
+            "data-[state=on]:bg-control-raised data-[state=on]:border-border data-[state=on]:enabled:text-ink",
+            // Unselected: transparent, ink-2; ink under a pointer. Disabled: ink-3, no opacity.
+            "data-[state=off]:bg-transparent data-[state=off]:border-transparent data-[state=off]:enabled:text-ink-2",
+            "[@media(hover:hover)]:data-[state=off]:enabled:hover:text-ink",
+            "disabled:text-ink-3 disabled:cursor-not-allowed",
           )}
         >
           {opt.label}

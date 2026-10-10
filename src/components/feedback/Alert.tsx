@@ -1,87 +1,84 @@
-import {
-  IconAlertTriangle,
-  IconCircleCheck,
-  IconCircleX,
-  IconInfoCircle,
-  IconX,
-} from "@tabler/icons-react";
-import type { ComponentType, HTMLAttributes, ReactNode } from "react";
-import { Button } from "../general/Button";
+import { IconX } from "@tabler/icons-react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { iconDefaults } from "../general/Icon";
 import { cn } from "../../utils/cn";
-import { toneBorderClass, toneTextClass, type FeedbackTone } from "./shared";
+import {
+  dismissButtonClass,
+  toneIcon,
+  toneSurfaceClass,
+  toneTextClass,
+  type FeedbackToneOrNeutral,
+} from "./shared";
 
-export type AlertType = FeedbackTone;
+/** `neutral` is the v2 default (the grey note); the four tones are tinted. */
+export type AlertType = FeedbackToneOrNeutral;
 
 export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+  /** Tone. Defaults to `neutral`: surface-2 with a hairline, the note drawn on the login screen. */
   type?: AlertType;
+  /** 14/20 500 ink. The title stays ink in every tone. */
   title?: ReactNode;
   closable?: boolean;
   onClose?: () => void;
-  /** Show the per-type status glyph, so state isn't carried by colour alone. */
+  /** Show the per-type status icon (16, in the tone's text colour). */
   showIcon?: boolean;
-  /** Custom glyph; implies `showIcon`. */
+  /** Custom icon; implies `showIcon`. */
   icon?: ReactNode;
+  /** Trailing action link (14/20 500), e.g. a `Button variant="text"`. */
+  action?: ReactNode;
+  /** Denser description: 13/18 instead of 14/20. */
+  compact?: boolean;
+  /** Description, ink-2, on the line below the title. */
   children?: ReactNode;
 }
 
-const GLYPHS: Record<AlertType, ComponentType<{ size?: number }>> = {
-  info: IconInfoCircle,
-  success: IconCircleCheck,
-  warning: IconAlertTriangle,
-  error: IconCircleX,
-};
-
+/**
+ * Inline status note (spec §4.4). A tinted, 8px-rounded box: icon 16 at the top, the title on
+ * the first line and the description below it, an optional action link and a 28 dismiss.
+ * Errors and warnings are announced (`role="alert"`); the other tones are `role="status"`.
+ */
 export function Alert({
-  type = "info",
+  type = "neutral",
   title,
   closable = false,
   onClose,
   showIcon = false,
   icon,
+  action,
+  compact = false,
   className,
   children,
   ...rest
 }: AlertProps) {
-  const tint = toneTextClass[type];
-  const Glyph = GLYPHS[type];
-  const glyph = icon ?? (showIcon ? <Glyph size={18} {...iconDefaults} /> : null);
+  const Glyph = toneIcon[type];
+  const glyph = icon ?? (showIcon ? <Glyph size={16} {...iconDefaults} /> : null);
 
   return (
     <div
-      role="alert"
+      role={type === "error" || type === "warning" ? "alert" : "status"}
       className={cn(
-        "w-full flex items-start gap-su3 py-su3 px-su4 rounded-none border border-solid border-rule bg-paper",
-        toneBorderClass[type],
+        "w-full box-border flex items-start gap-su2 py-[10px] px-su3 rounded-su-surface border border-solid font-sans text-body text-ink",
+        toneSurfaceClass[type],
         className,
       )}
       {...rest}
     >
       {glyph ? (
-        <span aria-hidden className={cn("shrink-0 mt-[2px] leading-none", tint)}>
+        <span aria-hidden className={cn("shrink-0 flex mt-[2px] leading-none", toneTextClass[type])}>
           {glyph}
         </span>
       ) : null}
       <div className="flex-1 min-w-0 break-words">
-        {title ? (
-          <div className="text-subhead font-semibold text-label">{title}</div>
-        ) : null}
+        {title ? <div className="text-body font-medium text-ink">{title}</div> : null}
         {children ? (
-          <div className="mt-su1 text-footnote text-label-secondary leading-[var(--su-leading-normal)]">
-            {children}
-          </div>
+          <div className={cn(compact ? "text-small" : "text-body", "text-ink-2")}>{children}</div>
         ) : null}
       </div>
+      {action ? <div className="shrink-0 text-body font-medium">{action}</div> : null}
       {closable ? (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="shrink-0 min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 -my-su2 text-ink-2 enabled:hover:text-ink enabled:hover:bg-fill-tertiary"
-          onClick={onClose}
-          aria-label="Close alert"
-        >
+        <button type="button" className={cn(dismissButtonClass, "-m-su1")} onClick={onClose} aria-label="Close alert">
           <IconX size={16} {...iconDefaults} />
-        </Button>
+        </button>
       ) : null}
     </div>
   );

@@ -11,12 +11,14 @@ import {
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 import { cn } from "../../utils/cn";
 import {
+  ComboboxOptionContent,
   NO_MATCHES,
   comboboxNoticeClass,
   comboboxOptionClass,
   comboboxPanelClass,
 } from "./AutoComplete";
 import { useFieldState, useFormItemContext } from "./Form";
+import { inputClass } from "./Input";
 import type { InputSize, SelectOption } from "./types";
 
 export interface MentionsProps {
@@ -45,10 +47,11 @@ function getMentionQuery(value: string, cursor: number, prefix: string): string 
   return /\s/.test(rest) ? null : rest;
 }
 
-const textareaSize: Record<InputSize, string | undefined> = {
-  sm: "min-h-[72px] text-[length:var(--su-text-footnote)]",
-  md: "min-h-[80px]",
-  lg: undefined,
+/** Textarea (§4.2, D): the Input field look, padding 8 12 (md), 14/20, min-height 80, resize vertical. */
+const textareaSize: Record<InputSize, string> = {
+  sm: "min-h-[72px] px-su2 py-su2 text-control",
+  md: "min-h-[80px] px-su3 py-su2 text-control",
+  lg: "min-h-[88px] px-[14px] py-su2 text-section",
 };
 
 export function Mentions({
@@ -196,10 +199,7 @@ export function Mentions({
           setCursor(pos);
           updateMentionState(value, pos);
         }}
-        className={cn(
-          "su-frame su-focus-ring w-full min-h-[88px] p-su3 font-sans text-body resize-y transition-[border-color,background] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] placeholder:text-ink-3 focus-visible:(border-accent shadow-none) aria-invalid:border-danger disabled:(opacity-45 cursor-not-allowed)",
-          textareaSize[size],
-        )}
+        className={cn(inputClass, "block m-0 resize-y", textareaSize[size])}
         required={item?.required}
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}
@@ -230,7 +230,7 @@ export function Mentions({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => insertMention(option)}
               >
-                {option.label}
+                <ComboboxOptionContent option={option} query={query} />
               </button>
             ))
           )}

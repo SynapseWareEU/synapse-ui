@@ -2,6 +2,7 @@ import { useCallback, useState, type ChangeEvent } from "react";
 import { cn } from "../../utils/cn";
 import { useFieldState, useFormItemContext } from "./Form";
 import { inputClass, inputSizeClass, nativePickerClass } from "./Input";
+import { pickerEndPadClass, pickerFieldClass } from "./DatePicker";
 import type { InputSize } from "./types";
 
 export interface TimePickerProps {
@@ -58,7 +59,7 @@ export function TimePicker({
     <div
       className={cn(
         "inline-flex w-full max-w-[180px]",
-        isDisabled && "opacity-45 cursor-not-allowed",
+        isDisabled && "cursor-not-allowed",
         className,
       )}
     >
@@ -72,7 +73,13 @@ export function TimePicker({
         step={step}
         disabled={isDisabled}
         onChange={handleChange}
-        className={cn(inputClass, nativePickerClass, inputSizeClass[size])}
+        className={cn(
+          inputClass,
+          nativePickerClass,
+          inputSizeClass[size],
+          pickerFieldClass,
+          pickerEndPadClass[size],
+        )}
         required={item?.required}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}

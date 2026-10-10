@@ -1,4 +1,5 @@
 import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { IconCheck, IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import {
   useCallback,
   useEffect,
@@ -10,7 +11,7 @@ import {
 } from "react";
 import { cn } from "../../utils/cn";
 import { useFieldState, useFormItemContext } from "./Form";
-import { selectTriggerClass } from "./Select";
+import { selectTriggerClass, selectTriggerSizeClass } from "./Select";
 import type { CascaderOption } from "./types";
 
 export interface CascaderProps {
@@ -51,6 +52,24 @@ function findPath(
   return { columns, labels };
 }
 
+/*
+ * Cascader (§4.2, D): panes 200 wide split by 1px border lines, 280 tall at most. Rows 32,
+ * padding 0 8, radius 4; a branch ends in a 14 ink-3 chevron-right, the chosen leaf in a 16 check.
+ * The active path is action-subtle. Keyboard focus is roving (arrow keys), so the focused row
+ * shows the highlighted background instead of an outline (§3), plus an inset outline under
+ * prefers-contrast / forced colours where a background alone is too faint.
+ */
+const cascaderOptionClass =
+  "flex items-center gap-su2 w-full min-h-[var(--su-row-overlay)] [@media(hover:none)]:min-h-[var(--su-hit-target)] px-su2 py-[6px] rounded-su-tag font-sans text-body text-start outline-none transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none contrast-more:focus-visible:outline-2 contrast-more:focus-visible:outline-solid contrast-more:focus-visible:outline-ink contrast-more:focus-visible:-outline-offset-2 forced-colors:focus-visible:outline-2 forced-colors:focus-visible:outline-solid forced-colors:focus-visible:-outline-offset-2";
+
+// One background per state, so stylesheet order never decides between them.
+const cascaderOptionStateClass = {
+  idle: "bg-transparent text-ink cursor-pointer [@media(hover:hover)]:hover:bg-surface-hover focus-visible:bg-surface-hover",
+  active:
+    "bg-action-subtle text-ink cursor-pointer [@media(hover:hover)]:hover:bg-action-subtle-hover focus-visible:bg-action-subtle-hover",
+  disabled: "bg-transparent text-ink-3 cursor-not-allowed",
+};
+
 function focusOption(column: Element | null | undefined, index = 0) {
   const opts = column?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)");
   if (!opts?.length) return;
@@ -68,7 +87,7 @@ export function Cascader({
   onChange,
 }: CascaderProps) {
   const item = useFormItemContext();
-  const { disabled: isDisabled } = useFieldState(undefined, disabled);
+  const { size, disabled: isDisabled } = useFieldState(undefined, disabled);
 
   const [internal, setInternal] = useState<string[]>(defaultValue);
   const [open, setOpen] = useState(false);
@@ -141,18 +160,16 @@ export function Cascader({
           type="button"
           id={item?.id}
           disabled={isDisabled}
-          className={cn(selectTriggerClass, className)}
+          className={cn(selectTriggerClass, selectTriggerSizeClass[size], "w-full", className)}
           aria-haspopup="listbox"
           aria-describedby={item?.descriptionId}
           aria-invalid={item?.error ? true : undefined}
           title={display ?? undefined}
         >
-          <span className={cn("min-w-0 truncate", !display && "text-label-tertiary")}>
+          <span className={cn("flex-1 min-w-0 truncate", !display && "text-ink-3")}>
             {display ?? placeholder}
           </span>
-          <span className="shrink-0 text-label-secondary text-[12px]" aria-hidden="true">
-            ▾
-          </span>
+          <IconChevronDown size={16} stroke={1.75} aria-hidden="true" className="shrink-0 text-ink-3" />
         </button>
       </PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
@@ -162,7 +179,7 @@ export function Cascader({
           align="start"
           sideOffset={4}
           collisionPadding={8}
-          className="su-popover flex max-w-[calc(100vw-var(--su-space-4))] overflow-x-auto border-rule-strong p-0"
+          className="su-popover flex p-0 max-w-[calc(100vw-var(--su-space-4))] overflow-x-auto animate-su-dropdown-in motion-reduce:animate-none"
           onKeyDown={handlePanelKeyDown}
           // Radix would park focus on the panel itself, where the arrow keys have no row to move from.
           onOpenAutoFocus={(event) => {
@@ -174,10 +191,10 @@ export function Cascader({
             <div
               key={level}
               data-column={level}
-              className="min-w-[140px] max-h-[var(--su-dropdown-max-h)] overflow-y-auto p-su1 border-e border-solid border-rule last:border-e-0"
+              className="w-[200px] shrink-0 max-h-[var(--su-dropdown-max-h)] overflow-y-auto overscroll-contain p-su1 border-e border-solid border-border last:border-e-0"
             >
               {column.length === 0 ? (
-                <div className="p-su3 text-footnote text-ink-2 text-center">{notFoundContent}</div>
+                <div className="p-su2 text-small text-ink-2 text-start">{notFoundContent}</div>
               ) : (
                 column.map((option, index) => {
                   const isActive = value[level] === option.value;
@@ -193,18 +210,28 @@ export function Cascader({
                       aria-selected={isActive}
                       disabled={option.disabled}
                       className={cn(
-                        "flex items-center justify-between gap-su2 w-full min-h-[var(--su-hit-target)] [@media(hover:none)]:min-h-[var(--su-control-lg)] px-su3 py-su2 rounded-none bg-transparent text-ink text-body text-start cursor-pointer su-focus-ring hover:bg-fill-secondary",
-                        isActive && "bg-fill-secondary shadow-[inset_2px_0_0_var(--su-accent)]",
-                        isActive && "contrast-more:(bg-accent text-on-action)",
-                        option.disabled && "opacity-45 cursor-not-allowed",
+                        cascaderOptionClass,
+                        cascaderOptionStateClass[
+                          option.disabled ? "disabled" : isActive ? "active" : "idle"
+                        ],
                       )}
                       onClick={() => handleSelect(level, option)}
                     >
-                      <span className="min-w-0 truncate">{option.label}</span>
+                      <span className="flex-1 min-w-0 truncate">{option.label}</span>
                       {isBranch ? (
-                        <span className="text-ink-2 text-caption-1" aria-hidden="true">
-                          ›
-                        </span>
+                        <IconChevronRight
+                          size={14}
+                          stroke={1.75}
+                          aria-hidden="true"
+                          className="shrink-0 text-ink-3 rtl:-scale-x-100"
+                        />
+                      ) : isActive ? (
+                        <IconCheck
+                          size={16}
+                          stroke={1.75}
+                          aria-hidden="true"
+                          className="shrink-0 text-action-text"
+                        />
                       ) : null}
                     </button>
                   );

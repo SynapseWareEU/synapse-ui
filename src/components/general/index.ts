@@ -17,3 +17,6 @@ export type { TypographyProps, TypographyVariant, TypographyTone } from "./Typog
 
 export { FloatButton } from "./FloatButton";
 export type { FloatButtonProps, FloatButtonPlacement } from "./FloatButton";
+
+export { Kbd } from "./Kbd";
+export type { KbdProps } from "./Kbd";

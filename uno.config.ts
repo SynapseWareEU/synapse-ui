@@ -5,8 +5,10 @@ import {
 } from "unocss";
 
 /**
- * Synapse UI — UnoCSS theme mirrors `src/styles/tokens.css` (`--su-*`).
- * Prefer semantic utilities (`bg-paper`, `text-ink`, `border-rule`) over raw hex.
+ * Synapse UI — UnoCSS theme mirrors `src/styles/tokens.css` (`--su-*`), Lattice UI v2.
+ * Prefer the v2 semantic utilities (`bg-surface`, `bg-bg`, `text-ink-2`, `border-border`,
+ * `rounded-su-control`, `shadow-su-overlay`) over raw hex. The v1 keys (`bg-paper`, `border-rule`,
+ * `text-label`…) still work: they resolve through the token aliases.
  *
  * Things that bite (found the hard way during the component sweep):
  * - `transformerVariantGroup` expands `hover:(a b)` in source files only — shortcut values below
@@ -45,6 +47,50 @@ export default defineConfig({
   transformers: [transformerVariantGroup()],
   theme: {
     colors: {
+      // ——— v2 neutrals ———
+      bg: "var(--su-bg)",
+      surface: "var(--su-surface)",
+      "surface-2": "var(--su-surface-2)",
+      "surface-hover": "var(--su-surface-hover)",
+      "surface-overlay": "var(--su-surface-overlay)",
+      border: "var(--su-border)",
+      "border-strong": "var(--su-border-strong)",
+      "border-control": "var(--su-border-control)",
+      "control-raised": "var(--su-control-raised)",
+      inverse: "var(--su-inverse-surface)",
+      "inverse-ink": "var(--su-inverse-ink)",
+      scrim: "var(--su-scrim)",
+      "scrim-strong": "var(--su-scrim-strong)",
+      // ——— v2 action ———
+      "action-hover": "var(--su-action-hover)",
+      "action-subtle": "var(--su-action-subtle)",
+      "action-subtle-hover": "var(--su-action-subtle-hover)",
+      "action-text": "var(--su-action-text)",
+      "action-text-hover": "var(--su-action-text-hover)",
+      focus: "var(--su-focus)",
+      // ——— v2 status: solid (`danger`…) · text · tint · line · strong ———
+      "danger-tint": "var(--su-danger-tint)",
+      "danger-line": "var(--su-danger-line)",
+      "danger-strong-hover": "var(--su-danger-strong-hover)",
+      "danger-strong-press": "var(--su-danger-strong-press)",
+      "warning-text": "var(--su-warning-text)",
+      "warning-tint": "var(--su-warning-tint)",
+      "warning-line": "var(--su-warning-line)",
+      "success-text": "var(--su-success-text)",
+      "success-tint": "var(--su-success-tint)",
+      "success-line": "var(--su-success-line)",
+      "info-text": "var(--su-info-text)",
+      "info-tint": "var(--su-info-tint)",
+      "info-line": "var(--su-info-line)",
+      "info-strong": "var(--su-info-strong)",
+      // An object, not a string: it merges into presetWind3's `neutral` scale, so `bg-neutral`
+      // is the v2 solid and `bg-neutral-500` keeps working for consumers.
+      neutral: { DEFAULT: "var(--su-neutral)" },
+      "neutral-text": "var(--su-neutral-text)",
+      "neutral-tint": "var(--su-neutral-tint)",
+      "neutral-line": "var(--su-neutral-line)",
+      // ——— v1 keys (kept). The status ones and `action`/`fill`/`ink*` carry v2 values directly;
+      // the rest resolve through the aliases in tokens.css (paper → surface, rule → border…). ———
       paper: "var(--su-paper)",
       canvas: "var(--su-canvas)",
       ink: "var(--su-ink)",
@@ -92,49 +138,97 @@ export default defineConfig({
     minHeight: spacing,
     maxWidth: spacing,
     maxHeight: spacing,
-    // The brand scale (11 · 13 · 15 · 17 · 19 · 22 · 32 · 48) with its own leading and tracking.
-    // `text-label` is the colour role; the 11px mono size is `text-label-type`.
+    // v2 scale: px size / line-height pairs from tokens.css. `body`, `control` and `label-type`
+    // read tokens that the `data-density="handheld"` scope re-sizes. `text-label` is the colour
+    // role; the label size is `text-label-type` (or the `su-label` shortcut).
     fontSize: {
+      display: [
+        "var(--su-text-display)",
+        { "line-height": "var(--su-leading-display)", "letter-spacing": "var(--su-tracking-display)" },
+      ],
+      title: [
+        "var(--su-text-title)",
+        { "line-height": "var(--su-leading-title)", "letter-spacing": "var(--su-tracking-tight)" },
+      ],
+      "title-phone": ["var(--su-text-title-phone)", { "line-height": "var(--su-leading-title-phone)" }],
+      section: ["var(--su-text-section)", { "line-height": "var(--su-leading-section)" }],
+      "empty-title": ["var(--su-text-empty-title)", { "line-height": "var(--su-leading-empty-title)" }],
+      body: ["var(--su-text-body)", { "line-height": "var(--su-leading-body)" }],
+      small: ["var(--su-text-small)", { "line-height": "var(--su-leading-small-px)" }],
+      micro: ["var(--su-text-micro)", { "line-height": "var(--su-leading-micro)" }],
+      control: ["var(--su-text-control)", { "line-height": "var(--su-leading-control)" }],
+      "control-sm": ["var(--su-text-control-sm)", { "line-height": "var(--su-leading-control-sm)" }],
+      // v1 names → v2 roles
       "large-title": [
-        "var(--su-text-large-title)",
-        { "line-height": "var(--su-leading-snug)", "letter-spacing": "var(--su-tracking-tight)" },
+        "var(--su-text-display)",
+        { "line-height": "var(--su-leading-display)", "letter-spacing": "var(--su-tracking-display)" },
       ],
       "title-1": [
-        "var(--su-text-title-1)",
-        { "line-height": "var(--su-leading-snug)", "letter-spacing": "var(--su-tracking-tight)" },
+        "var(--su-text-title)",
+        { "line-height": "var(--su-leading-title)", "letter-spacing": "var(--su-tracking-tight)" },
       ],
-      "title-2": [
-        "var(--su-text-title-2)",
-        { "line-height": "var(--su-leading-normal)", "letter-spacing": "-0.01em" },
+      "title-2": ["var(--su-text-title-phone)", { "line-height": "var(--su-leading-title-phone)" }],
+      "title-3": ["var(--su-text-section)", { "line-height": "var(--su-leading-section)" }],
+      headline: ["var(--su-text-empty-title)", { "line-height": "var(--su-leading-empty-title)" }],
+      callout: ["var(--su-text-body)", { "line-height": "var(--su-leading-body)" }],
+      subhead: ["var(--su-text-body)", { "line-height": "var(--su-leading-body)" }],
+      footnote: ["var(--su-text-small)", { "line-height": "var(--su-leading-small-px)" }],
+      "caption-1": ["var(--su-text-small)", { "line-height": "var(--su-leading-small-px)" }],
+      "caption-2": ["var(--su-text-micro)", { "line-height": "var(--su-leading-micro)" }],
+      "label-type": ["var(--su-text-label)", { "line-height": "var(--su-leading-label-px)" }],
+      // Handheld (390 wide)
+      "hh-flow": ["var(--su-hh-text-flow)", { "line-height": "var(--su-hh-leading-flow)" }],
+      "hh-step": ["var(--su-hh-text-step)", { "line-height": "var(--su-hh-leading-step)" }],
+      "hh-key": ["var(--su-hh-text-key)", { "line-height": "var(--su-hh-leading-key)" }],
+      "hh-value": ["var(--su-hh-text-value)", { "line-height": "var(--su-hh-leading-value)" }],
+      "hh-question": [
+        "var(--su-hh-text-question)",
+        { "line-height": "var(--su-hh-leading-question)", "letter-spacing": "var(--su-tracking-tight)" },
       ],
-      "title-3": ["var(--su-text-title-3)", { "line-height": "var(--su-leading-normal)" }],
-      headline: ["var(--su-text-headline)", { "line-height": "var(--su-leading-small)" }],
-      body: ["var(--su-text-body)", { "line-height": "var(--su-leading-relaxed)" }],
-      callout: ["var(--su-text-callout)", { "line-height": "var(--su-leading-small)" }],
-      subhead: ["var(--su-text-subhead)", { "line-height": "var(--su-leading-small)" }],
-      footnote: ["var(--su-text-footnote)", { "line-height": "var(--su-leading-small)" }],
-      "caption-1": ["var(--su-text-caption-1)", { "line-height": "var(--su-leading-small)" }],
-      "caption-2": ["var(--su-text-caption-2)", { "line-height": "var(--su-leading-label)" }],
-      control: ["var(--su-text-control)", { "line-height": "1" }],
-      "label-type": ["var(--su-text-label)", { "line-height": "var(--su-leading-label)" }],
+      "hh-body": ["var(--su-hh-text-body)", { "line-height": "var(--su-hh-leading-body)" }],
+      "hh-hint": ["var(--su-hh-text-hint)", { "line-height": "var(--su-hh-leading-hint)" }],
+      "hh-band-line": ["var(--su-hh-text-band-line)", { "line-height": "var(--su-hh-leading-band-line)" }],
+      "hh-big": ["var(--su-hh-text-big)", { "line-height": "var(--su-hh-leading-big)" }],
+      "hh-primary": ["var(--su-hh-text-primary)", { "line-height": "var(--su-hh-leading-primary)" }],
+      "hh-secondary": ["var(--su-hh-text-secondary)", { "line-height": "var(--su-hh-leading-secondary)" }],
+      "hh-keypad": ["var(--su-hh-text-keypad)", { "line-height": "var(--su-hh-leading-keypad)" }],
     },
     // Square everywhere: every built-in radius step, `rounded-full` included, resolves to 0.
+    // v2 shape: 4 for tags and chips, 6 for controls, 8 for surfaces; rows stay square
+    // (`rounded-none` is still 0). Prefer the role keys (`rounded-su-control`, `rounded-su-tag`,
+    // `rounded-su-surface`); the size steps map onto them so consumers' `rounded-lg` follows v2 too.
     borderRadius: {
-      DEFAULT: "0",
+      DEFAULT: "var(--su-radius-control)",
       none: "0",
-      sm: "0",
-      md: "0",
-      lg: "0",
-      xl: "0",
-      "2xl": "0",
-      "3xl": "0",
-      full: "0",
-      su: "0",
+      bar: "var(--su-radius-bar)",
+      sm: "var(--su-radius-tag)",
+      tag: "var(--su-radius-tag)",
+      md: "var(--su-radius-control)",
+      control: "var(--su-radius-control)",
+      lg: "var(--su-radius-surface)",
+      surface: "var(--su-radius-surface)",
+      xl: "var(--su-radius-surface)",
+      "2xl": "var(--su-radius-surface)",
+      "3xl": "var(--su-radius-surface)",
+      full: "9999px",
+      su: "var(--su-radius-control)",
+      "su-row": "var(--su-radius-row)",
+      "su-bar": "var(--su-radius-bar)",
+      "su-tag": "var(--su-radius-tag)",
+      "su-control": "var(--su-radius-control)",
+      "su-surface": "var(--su-radius-surface)",
+      "su-pill": "var(--su-radius-pill)",
+      "su-round": "var(--su-radius-round)",
     },
+    // Overlays only (popover, menu, modal, drawer, toast); content stays flat.
+    boxShadow: {
+      "su-overlay": "var(--su-shadow-overlay)",
+    },
+    // The stacks live in tokens.css; the fallbacks keep IBM Plex when only the Uno config is used.
     fontFamily: {
-      sans: "var(--su-font-sans)",
-      mono: "var(--su-font-mono)",
-      display: "var(--su-font-display)",
+      sans: 'var(--su-font-sans, "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif)',
+      mono: 'var(--su-font-mono, "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace)',
+      display: "var(--su-font-display, var(--su-font-sans))",
     },
     aria: {
       invalid: 'invalid="true"',
@@ -146,14 +240,16 @@ export default defineConfig({
         "su-fade-in": "{from{opacity:0}to{opacity:1}}",
         "su-rise-in":
           "{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}",
+        // Popover and menu: fade + 4px drop, no scale.
         "su-dropdown-in":
-          "{from{opacity:0;transform:translateY(-4px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}",
+          "{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}",
         "su-slide-in":
           "{from{transform:translateX(16px)}to{transform:translateX(0)}}",
         "su-slide-in-left":
           "{from{transform:translateX(-16px)}to{transform:translateX(0)}}",
+        // Modal: fade + 4px rise. The v2 modal is top-anchored, not centred with -50%.
         "su-scale-in":
-          "{from{opacity:0;transform:translate(-50%,-48%) scale(0.96)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}",
+          "{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}",
         // Radix Accordion sets --radix-accordion-content-height; Collapsible sets its own variable.
         "su-slide-down":
           "{from{height:0}to{height:var(--radix-accordion-content-height)}}",
@@ -180,7 +276,7 @@ export default defineConfig({
         "su-dropdown-in": "var(--su-duration-fast)",
         "su-slide-in": "var(--su-duration-base)",
         "su-slide-in-left": "var(--su-duration-base)",
-        "su-scale-in": "var(--su-duration-base)",
+        "su-scale-in": "var(--su-duration-fast)",
         "su-slide-down": "var(--su-duration-normal)",
         "su-slide-up": "var(--su-duration-normal)",
         "su-collapse-down": "var(--su-duration-normal)",
@@ -243,16 +339,24 @@ export default defineConfig({
   shortcuts: {
     "su-hairline": "border border-rule border-solid forced-colors:border-[CanvasText]",
     "su-rule": "bg-separator forced-colors:bg-[CanvasText]",
-    "su-frame": "bg-paper text-ink border border-rule border-solid rounded-none",
-    // The square focus ring: 2px accent, 3px offset. Put it on anything that sets outline-none.
+    "su-frame": "bg-surface text-ink border border-solid border-border rounded-su-surface",
+    // Focus ring: 2px `--su-focus` outline, 2px offset. An outline follows the element's own
+    // border-radius, so the ring is as round as the control. Put it on anything that sets outline-none.
     "su-focus-ring":
-      "outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-accent focus-visible:outline-offset-[var(--su-focus-ring-offset)]",
-    // Mono label: 11px, wide cut, 0.04em, uppercase. Colour is the caller's (text-ink-2 for codes).
-    "su-label":
-      "font-mono text-label-type font-medium [font-stretch:112.5%] tracking-[var(--su-tracking-label)] uppercase",
-    // Floating surface for menus, listboxes and popovers.
+      "outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-focus focus-visible:outline-offset-[var(--su-focus-ring-offset)]",
+    // Label: sans 13/18 500 ink-2, sentence case (field labels, table headers, group labels).
+    // No uppercase, no tracking, no width axis, no mono. A caller's colour utility wins over ink-2.
+    "su-label": "font-sans text-label-type font-medium text-ink-2",
+    // Floating surface for menus, listboxes and popovers: 8 radius, hairline, overlay shadow.
     "su-popover":
-      "z-[var(--su-z-dropdown)] p-su1 font-sans rounded-none border border-solid border-rule-strong bg-paper shadow-none",
+      "z-[var(--su-z-dropdown)] p-su1 font-sans rounded-su-surface border border-solid border-border bg-surface-overlay shadow-su-overlay",
+    // Boxed white panel on the grey ground (tables, cards, settings groups).
+    "su-panel": "bg-surface border border-solid border-border rounded-su-surface overflow-hidden",
+    // Figures that line up in columns (numeric cells, meters, counters, Statistic).
+    "su-tabular": "[font-variant-numeric:tabular-nums]",
+    // Identifiers (SKU, SO/PO numbers, bins, lots): the row identity, and a supporting identifier.
+    "su-id": "font-mono font-medium text-ink",
+    "su-id-2": "font-mono text-small text-ink-2",
     // 32px visible, 44px to press: a centred pseudo-element carries the hit slop.
     "su-hit-44":
       "relative [&::after]:content-empty [&::after]:absolute [&::after]:left-1/2 [&::after]:top-1/2 [&::after]:-translate-x-1/2 [&::after]:-translate-y-1/2 [&::after]:w-[var(--su-hit-target)] [&::after]:h-[var(--su-hit-target)]",
@@ -260,12 +364,12 @@ export default defineConfig({
       "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0",
     "border-none": "[border-style:none]",
     "su-skeleton-active":
-      "bg-[linear-gradient(90deg,var(--su-fill-secondary)_25%,var(--su-fill-quaternary)_37%,var(--su-fill-secondary)_63%)] bg-[length:400%_100%] animate-shimmer motion-reduce:animate-none",
+      "bg-[linear-gradient(90deg,var(--su-fill)_25%,var(--su-surface-2)_37%,var(--su-fill)_63%)] bg-[length:400%_100%] animate-shimmer motion-reduce:animate-none",
     "su-overlay":
-      "fixed inset-0 z-[var(--su-z-overlay)] bg-[rgba(10,12,18,0.45)] animate-su-fade-in motion-reduce:animate-none",
+      "fixed inset-0 z-[var(--su-z-overlay)] bg-[var(--su-scrim)] animate-su-fade-in motion-reduce:animate-none",
     // Lightbox strength: content behind is suppressed so white-on-scrim copy keeps contrast.
     "su-overlay-strong":
-      "fixed inset-0 z-[var(--su-z-overlay)] bg-[rgba(10,12,18,0.88)] animate-su-fade-in motion-reduce:animate-none",
+      "fixed inset-0 z-[var(--su-z-overlay)] bg-[var(--su-scrim-strong)] animate-su-fade-in motion-reduce:animate-none",
     // Hairline rim for the nav material; the tokens already lift it under prefers-contrast.
     "su-chrome": "shadow-[0_0_0_1px_var(--su-chrome-border)]",
     "su-chrome-strong": "shadow-[0_0_0_1px_var(--su-chrome-border-outer)]",

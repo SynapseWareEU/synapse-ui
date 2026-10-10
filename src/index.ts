@@ -23,4 +23,5 @@ export * from "./components/data-entry";
 export * from "./components/data-display";
 export * from "./components/feedback";
 export * from "./components/other";
+export * from "./components/handheld";
 export * from "./components/shaders";

@@ -15,10 +15,11 @@ export interface AvatarProps extends ComponentPropsWithoutRef<typeof RadixAvatar
   size?: AvatarSize;
 }
 
+// sm 24 · md 28 (default) · lg 40. Initials 12/16 600 (14/20 at lg).
 const sizeClass: Record<AvatarSize, string> = {
-  sm: "size-[28px] text-caption-1",
-  md: "size-9 text-footnote",
-  lg: "size-12 text-subhead",
+  sm: "size-[24px] text-micro",
+  md: "size-[28px] text-micro",
+  lg: "size-[40px] text-[14px] leading-[20px]",
 };
 
 // ponytail: fallback text is assumed to be 1-2 letter initials and hard-clips
@@ -32,7 +33,7 @@ export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar(
     <RadixAvatar.Root
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center overflow-hidden rounded-none bg-fill-secondary text-label-secondary font-semibold shrink-0",
+        "inline-flex items-center justify-center overflow-hidden rounded-su-round bg-fill text-ink-2 font-sans font-semibold shrink-0 select-none",
         sizeClass[size],
         className,
       )}

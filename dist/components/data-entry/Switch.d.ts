@@ -5,13 +5,17 @@ export interface SwitchProps {
     checked?: boolean;
     defaultChecked?: boolean;
     disabled?: boolean;
-    /** Async toggle in flight: shows a slot spinner in the thumb and blocks input. */
+    /** Async toggle in flight: shows a ring spinner in the thumb and blocks input. */
     loading?: boolean;
     required?: boolean;
     name?: string;
     value?: string;
     id?: string;
     className?: string;
+    /**
+     * The state in words, beside the switch in 14/20 ink ("Pornit", "Se cere la fiecare recepție").
+     * v2 always pairs the switch with its state; the field label sits above, in a FormItem.
+     */
     children?: ReactNode;
     onCheckedChange?: (checked: boolean) => void;
 }

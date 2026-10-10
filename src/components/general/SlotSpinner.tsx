@@ -114,7 +114,9 @@ export interface SlotSpinnerProps {
 
 /**
  * Warehouse slot-field loader: a 3×3 rack face with stock-state colour
- * walking the perimeter. Shared by Button loading and Spin.
+ * walking the perimeter. Brand motif, kept for marketing and brand surfaces:
+ * in Lattice UI v2 no product component uses it (Button, Switch and Spin
+ * show the ring spinner instead).
  *
  * Decorative by design — `aria-hidden`. The busy announcement belongs to the
  * consumer (Spin's role="status", Button's aria-busy).

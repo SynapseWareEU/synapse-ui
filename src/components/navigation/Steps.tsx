@@ -1,16 +1,21 @@
 import type { HTMLAttributes, Key, ReactNode } from "react";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
-import { Icon } from "../general/Icon";
 
 export type StepStatus = "wait" | "process" | "finish" | "error";
+
+/**
+ * `"default"`: labelled steps (20px markers, titles, connectors).
+ * `"bar"`: the handheld flow header, one 4px segment per step plus a "Step 2 of 4" counter.
+ */
+export type StepsType = "default" | "bar";
 
 export interface StepItem {
   title: ReactNode;
   description?: ReactNode;
   /** Overrides the status derived from `current`. */
   status?: StepStatus;
-  /** Replaces the step numeral (16px glyph, same box). */
+  /** Replaces the step numeral inside the 20px marker (12px glyph). */
   icon?: ReactNode;
   /** Stable key; falls back to the array index. */
   key?: Key;
@@ -21,30 +26,45 @@ export interface StepsProps extends HTMLAttributes<HTMLElement> {
   items: StepItem[];
   direction?: "horizontal" | "vertical";
   status?: StepStatus;
+  type?: StepsType;
+  /**
+   * `type="bar"` only: the counter above the segments. Defaults to "Step {n} of {total}";
+   * pass a function for your locale (`(n, total) => \`Pasul ${n} din ${total}\``) or `false`
+   * to hide it. 13/18 ink-2 on desk, 17/24 500 under `data-density="handheld"`.
+   */
+  counter?: ReactNode | ((step: number, total: number) => ReactNode);
 }
 
 const transition =
   "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none";
 
 /**
- * The marker is a hairline-over-fill square: only the live step is filled with
- * the action colour, the travelled path is settled ink, and red is reserved for
- * a real failure (which also swaps the glyph, so hue is never the only cue).
+ * 20px round marker. Done is settled ink with a check, the live step is the action colour,
+ * waiting is an outlined surface, and an error is danger with a "!" (the glyph changes too,
+ * so hue is never the only cue). Numerals are sans 12/16 600, tabular.
+ * `text-surface` is white on light ink and dark on dark-theme ink, so the mark always reads.
  */
 const markerStatusClass: Record<StepStatus, string> = {
-  wait: "text-ink-2 shadow-[inset_0_0_0_1px_var(--su-rule-strong)]",
-  process:
-    "bg-action text-on-action shadow-[inset_0_0_0_1px_var(--su-action-edge)]",
-  finish: "bg-ink text-paper",
-  error: "bg-danger-strong text-on-action",
+  wait: "bg-surface text-ink-2 border border-solid border-border-strong",
+  process: "bg-action text-on-action",
+  finish: "bg-ink text-surface",
+  error: "bg-danger text-on-action",
 };
 
 const markerClass = cn(
-  "inline-flex items-center justify-center shrink-0 size-[var(--su-control-sm)]",
-  // Brand: indices are Martian Mono at the label spec, tabular so 1 and 8 align.
-  "su-label tabular-nums",
+  "inline-flex items-center justify-center shrink-0 size-[20px] rounded-su-round",
+  "font-sans text-micro font-semibold su-tabular [&>svg]:size-[12px]",
+  "forced-colors:border forced-colors:border-solid forced-colors:border-[CanvasText]",
   transition,
 );
+
+/** Segment colours: done ink, current action (danger on error), to do border. */
+const segmentClass: Record<StepStatus, string> = {
+  finish: "bg-ink",
+  process: "bg-action",
+  error: "bg-danger",
+  wait: "bg-border",
+};
 
 const statusLabel: Record<StepStatus, string> = {
   wait: "not started",
@@ -52,6 +72,13 @@ const statusLabel: Record<StepStatus, string> = {
   finish: "completed",
   error: "error",
 };
+
+function statusOf(index: number, currentIndex: number, status: StepStatus, item: StepItem) {
+  return (
+    item.status ??
+    (index < currentIndex ? "finish" : index > currentIndex ? "wait" : status)
+  );
+}
 
 /**
  * Layout is vertical-first: the stacked form is the base and the horizontal row
@@ -66,6 +93,8 @@ export function Steps({
   items,
   direction = "horizontal",
   status = "process",
+  type = "default",
+  counter,
   className,
   ...rest
 }: StepsProps) {
@@ -73,6 +102,51 @@ export function Steps({
 
   const row = direction !== "vertical";
   const currentIndex = Math.trunc(current);
+
+  if (type === "bar") {
+    const step = Math.min(Math.max(currentIndex + 1, 1), items.length);
+    const counterNode =
+      counter === false || counter === null
+        ? null
+        : typeof counter === "function"
+          ? counter(step, items.length)
+          : (counter ?? `Step ${step} of ${items.length}`);
+
+    return (
+      <nav className={cn("w-full font-sans", className)} aria-label="Progress" {...rest}>
+        {counterNode != null && counterNode !== false ? (
+          <div
+            className="flex justify-end mb-[9px] text-small text-ink-2 su-tabular [[data-density=handheld]_&]:text-hh-step [[data-density=handheld]_&]:font-medium"
+            aria-hidden="true"
+          >
+            {counterNode}
+          </div>
+        ) : null}
+        <ol role="list" className="flex gap-su1 m-0 p-0 list-none">
+          {items.map((item, index) => {
+            const stepStatus = statusOf(index, currentIndex, status, item);
+            return (
+              <li
+                key={item.key ?? index}
+                className={cn(
+                  "flex-1 min-w-0 h-[4px] rounded-su-bar forced-colors:border forced-colors:border-solid forced-colors:border-[CanvasText]",
+                  segmentClass[stepStatus],
+                  transition,
+                )}
+                data-status={stepStatus}
+                aria-current={index === currentIndex ? "step" : undefined}
+              >
+                <span className="sr-only">
+                  {`Step ${index + 1} of ${items.length}, ${statusLabel[stepStatus]}: `}
+                  {item.title}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+    );
+  }
 
   return (
     <nav
@@ -84,24 +158,18 @@ export function Steps({
         role="list"
         className={cn(
           "flex flex-col items-stretch w-full m-0 p-0 list-none",
-          row && "min-[533px]:(flex-row items-start gap-su3)",
+          row && "min-[533px]:(flex-row items-start gap-su4)",
         )}
       >
         {items.map((item, index) => {
-          const stepStatus =
-            item.status ??
-            (index < currentIndex
-              ? "finish"
-              : index > currentIndex
-                ? "wait"
-                : status);
+          const stepStatus = statusOf(index, currentIndex, status, item);
           const isLast = index === items.length - 1;
 
           return (
             <li
               key={item.key ?? index}
               className={cn(
-                "relative flex items-start gap-su3 min-w-0",
+                "relative flex items-start gap-su2 min-w-0",
                 row &&
                   (isLast
                     ? "min-[533px]:flex-[0_1_auto]"
@@ -116,23 +184,19 @@ export function Steps({
               >
                 {item.icon ??
                   (stepStatus === "finish" ? (
-                    <Icon size="sm">
-                      <IconCheck />
-                    </Icon>
+                    <IconCheck size={12} stroke={3} />
                   ) : stepStatus === "error" ? (
-                    <Icon size="sm">
-                      <IconX />
-                    </Icon>
+                    "!"
                   ) : (
                     index + 1
                   ))}
               </span>
               <div
                 className={cn(
-                  // Optical centring against the line box the title actually renders.
-                  "grow min-w-0 pt-[calc((var(--su-control-sm)-var(--su-text-subhead)*var(--su-leading-normal))/2)]",
+                  // The marker and the title's line box are both 20 tall, so they share a centre.
+                  "grow min-w-0",
                   row && "min-[533px]:grow-0",
-                  !isLast && "pb-su6",
+                  !isLast && "pb-su4",
                   !isLast && row && "min-[533px]:pb-0",
                 )}
               >
@@ -141,14 +205,14 @@ export function Steps({
                 </span>
                 <span
                   className={cn(
-                    "block text-subhead font-medium leading-[var(--su-leading-normal)] break-words",
+                    "block text-body font-medium break-words",
                     stepStatus === "wait" ? "text-ink-2" : "text-ink",
                   )}
                 >
                   {item.title}
                 </span>
                 {item.description ? (
-                  <span className="block mt-su1 text-ink-2 text-footnote leading-[var(--su-leading-normal)] break-words">
+                  <span className="block mt-su1 text-small text-ink-2 break-words">
                     {item.description}
                   </span>
                 ) : null}
@@ -156,10 +220,11 @@ export function Steps({
               {!isLast ? (
                 <span
                   className={cn(
-                    "absolute [inset-inline-start:calc((var(--su-control-sm)-1px)/2)] top-[calc(var(--su-control-sm)+var(--su-space-1))] bottom-0 w-px",
+                    // Stacked: down the marker column, 4 clear of each marker.
+                    "absolute [inset-inline-start:calc((var(--su-space-5)-1px)/2)] top-[calc(var(--su-space-5)+var(--su-space-1))] bottom-su1 w-px",
                     row &&
-                      "min-[533px]:(static h-px w-auto flex-[1_1_0%] self-start min-w-[var(--su-space-4)] mt-[calc((var(--su-control-sm)-1px)/2)])",
-                    stepStatus === "finish" ? "bg-ink" : "bg-rule-strong",
+                      "min-[533px]:(static h-px w-auto flex-[1_1_0%] self-start min-w-[var(--su-space-4)] mt-[calc((var(--su-space-5)-1px)/2)])",
+                    stepStatus === "finish" ? "bg-ink" : "bg-border",
                     transition,
                   )}
                   aria-hidden="true"

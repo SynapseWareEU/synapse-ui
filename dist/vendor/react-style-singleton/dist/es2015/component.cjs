@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const r=require("./hook.cjs");var i=function(){var t=r.styleHookSingleton(),n=function(e){var l=e.styles,o=e.dynamic;return t(l,o),null};return n};exports.styleSingleton=i;

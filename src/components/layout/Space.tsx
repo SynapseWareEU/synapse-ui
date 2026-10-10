@@ -4,13 +4,20 @@ import { cn } from "../../utils/cn";
 import {
   ALIGN_CLASS as ALIGN,
   GAP_CLASS as GAP,
-  SIZE_PRESET as SIZE,
   space as spacing,
 } from "../../utils/space";
 
 /**
+ * v2 presets, in scale steps: `small` 8 · `middle` 16 · `large` 24. Shared with `Flex`.
+ * (Supersedes `SIZE_PRESET` in utils/space.ts, which still holds the v1 2/3/4.)
+ */
+export const SPACE_PRESET: Record<string, number> = { small: 2, middle: 4, large: 6 };
+const SIZE = SPACE_PRESET;
+
+/**
  * A gap: a space-scale STEP as a number (`3` → `--su-space-3` → 12px), one of
- * the three presets, or a raw CSS length string (`"1.5rem"`, `"clamp(…)"`).
+ * the three presets (`small` 8, `middle` 16, `large` 24), or a raw CSS length
+ * string (`"1.5rem"`, `"clamp(…)"`).
  */
 export type SpaceSize = number | "small" | "middle" | "large" | (string & {});
 
@@ -107,7 +114,7 @@ export const Space = forwardRef<HTMLDivElement, SpaceProps>(function Space(
               ? [child]
               : [
                   // `contents` keeps the separator itself the flex item, so a
-                  // `<Divider orientation="vertical">` still self-stretches.
+                  // `<Divider orientation="vertical">` (1×20) centres on the row.
                   <span key={`sep-${i}`} aria-hidden="true" className="contents">
                     {separator}
                   </span>,

@@ -5,7 +5,7 @@ export type { DrawerProps } from "./Drawer";
 export { MessageProvider, useMessage, message } from "./Message";
 export type { MessageOptions, MessageType } from "./Message";
 export { Modal } from "./Modal";
-export type { ModalProps } from "./Modal";
+export type { ModalProps, ModalSize } from "./Modal";
 export { Notification } from "./Notification";
 export type { NotificationProps, NotificationType, NotificationStackProps } from "./Notification";
 export { Popconfirm } from "./Popconfirm";

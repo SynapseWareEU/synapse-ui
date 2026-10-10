@@ -9,5 +9,9 @@ export interface PopoverProps extends Omit<ComponentPropsWithoutRef<typeof Radix
     /** Portal target; defaults to document.body. For shadow DOM / iframe hosts. */
     container?: HTMLElement | null;
 }
+/**
+ * v2 overlay: surface-overlay, 1px border, radius 8, overlay shadow, padding 8, 4 from the
+ * trigger, no arrow. Fades in with a 4px drift (150ms).
+ */
 export declare function Popover({ trigger, content, side, align, contentClassName, container, ...rest }: PopoverProps): import("react").JSX.Element;
 //# sourceMappingURL=Popover.d.ts.map

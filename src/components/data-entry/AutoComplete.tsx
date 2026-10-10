@@ -8,7 +8,9 @@ import {
 } from "react";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 import { cn } from "../../utils/cn";
-import { Input } from "./Input";
+import { useFieldState } from "./Form";
+import { FieldClearButton, Input, fieldClearPadding } from "./Input";
+import { SelectOptionLabel } from "./Select";
 import type { InputSize, SelectOption } from "./types";
 
 export interface AutoCompleteProps {
@@ -47,16 +49,53 @@ function defaultFilter(input: string, option: SelectOption): boolean {
 
 /* Listbox chrome shared with Mentions — one copy so the two can't drift again. */
 
-/** Anchored suggestion surface. The parent must be `relative`. */
+/** Anchored suggestion surface: `su-popover`, 4 below the field, as wide as it, 280 max. The parent must be `relative`. */
 export const comboboxPanelClass =
-  "absolute top-full left-0 right-0 z-[var(--su-z-dropdown)] overflow-y-auto overscroll-contain max-h-[min(var(--su-dropdown-max-h),50vh)] mt-su1 p-su1 border border-solid border-rule-strong contrast-more:border-2 rounded-none bg-paper shadow-none animate-su-dropdown-in motion-reduce:animate-none";
+  "su-popover absolute top-full inset-x-0 mt-su1 overflow-y-auto overscroll-contain max-h-[min(var(--su-dropdown-max-h),50vh)] animate-su-dropdown-in motion-reduce:animate-none";
 
-/** Empty / busy row — the brand's mono label recipe. */
-export const comboboxNoticeClass = "px-su3 py-su3 su-label text-ink-2 text-start";
+/** Empty / busy row: 13/18 ink-2, padding 8. Sentence case, not mono. */
+export const comboboxNoticeClass = "p-su2 text-small text-ink-2 text-start";
 
-/** One suggestion: 44px to press, accent rail on the keyboard-active row. */
+/**
+ * One suggestion (§4.2 AutoComplete, D): 32 tall, padding 0 8, radius 4, 14/20 ink.
+ * The active descendant (what Enter will pick) is action-subtle, as the palette does; pointer
+ * hover is surface-hover, or action-subtle-hover on the active row. Disabled: ink-3.
+ * Under prefers-contrast / forced colours the active row also gets an inset outline.
+ */
 export const comboboxOptionClass =
-  "flex items-center w-full min-h-[var(--su-hit-target)] [@media(hover:none)]:min-h-[var(--su-control-lg)] px-su3 py-su2 rounded-none bg-transparent text-ink text-body text-start [overflow-wrap:anywhere] cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:bg-fill-secondary data-[active]:(bg-fill-secondary shadow-[inset_2px_0_0_var(--su-accent)]) contrast-more:data-[active]:(bg-accent text-on-action) data-[disabled]:(text-ink-3 opacity-45 pointer-events-none cursor-not-allowed)";
+  "flex items-center gap-su2 w-full min-h-[var(--su-row-overlay)] [@media(hover:none)]:min-h-[var(--su-hit-target)] px-su2 py-[6px] rounded-su-tag bg-transparent font-sans text-body text-ink text-start [overflow-wrap:anywhere] cursor-pointer outline-none transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none data-[active]:bg-action-subtle [@media(hover:hover)]:[&:hover:not([data-active]):not([data-disabled])]:bg-surface-hover [@media(hover:hover)]:data-[active]:hover:bg-action-subtle-hover data-[disabled]:text-ink-3 data-[disabled]:cursor-not-allowed contrast-more:data-[active]:outline-2 contrast-more:data-[active]:outline-solid contrast-more:data-[active]:outline-ink contrast-more:data-[active]:-outline-offset-2 forced-colors:data-[active]:outline-2 forced-colors:data-[active]:outline-solid forced-colors:data-[active]:-outline-offset-2";
+
+/** `label` with the first case-insensitive occurrence of `query` in 500 (matched text, §4.2). */
+function highlightMatch(label: string, query: string | null | undefined): ReactNode {
+  if (!query) return label;
+  const lower = label.toLowerCase();
+  // Some characters change length when lower-cased; the indices would no longer line up.
+  if (lower.length !== label.length) return label;
+  const at = lower.indexOf(query.toLowerCase());
+  if (at === -1) return label;
+  const end = at + query.length;
+  return (
+    <>
+      {label.slice(0, at)}
+      <span className="font-medium">{label.slice(at, end)}</span>
+      {label.slice(end)}
+    </>
+  );
+}
+
+/** A suggestion's content: the label (or code + name pair) with the match in 500, then the description line. */
+export function ComboboxOptionContent({ option, query }: { option: SelectOption; query?: string | null }) {
+  return (
+    <span className="flex-1 min-w-0">
+      <span className="block">
+        <SelectOptionLabel option={option} label={highlightMatch(option.label, query)} />
+      </span>
+      {option.description ? (
+        <span className="block text-small text-ink-2">{option.description}</span>
+      ) : null}
+    </span>
+  );
+}
 
 /** Default empty-state copy, shared so both components say the same thing. */
 export const NO_MATCHES = "No matches";
@@ -84,6 +123,7 @@ export function AutoComplete({
   onBlur,
 }: AutoCompleteProps) {
   const listId = useId();
+  const { size: fieldSize, disabled: isDisabled } = useFieldState(size, disabled);
   const [internal, setInternal] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -159,7 +199,7 @@ export function AutoComplete({
     }
   };
 
-  const showClear = Boolean(allowClear && value && !disabled);
+  const showClear = Boolean(allowClear && value && !isDisabled);
   const showPanel = open && (loading || filtered.length > 0 || options.length > 0);
 
   return (
@@ -174,11 +214,11 @@ export function AutoComplete({
         aria-controls={showPanel ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={showPanel && activeOption ? `${listId}-${active}` : undefined}
-        className={cn(showClear && "pr-[var(--su-hit-target)]")}
+        style={showClear ? { paddingInlineEnd: fieldClearPadding(fieldSize) } : undefined}
         value={value}
         placeholder={placeholder}
-        disabled={disabled}
-        size={size}
+        disabled={isDisabled}
+        size={fieldSize}
         onChange={(e) => {
           filteringRef.current = true;
           emitChange(e.target.value);
@@ -198,10 +238,8 @@ export function AutoComplete({
         autoComplete="off"
       />
       {showClear && (
-        <button
-          type="button"
-          aria-label="Clear"
-          className="absolute top-0 right-0 grid place-items-center h-full w-[var(--su-hit-target)] rounded-none bg-transparent text-ink-2 text-footnote cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:text-ink"
+        <FieldClearButton
+          size={fieldSize}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             filteringRef.current = true;
@@ -210,9 +248,7 @@ export function AutoComplete({
             setActiveIndex(0);
             setOpen(true);
           }}
-        >
-          ✕
-        </button>
+        />
       )}
       <span
         aria-live="polite"
@@ -254,7 +290,10 @@ export function AutoComplete({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => selectOption(option)}
               >
-                {option.label}
+                <ComboboxOptionContent
+                  option={option}
+                  query={value && filteringRef.current ? value : null}
+                />
               </button>
             ))
           )}

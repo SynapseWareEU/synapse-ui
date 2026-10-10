@@ -1,5 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
-export type BadgeVariant = "default" | "success" | "warning" | "danger";
+/** `default` is the neutral pill (the v1 name, kept). */
+export type BadgeVariant = "default" | "neutral" | "accent" | "info" | "success" | "warning" | "danger";
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     count?: number;
     dot?: boolean;

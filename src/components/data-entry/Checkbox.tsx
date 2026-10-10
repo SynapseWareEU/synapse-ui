@@ -22,16 +22,110 @@ export interface CheckboxProps {
   onCheckedChange?: (checked: boolean, state: CheckboxState) => void;
 }
 
-const boxClass = [
-  "flex items-center justify-center size-[22px] rounded-none bg-transparent text-on-action cursor-pointer",
-  // ink-3 (not gray-3) so the unchecked box clears WCAG 1.4.11 3:1 against paper, as Switch's track does.
-  "border-[1.5px] border-solid border-ink-3 contrast-more:border-[var(--su-label)]",
-  "transition-[background-color,border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
-  "hover:border-[var(--su-label)] data-[state=unchecked]:hover:bg-[var(--su-gray-4)]",
-  "data-[state=checked]:(bg-accent border-accent) data-[state=indeterminate]:(bg-accent border-accent)",
-  "data-[state=checked]:hover:bg-[var(--su-accent-hover)] data-[state=indeterminate]:hover:bg-[var(--su-accent-hover)]",
-  "su-focus-ring",
+/*
+ * 16×16 box, radius 4, border-box.
+ * - Unchecked: surface + 1px border-control (#8a919d, 3:1 on surface, WCAG 1.4.11).
+ * - Checked / indeterminate: action fill + action border, white mark.
+ * - Hover (only where hover exists) follows the whole label row, `group/cb`: unchecked border
+ *   ink-3, checked fill action-hover.
+ * - Disabled: fill + border colour; checked turns border-strong with the white mark kept. No opacity.
+ * - Invalid: danger border while unchecked.
+ * Each branch emits one class per property and state, so nothing depends on UnoCSS emission order.
+ */
+const boxBaseClass = [
+  "relative inline-flex shrink-0 items-center justify-center size-[16px] p-0 rounded-su-tag",
+  "border border-solid text-on-action",
+  "transition-[background-color,border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  // High Contrast: paint the token colours (Canvas, CanvasText, Highlight) instead of letting the
+  // browser erase the fill, which would hide the checked state.
+  "forced-colors:[forced-color-adjust:none]",
 ].join(" ");
+
+const boxEnabledClass = [
+  "cursor-pointer bg-surface",
+  "data-[state=checked]:bg-action data-[state=checked]:border-action",
+  "data-[state=indeterminate]:bg-action data-[state=indeterminate]:border-action",
+  "[@media(hover:hover)]:group-hover/cb:data-[state=checked]:bg-action-hover",
+  "[@media(hover:hover)]:group-hover/cb:data-[state=checked]:border-action-hover",
+  "[@media(hover:hover)]:group-hover/cb:data-[state=indeterminate]:bg-action-hover",
+  "[@media(hover:hover)]:group-hover/cb:data-[state=indeterminate]:border-action-hover",
+].join(" ");
+
+const boxValidClass =
+  "border-border-control [@media(hover:hover)]:group-hover/cb:data-[state=unchecked]:border-ink-3";
+
+const boxInvalidClass = "border-danger";
+
+const boxDisabledClass = [
+  "cursor-not-allowed bg-fill border-border",
+  "data-[state=checked]:bg-border-strong data-[state=checked]:border-border-strong",
+  "data-[state=indeterminate]:bg-border-strong data-[state=indeterminate]:border-border-strong",
+].join(" ");
+
+/** Internal: the box recipe, shared by `Checkbox` and the decorative `CheckboxMark`. */
+export function checkboxBoxClass({
+  disabled,
+  invalid,
+}: {
+  disabled?: boolean;
+  invalid?: boolean;
+}) {
+  return cn(
+    boxBaseClass,
+    disabled ? boxDisabledClass : cn(boxEnabledClass, invalid ? boxInvalidClass : boxValidClass),
+  );
+}
+
+/** 12px white check (stroke 3, round), or an 8×2 bar with radius 1 when indeterminate. */
+function CheckGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="block size-[12px]">
+      <path
+        d="M5 12l5 5l10 -10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="[[data-state=indeterminate]_&]:hidden"
+      />
+      <rect
+        x="4"
+        y="10"
+        width="16"
+        height="4"
+        rx="2"
+        fill="currentColor"
+        className="hidden [[data-state=indeterminate]_&]:block"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Internal: a decorative (`aria-hidden`) box that mirrors a selection, for rows that are
+ * themselves the control (listbox options in Transfer). Put `group/cb` on the row for hover.
+ */
+export function CheckboxMark({
+  checked,
+  disabled,
+  className,
+}: {
+  checked: CheckboxState;
+  disabled?: boolean;
+  className?: string;
+}) {
+  const state =
+    checked === "indeterminate" ? "indeterminate" : checked ? "checked" : "unchecked";
+  return (
+    <span
+      aria-hidden="true"
+      data-state={state}
+      className={cn(checkboxBoxClass({ disabled }), className)}
+    >
+      {state === "unchecked" ? null : <CheckGlyph />}
+    </span>
+  );
+}
 
 export function Checkbox({
   checked,
@@ -50,12 +144,16 @@ export function Checkbox({
   const form = useFormContext();
   const item = useFormItemContext();
   const isDisabled = disabled ?? form.disabled;
+  const invalid = Boolean(item?.error);
 
   return (
     <label
       className={cn(
-        "inline-flex items-center gap-su2 min-h-[var(--su-hit-target)] cursor-pointer",
-        isDisabled && "opacity-45 cursor-not-allowed",
+        // The whole row is the target: box + 8 + label 14/20. Desk keeps the visual size;
+        // touch gets the 44px floor.
+        "group/cb inline-flex items-center gap-su2",
+        "[@media(hover:none)]:min-h-[var(--su-hit-target)] [@media(hover:none)]:min-w-[var(--su-hit-target)]",
+        isDisabled ? "cursor-not-allowed" : "cursor-pointer",
         className,
       )}
     >
@@ -71,28 +169,17 @@ export function Checkbox({
         required={required ?? item?.required}
         name={name}
         value={value}
-        className={boxClass}
+        className={cn(checkboxBoxClass({ disabled: isDisabled, invalid }), "su-focus-ring")}
         onCheckedChange={(state) => onCheckedChange?.(state === true, state)}
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}
       >
-        <CheckboxPrimitive.Indicator className="size-3">
-          <svg
-            viewBox="0 0 12 12"
-            fill="none"
-            aria-hidden="true"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M2.5 6L5 8.5L9.5 3.5" className="[[data-state=indeterminate]_&]:hidden" />
-            <path d="M2.5 6H9.5" className="hidden [[data-state=indeterminate]_&]:block" />
-          </svg>
+        <CheckboxPrimitive.Indicator className="flex items-center justify-center">
+          <CheckGlyph />
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
       {children && (
-        <span className="text-body text-label select-none">
+        <span className={cn("text-body select-none", isDisabled ? "text-ink-3" : "text-ink")}>
           {children}
         </span>
       )}

@@ -1,0 +1,7 @@
+import { RemoveScrollSideCar as r } from "./SideEffect.js";
+import { effectCar as o } from "./medium.js";
+import { exportSidecar as e } from "../../../use-sidecar/dist/es2015/exports.js";
+const f = e(o, r);
+export {
+  f as default
+};

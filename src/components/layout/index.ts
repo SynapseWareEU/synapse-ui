@@ -8,7 +8,7 @@ export { Grid, Row, Col } from "./Grid";
 export type { RowProps, ColProps } from "./Grid";
 
 export { Layout, Header, Sider, Content, Footer } from "./Layout";
-export type { LayoutProps } from "./Layout";
+export type { LayoutProps, HeaderProps, HeaderMaterial } from "./Layout";
 
 export { Space } from "./Space";
 export type { SpaceProps } from "./Space";
