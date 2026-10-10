@@ -8,6 +8,11 @@ export interface PopoverProps
   content: ReactNode;
   side?: ComponentPropsWithoutRef<typeof RadixPopover.Content>["side"];
   align?: ComponentPropsWithoutRef<typeof RadixPopover.Content>["align"];
+  /**
+   * Distance from the trigger, in px. Defaults to the v2 overlay's 4. For a trigger that sits
+   * inside a frame the overlay must clear, such as a rail tile whose panel opens past the rail.
+   */
+  sideOffset?: number;
   contentClassName?: string;
   /** Portal target; defaults to document.body. For shadow DOM / iframe hosts. */
   container?: HTMLElement | null;
@@ -22,6 +27,7 @@ export function Popover({
   content,
   side = "bottom",
   align = "center",
+  sideOffset = 4,
   contentClassName,
   container,
   ...rest
@@ -35,7 +41,7 @@ export function Popover({
         <RadixPopover.Content
           side={side}
           align={align}
-          sideOffset={4}
+          sideOffset={sideOffset}
           className={cn(
             "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",
             "font-sans text-body text-ink su-focus-ring",
