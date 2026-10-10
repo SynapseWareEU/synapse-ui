@@ -15,6 +15,7 @@ Nothing is removed and no default changes its look. Two fixes change behaviour, 
 - **ResultBand** (fix): the title and the lines wrap at words instead of ending in an ellipsis, so a refusal that is a whole sentence can be read. When the title and the signal do not fit side by side, the signal drops to a line of its own under the title. One-line bands keep their 88 and 110 heights.
 - **HandheldTopBar**: `backDisabled` and `sessionDisabled` disable the two buttons in place (ink-3); `flowAs="h1" | "h2" | "h3"` renders the flow name as a heading (default `span`); and the session block now shrinks and cuts a long site or operator with an ellipsis instead of widening the page (fix).
 - **Popover `sideOffset`** (px, default 4, as before): the distance from the trigger, for a trigger inside a frame the overlay must clear, such as a rail tile whose panel opens 8 past the rail's edge.
+- **AutoComplete `selectedValue`**: the `value` of the option the caller holds. That option is marked `aria-selected`, whatever the box reads. Without it the option whose `label` equals the visible text is marked, as before, which a box showing a code + name pair on one line never matched.
 - **Token `--su-inverse-ink-2`** (`text-inverse-ink-2`): secondary text on the inverse surface, `#cdd2d9` in light and `#525866` in dark.
 
 ### Breaking changes

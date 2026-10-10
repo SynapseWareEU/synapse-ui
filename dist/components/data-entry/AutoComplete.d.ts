@@ -19,6 +19,12 @@ export interface AutoCompleteProps {
     loading?: boolean;
     /** Replaces the default "No matches" row. */
     notFoundContent?: ReactNode;
+    /**
+     * The `value` of the option the caller holds, for a box whose text is not that option's `label`
+     * (a code + name pair read as one line). That option is the one marked `aria-selected`.
+     * Absent, the option whose `label` is the visible text is.
+     */
+    selectedValue?: string;
     "aria-label"?: string;
     "aria-labelledby"?: string;
     /** Fires with the visible text — including the option's `label` when one is picked. */
@@ -47,5 +53,5 @@ export declare function ComboboxOptionContent({ option, query }: {
 }): import("react").JSX.Element;
 /** Default empty-state copy, shared so both components say the same thing. */
 export declare const NO_MATCHES = "No matches";
-export declare function AutoComplete({ value: valueProp, defaultValue, placeholder, disabled, size, options, filterOption, className, id, name, allowClear, loading, notFoundContent, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, onChange, onSelect, onClear, onFocus, onBlur, }: AutoCompleteProps): import("react").JSX.Element;
+export declare function AutoComplete({ value: valueProp, defaultValue, placeholder, disabled, size, options, filterOption, className, id, name, allowClear, loading, notFoundContent, selectedValue, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, onChange, onSelect, onClear, onFocus, onBlur, }: AutoCompleteProps): import("react").JSX.Element;
 //# sourceMappingURL=AutoComplete.d.ts.map

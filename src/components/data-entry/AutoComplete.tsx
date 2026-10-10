@@ -32,6 +32,12 @@ export interface AutoCompleteProps {
   loading?: boolean;
   /** Replaces the default "No matches" row. */
   notFoundContent?: ReactNode;
+  /**
+   * The `value` of the option the caller holds, for a box whose text is not that option's `label`
+   * (a code + name pair read as one line). That option is the one marked `aria-selected`.
+   * Absent, the option whose `label` is the visible text is.
+   */
+  selectedValue?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
   /** Fires with the visible text — including the option's `label` when one is picked. */
@@ -114,6 +120,7 @@ export function AutoComplete({
   allowClear,
   loading,
   notFoundContent,
+  selectedValue,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   onChange,
@@ -282,7 +289,11 @@ export function AutoComplete({
                 tabIndex={-1}
                 type="button"
                 role="option"
-                aria-selected={option.label === value}
+                aria-selected={
+                  selectedValue !== undefined
+                    ? option.value === selectedValue
+                    : option.label === value
+                }
                 data-active={index === active || undefined}
                 aria-disabled={option.disabled || undefined}
                 data-disabled={option.disabled || undefined}
