@@ -28,8 +28,11 @@ export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   onClose?: () => void;
   /** Filter chip only: the key ("Zone:") in 500 before the values (`children`, 400). */
   filterLabel?: ReactNode;
-  /** Accessible name of the remove button, e.g. "Remove the Zone filter". */
-  closeLabel?: string;
+  /**
+   * The remove button's accessible name. By default "Remove the <key> filter" when `filterLabel`
+   * is a string, else "Remove <text>" (or "Remove tag"). Pass the application's words.
+   */
+  removeLabel?: string;
   children?: ReactNode;
 }
 
@@ -56,8 +59,8 @@ const dotClass: Record<TagColor, string | undefined> = {
 // In forced colours the tint disappears, so the box keeps a system-colour outline.
 const forcedBox = "forced-colors:border forced-colors:border-solid forced-colors:border-[CanvasText]";
 
-function closeName(closeLabel: string | undefined, filterLabel: ReactNode, children: ReactNode) {
-  if (closeLabel) return closeLabel;
+function closeName(removeLabel: string | undefined, filterLabel: ReactNode, children: ReactNode) {
+  if (removeLabel) return removeLabel;
   if (typeof filterLabel === "string") return `Remove the ${filterLabel.replace(/:\s*$/, "")} filter`;
   if (typeof children === "string") return `Remove ${children}`;
   return "Remove tag";
@@ -69,7 +72,7 @@ export function Tag({
   closable = false,
   onClose,
   filterLabel,
-  closeLabel,
+  removeLabel,
   className,
   children,
   ...rest
@@ -96,7 +99,7 @@ export function Tag({
           type="button"
           className="inline-flex items-center justify-center shrink-0 size-[20px] p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-action-subtle-hover [@media(hover:none)]:su-hit-44"
           onClick={onClose}
-          aria-label={closeName(closeLabel, filterLabel, children)}
+          aria-label={closeName(removeLabel, filterLabel, children)}
         >
           <svg
             width="14"

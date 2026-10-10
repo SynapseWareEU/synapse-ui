@@ -18,9 +18,12 @@ export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
     onClose?: () => void;
     /** Filter chip only: the key ("Zone:") in 500 before the values (`children`, 400). */
     filterLabel?: ReactNode;
-    /** Accessible name of the remove button, e.g. "Remove the Zone filter". */
-    closeLabel?: string;
+    /**
+     * The remove button's accessible name. By default "Remove the <key> filter" when `filterLabel`
+     * is a string, else "Remove <text>" (or "Remove tag"). Pass the application's words.
+     */
+    removeLabel?: string;
     children?: ReactNode;
 }
-export declare function Tag({ color, dot, closable, onClose, filterLabel, closeLabel, className, children, ...rest }: TagProps): import("react").JSX.Element;
+export declare function Tag({ color, dot, closable, onClose, filterLabel, removeLabel, className, children, ...rest }: TagProps): import("react").JSX.Element;
 //# sourceMappingURL=Tag.d.ts.map

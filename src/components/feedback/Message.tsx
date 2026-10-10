@@ -54,7 +54,14 @@ const DEFAULT_DURATION = 4500;
  * Set `--su-content-inset-start` on the root (e.g. to the rail width) to move them past a rail.
  * Errors are announced assertively, the rest politely.
  */
-export function MessageProvider({ children }: { children: ReactNode }) {
+export function MessageProvider({
+  children,
+  closeLabel = "Dismiss",
+}: {
+  children: ReactNode;
+  /** The close button's accessible name on every toast, "Dismiss" by default. Pass the application's word. */
+  closeLabel?: string;
+}) {
   const [items, setItems] = useState<MessageItem[]>([]);
 
   const { direction } = useConfig();
@@ -116,12 +123,11 @@ export function MessageProvider({ children }: { children: ReactNode }) {
                   {item.content}
                 </Toast.Description>
                 {item.action ? <div className="shrink-0 text-body font-medium">{item.action}</div> : null}
-                {/* The drawn toast has no close; one that never times out needs a way to go. */}
-                {persistent ? (
-                  <Toast.Close className={cn(dismissButtonClass, "-my-su1 -me-su1")} aria-label="Dismiss">
-                    <IconX size={16} {...iconDefaults} />
-                  </Toast.Close>
-                ) : null}
+                {/* The drawn toast has no close. Every toast keeps one all the same: a toast that
+                    never times out needs a way to go, and a keyboard or switch user cannot swipe. */}
+                <Toast.Close className={cn(dismissButtonClass, "-my-su1 -me-su1")} aria-label={closeLabel}>
+                  <IconX size={16} {...iconDefaults} />
+                </Toast.Close>
               </div>
             </Toast.Root>
           );

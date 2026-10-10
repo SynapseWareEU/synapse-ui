@@ -26,7 +26,7 @@ function w({
   closable: o = !1,
   onClose: g,
   filterLabel: s,
-  closeLabel: x,
+  removeLabel: x,
   className: c,
   children: a,
   ...u

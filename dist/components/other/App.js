@@ -1,44 +1,44 @@
-import { jsx as n, jsxs as f, Fragment as C } from "react/jsx-runtime";
+import { jsx as n, jsxs as l, Fragment as C } from "react/jsx-runtime";
 import { Provider as N, Root as O, Viewport as I } from "../../vendor/@radix-ui/react-toast/dist/index.js";
-import { useContext as T, useState as x, useCallback as l, useMemo as m, createContext as j } from "react";
+import { useContext as T, useState as k, useCallback as m, useMemo as u, createContext as j } from "react";
 import { ConfigProvider as z, useConfig as R } from "../../ConfigProvider.js";
 import { MessageProvider as B, useMessage as D } from "../feedback/Message.js";
 import { Modal as E } from "../feedback/Modal.js";
 import { Notification as F } from "../feedback/Notification.js";
-import { Button as k } from "../general/Button.js";
+import { Button as w } from "../general/Button.js";
 import { TooltipProvider as K } from "../data-display/Tooltip.js";
-const w = j(null);
+const A = j(null);
 let S = 0;
 function V({ children: e }) {
-  const c = D(), { direction: A } = R(), [M, p] = x([]), [t, d] = x({ open: !1 }), u = l(
-    (o) => p((i) => i.filter((s) => s.key !== o)),
+  const c = D(), { direction: p } = R(), [M, d] = k([]), [t, f] = k({ open: !1 }), g = m(
+    (o) => d((i) => i.filter((s) => s.key !== o)),
     []
-  ), g = m(
+  ), h = u(
     () => ({
-      open: (o) => p((i) => [...i, { ...o, key: ++S }]),
-      destroy: () => p([])
+      open: (o) => d((i) => [...i, { ...o, key: ++S }]),
+      destroy: () => d([])
     }),
     []
-  ), a = l(() => d({ open: !1 }), []), h = l(() => {
+  ), a = m(() => f({ open: !1 }), []), v = m(() => {
     var o;
     (o = t.onCancel) == null || o.call(t), a();
-  }, [t, a]), v = m(
+  }, [t, a]), x = u(
     () => ({
-      confirm: (o) => d({ ...o, open: !0, kind: "confirm" }),
-      info: (o) => d({ ...o, open: !0, kind: "info" }),
+      confirm: (o) => f({ ...o, open: !0, kind: "confirm" }),
+      info: (o) => f({ ...o, open: !0, kind: "info" }),
       destroy: a
     }),
     [a]
-  ), b = m(
+  ), b = u(
     () => ({
       message: c,
-      notification: g,
-      modal: v
+      notification: h,
+      modal: x
     }),
-    [c, g, v]
+    [c, h, x]
   );
-  return /* @__PURE__ */ f(w.Provider, { value: b, children: [
-    /* @__PURE__ */ f(N, { swipeDirection: A === "rtl" ? "right" : "left", children: [
+  return /* @__PURE__ */ l(A.Provider, { value: b, children: [
+    /* @__PURE__ */ l(N, { swipeDirection: p === "rtl" ? "right" : "left", children: [
       e,
       M.map(({ key: o, duration: i, type: s, onClose: r, ...y }) => /* @__PURE__ */ n(
         O,
@@ -46,7 +46,7 @@ function V({ children: e }) {
           type: s === "error" ? "foreground" : "background",
           duration: i === 0 ? 1 / 0 : i ?? 4500,
           onOpenChange: (P) => {
-            P || (r == null || r(), u(o));
+            P || (r == null || r(), g(o));
           },
           children: /* @__PURE__ */ n(
             F,
@@ -55,7 +55,7 @@ function V({ children: e }) {
               type: s,
               role: "none",
               onClose: () => {
-                r == null || r(), u(o);
+                r == null || r(), g(o);
               }
             }
           )
@@ -68,12 +68,12 @@ function V({ children: e }) {
       E,
       {
         open: t.open,
-        onOpenChange: (o) => !o && h(),
+        onOpenChange: (o) => !o && v(),
         title: t.title,
         width: 400,
-        footer: /* @__PURE__ */ f(C, { children: [
+        footer: /* @__PURE__ */ l(C, { children: [
           /* @__PURE__ */ n(
-            k,
+            w,
             {
               variant: "primary",
               danger: t.danger,
@@ -84,18 +84,18 @@ function V({ children: e }) {
               children: t.okText ?? "OK"
             }
           ),
-          t.kind === "confirm" ? /* @__PURE__ */ n(k, { onClick: h, children: t.cancelText ?? "Cancel" }) : null
+          t.kind === "confirm" ? /* @__PURE__ */ n(w, { onClick: v, children: t.cancelText ?? "Cancel" }) : null
         ] }),
         children: t.content
       }
     )
   ] });
 }
-function Y({ children: e, ...c }) {
-  return /* @__PURE__ */ n(z, { ...c, children: /* @__PURE__ */ n(K, { children: /* @__PURE__ */ n(B, { children: /* @__PURE__ */ n(V, { children: e }) }) }) });
+function Y({ children: e, closeLabel: c, ...p }) {
+  return /* @__PURE__ */ n(z, { ...p, children: /* @__PURE__ */ n(K, { children: /* @__PURE__ */ n(B, { closeLabel: c, children: /* @__PURE__ */ n(V, { children: e }) }) }) });
 }
 function Z() {
-  const e = T(w);
+  const e = T(A);
   if (!e) throw new Error("useApp must be used within App");
   return e;
 }

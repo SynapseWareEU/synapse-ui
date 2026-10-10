@@ -9,6 +9,8 @@ export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
     title?: ReactNode;
     closable?: boolean;
     onClose?: () => void;
+    /** The close button's accessible name, "Close alert" by default. Pass the application's word. */
+    closeLabel?: string;
     /** Show the per-type status icon (16, in the tone's text colour). */
     showIcon?: boolean;
     /** Custom icon; implies `showIcon`. */
@@ -25,5 +27,5 @@ export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
  * the first line and the description below it, an optional action link and a 28 dismiss.
  * Errors and warnings are announced (`role="alert"`); the other tones are `role="status"`.
  */
-export declare function Alert({ type, title, closable, onClose, showIcon, icon, action, compact, className, children, ...rest }: AlertProps): import("react").JSX.Element;
+export declare function Alert({ type, title, closable, onClose, closeLabel, showIcon, icon, action, compact, className, children, ...rest }: AlertProps): import("react").JSX.Element;
 //# sourceMappingURL=Alert.d.ts.map

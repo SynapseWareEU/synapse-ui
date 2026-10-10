@@ -26,8 +26,10 @@ interface MessageContextValue {
  * Set `--su-content-inset-start` on the root (e.g. to the rail width) to move them past a rail.
  * Errors are announced assertively, the rest politely.
  */
-export declare function MessageProvider({ children }: {
+export declare function MessageProvider({ children, closeLabel, }: {
     children: ReactNode;
+    /** The close button's accessible name on every toast, "Dismiss" by default. Pass the application's word. */
+    closeLabel?: string;
 }): import("react").JSX.Element;
 export declare function useMessage(): MessageContextValue;
 /** Imperative helper when provider is mounted via App */

@@ -1635,6 +1635,7 @@ export function TagDemo() {
     { key: "zone", label: "Zone:", value: "A, B" },
     { key: "status", label: "Status:", value: "Short pick" },
   ]);
+  const [tags, setTags] = useState(["Removable", "Needs review"]);
   return (
     <UI.Space direction="vertical" size="large">
       <UI.Space wrap>
@@ -1669,10 +1670,21 @@ export function TagDemo() {
             key={f.key}
             closable
             filterLabel={f.label}
-            closeLabel={`Remove the ${f.label.replace(":", "")} filter`}
+            removeLabel={`Remove the ${f.label.replace(":", "")} filter`}
             onClose={() => setFilters((prev) => prev.filter((x) => x.key !== f.key))}
           >
             {f.value}
+          </UI.Tag>
+        ))}
+        {tags.map((tag, i) => (
+          <UI.Tag
+            key={tag}
+            closable
+            // removeLabel names the remove button; an application passes one in its own language.
+            removeLabel={i === 1 ? "Mark as reviewed" : undefined}
+            onClose={() => setTags((prev) => prev.filter((t) => t !== tag))}
+          >
+            {tag}
           </UI.Tag>
         ))}
       </UI.Space>
@@ -1762,7 +1774,8 @@ export function AlertDemo() {
       <UI.Alert showIcon title="Signed in on a shared terminal">
         Sign out when you leave the dock.
       </UI.Alert>
-      <UI.Alert type="info" showIcon title="A little heads-up">
+      {/* closeLabel names the close button; an application passes one in its own language. */}
+      <UI.Alert type="info" showIcon title="A little heads-up" closable closeLabel="Hide this tip">
         Your changes are saved automatically.
       </UI.Alert>
       <UI.Alert type="success" showIcon title="All up to date">
@@ -1786,6 +1799,7 @@ export function AlertDemo() {
 }
 export function DrawerDemo() {
   const [open, setOpen] = useState(false);
+  const [sharing, setSharing] = useState(false);
   return (
     <UI.Space wrap>
       <UI.Drawer
@@ -1826,6 +1840,17 @@ export function DrawerDemo() {
       >
         <UI.Input aria-label="New name" placeholder="New name" autoFocus />
       </UI.Drawer>
+      {/* Opened from a menu item, the way a table row's menu opens one. The item is gone once
+          the menu closes, so closing the drawer gives focus back to the menu's trigger. */}
+      <UI.Dropdown>
+        <UI.DropdownTrigger>Project actions</UI.DropdownTrigger>
+        <UI.DropdownContent>
+          <UI.DropdownItem onSelect={() => setSharing(true)}>Share project</UI.DropdownItem>
+        </UI.DropdownContent>
+      </UI.Dropdown>
+      <UI.Drawer open={sharing} onOpenChange={setSharing} title="Share project">
+        <UI.Input aria-label="Email" placeholder="Email" />
+      </UI.Drawer>
     </UI.Space>
   );
 }
@@ -1854,7 +1879,21 @@ export function MessageDemo() {
       >
         Message with action
       </UI.Button>
+      {/* closeLabel names every toast's close button. An application passes one in its own
+          language on its App, which hands it to MessageProvider; this App is nested only to
+          show both names side by side. */}
+      <UI.App closeLabel="Close message">
+        <LabelledMessage />
+      </UI.App>
     </UI.Space>
+  );
+}
+function LabelledMessage() {
+  const { message } = UI.useApp();
+  return (
+    <UI.Button onClick={() => message.info("Draft kept for later")}>
+      Labelled message
+    </UI.Button>
   );
 }
 export function ModalDemo() {
