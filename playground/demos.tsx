@@ -518,6 +518,7 @@ export function MenuDemo() {
   return (
     <div className="flex flex-wrap items-start gap-su6">
       <UI.Menu
+        aria-label="Workspace sections"
         style={{ width: 260 }}
         selectedKey={selected}
         onSelect={setSelected}
@@ -643,7 +644,34 @@ export function TabsDemo() {
   );
 }
 export function AutoCompleteDemo() {
+  const [partner, setPartner] = useState("cust-003");
+  const partners = [
+    { value: "cust-001", code: "CUST-001", label: "Vet Clinic Brasov" },
+    { value: "cust-003", code: "CUST-003", label: "PetVet Cluj" },
+    { value: "cust-007", code: "CUST-007", label: "Agro Farm Iasi, north depot and returns desk" },
+    { value: "supp-012", code: "SUPP-012", label: "Bandage Works" },
+  ];
   return (
+    <div className="demo-stack" style={{ width: 320, maxWidth: "100%" }}>
+    {/* picker: the value is the option's value, and the box at rest draws the code + name pair. */}
+    <UI.FormItem label="Partner">
+      <UI.AutoComplete
+        picker
+        data-testid="partner-picker"
+        placeholder="Search by code or name"
+        allowClear
+        clearLabel="Clear the partner"
+        listLabel="Partners"
+        notFoundContent="No partner matches"
+        countLabel={(n) => `${n} partners`}
+        value={partner}
+        onChange={setPartner}
+        options={partners}
+      />
+      <span className="text-small text-ink-2" data-testid="partner-value">
+        Value held: <span className="su-id-2">{partner || "none"}</span>
+      </span>
+    </UI.FormItem>
     <UI.FormItem label="Bay code">
       <UI.AutoComplete
         placeholder="WH1-A-12-03"
@@ -664,6 +692,7 @@ export function AutoCompleteDemo() {
         ]}
       />
     </UI.FormItem>
+    </div>
   );
 }
 export function CascaderDemo() {
@@ -984,6 +1013,9 @@ export function SelectDemo() {
           { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
         ]}
       />
+      <div style={{ width: 260 }}>
+        <UI.Select aria-label="Empty list" placeholder="Nothing to choose" emptyContent="No carriers yet" />
+      </div>
     </UI.Space>
   );
 }
@@ -1541,6 +1573,128 @@ export function TableDemo() {
           </UI.Table.Body>
         </UI.Table>
       </div>
+      {/* A titled strip above the column header, a body that scrolls under a pinned header inside
+          the panel, 24 between columns, and a footer note that runs to several lines. */}
+      <UI.Table
+        aria-labelledby="modules-title"
+        stickyHeader
+        panelClassName="max-h-[236px]"
+        columnGap={24}
+        header={
+          <>
+            <h3 id="modules-title" className="m-0 text-section font-semibold">
+              Installed modules
+            </h3>
+            <UI.Badge count={9} variant="neutral" />
+            <a href="#Table" className="ms-auto text-small font-medium text-action-text">
+              Module log
+            </a>
+          </>
+        }
+        footer={
+          <span data-testid="modules-note">
+            Modules are installed from the server, not from this screen. Run the install command on
+            the machine that hosts the service, then come back here and refresh: the new module
+            shows as inactive until an administrator turns it on for a site.
+          </span>
+        }
+      >
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th className="w-[220px]">Module</UI.Table.Th>
+            <UI.Table.Th>What it does</UI.Table.Th>
+            <UI.Table.Th className="w-[96px]">Version</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          {["Labels", "Carrier link", "Cold chain", "Counting", "Returns", "Kitting", "Yard", "Billing", "Customs"].map(
+            (name, i) => (
+              <UI.Table.Row key={name}>
+                <UI.Table.Td className="font-medium">{name}</UI.Table.Td>
+                <UI.Table.Td kind="secondary">Adds the {name.toLowerCase()} screens and their rules</UI.Table.Td>
+                <UI.Table.Td>{`1.${i}.0`}</UI.Table.Td>
+              </UI.Table.Row>
+            ),
+          )}
+        </UI.Table.Body>
+      </UI.Table>
+      {/* headerHidden: no header row is drawn, the cells still name the columns. Table.Detail with
+          its own start (16, there is no disclosure column) and the 12-below strip. */}
+      <UI.Table aria-label="Docks" headerHidden className="table-fixed">
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th className="w-[120px]">Dock</UI.Table.Th>
+            <UI.Table.Th>Use</UI.Table.Th>
+            <UI.Table.Th className="w-[120px]">State</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          <UI.Table.Row expanded>
+            <UI.Table.Td kind="id">DOCK-01</UI.Table.Td>
+            <UI.Table.Td>Receiving</UI.Table.Td>
+            <UI.Table.Td>
+              <UI.Tag color="warning" dot>
+                Paused
+              </UI.Tag>
+            </UI.Table.Td>
+          </UI.Table.Row>
+          <UI.Table.Detail colSpan={3} startInset={16} strip data-testid="dock-strip">
+            <div className="flex flex-wrap items-center gap-su2">
+              <span className="su-label">Why</span>
+              <UI.Input size="sm" aria-label="Reason" fullWidth={false} style={{ width: 240 }} />
+              <UI.Button size="sm" variant="primary">
+                Resume the dock
+              </UI.Button>
+              <UI.Button size="sm" variant="ghost">
+                Cancel
+              </UI.Button>
+            </div>
+          </UI.Table.Detail>
+          <UI.Table.Row>
+            <UI.Table.Td kind="id">DOCK-02</UI.Table.Td>
+            <UI.Table.Td>Shipping</UI.Table.Td>
+            <UI.Table.Td />
+          </UI.Table.Row>
+        </UI.Table.Body>
+      </UI.Table>
+      {/* stackEnd: under 1024 the state tag ends the record's first line and the rest starts below. */}
+      <UI.Table aria-label="Arrivals" stack="lg">
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th>Arrival</UI.Table.Th>
+            <UI.Table.Th>Carrier</UI.Table.Th>
+            <UI.Table.Th>State</UI.Table.Th>
+            <UI.Table.Th>Trailer</UI.Table.Th>
+            <UI.Table.Th>Dock</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          <UI.Table.Row data-testid="arrival-1">
+            <UI.Table.Td kind="id">ARR-2026-0412</UI.Table.Td>
+            <UI.Table.Td className="flex-1 truncate">Transcarpatica Logistic and Forwarding</UI.Table.Td>
+            <UI.Table.Td stackEnd data-testid="arrival-1-state">
+              <UI.Tag color="info" dot>
+                Unloading
+              </UI.Tag>
+            </UI.Table.Td>
+            <UI.Table.Td kind="idSecondary" data-testid="arrival-1-trailer">
+              B-204-TRL
+            </UI.Table.Td>
+            <UI.Table.Td kind="idSecondary">DOCK-01</UI.Table.Td>
+          </UI.Table.Row>
+          <UI.Table.Row data-testid="arrival-2">
+            <UI.Table.Td kind="id">ARR-2026-0413</UI.Table.Td>
+            <UI.Table.Td className="flex-1 truncate">Fan Courier</UI.Table.Td>
+            <UI.Table.Td stackEnd>
+              <UI.Tag color="danger" dot>
+                Late
+              </UI.Tag>
+            </UI.Table.Td>
+            <UI.Table.Td kind="idSecondary">CJ-11-FAN</UI.Table.Td>
+            <UI.Table.Td kind="idSecondary">DOCK-02</UI.Table.Td>
+          </UI.Table.Row>
+        </UI.Table.Body>
+      </UI.Table>
       {/* stack="lg": under 1024 the same tree is a list of records, with no sideways scroll. */}
       <UI.Table aria-label="Stock by location" stack="lg">
         <UI.Table.Head>
@@ -1738,6 +1892,15 @@ export function TagDemo() {
         <UI.Tag color="warning">Short pick</UI.Tag>
         <UI.Tag color="danger">Refused</UI.Tag>
         <UI.Tag color="accent">Selected</UI.Tag>
+      </UI.Space>
+      {/* size="handheld": 28 high, 17/24, for a terminal screen. */}
+      <UI.Space wrap>
+        <UI.Tag size="handheld" color="danger" dot data-testid="tag-handheld">
+          Late
+        </UI.Tag>
+        <UI.Tag size="handheld" color="info">
+          In progress
+        </UI.Tag>
       </UI.Space>
       <UI.Space wrap>
         <UI.Tag color="neutral" dot>
@@ -2208,8 +2371,18 @@ export function DocketDemo() {
       </UI.ConfigProvider>
       <UI.ConfigProvider density="handheld" className="hh-frame">
         <UI.Docket readOnly aria-label="Receipt">
-          <UI.DocketRow label="Location" value="A-09-01-1" />
+          <UI.DocketRow label="Location" value="A-09-01-1" data-testid="docket-location" />
           <UI.DocketRow label="Quantity" value="20 buc" mono={false} />
+          {/* wrap: an identifier longer than the row is read whole. */}
+          <UI.DocketRow
+            wrap
+            label="Pallet"
+            value="359400000000000029"
+            sub="Lot LOT-2026-04-BANDAGE-ROLL-10CM-EU"
+            data-testid="docket-pallet"
+            valueProps={{ "data-testid": "docket-pallet-value" }}
+          />
+          <UI.DocketRow wrap label="Dock" value="DOCK-01" data-testid="docket-dock" />
         </UI.Docket>
         <div className="hh-body">
           <UI.Button variant="primary" size="lg">
@@ -2222,6 +2395,8 @@ export function DocketDemo() {
 }
 export function ScanFieldDemo() {
   const [last, setLast] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [reads, setReads] = useState(0);
   return (
     <div className="flex flex-wrap justify-center gap-su6 w-full">
       <UI.ConfigProvider density="handheld" className="hh-frame">
@@ -2234,6 +2409,36 @@ export function ScanFieldDemo() {
           <span className="text-hh-body text-ink-2" aria-live="polite">
             {last ? `Read: ${last}` : "Type a code and press Enter."}
           </span>
+        </div>
+      </UI.ConfigProvider>
+      {/* The question as the screen's heading, a hint tied to the input, and a read in flight. */}
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.ScanField
+            label="Scan the shelf"
+            labelAs="h2"
+            hint="The label on the shelf where the goods go"
+            placeholder="Ready to scan"
+            busy={busy}
+            busyLabel="Checking the shelf"
+            data-testid="scan-busy"
+            onScan={(read) => {
+              setReads((n) => n + 1);
+              setLast(read);
+              setBusy(true);
+              window.setTimeout(() => setBusy(false), 1500);
+            }}
+          />
+          <span className="text-hh-body text-ink-2" data-testid="scan-reads">
+            Reads taken: {reads}
+          </span>
+          {/* The error line of the library's own fields, under a field it does not draw. */}
+          <div>
+            <UI.Input aria-label="Gross weight" aria-invalid aria-describedby="weight-error" defaultValue="0" />
+            <UI.HandheldErrorLine id="weight-error">
+              The weight must be more than <code>0</code>.
+            </UI.HandheldErrorLine>
+          </div>
         </div>
       </UI.ConfigProvider>
       <UI.ConfigProvider density="handheld" className="hh-frame">
@@ -2254,6 +2459,7 @@ export function ScanFieldDemo() {
 }
 export function QuantityStepperDemo() {
   const [qty, setQty] = useState<number | null>(20);
+  const [kg, setKg] = useState("0.1");
   return (
     <div className="flex flex-wrap justify-center gap-su6 w-full">
       <UI.ConfigProvider density="handheld" className="hh-frame">
@@ -2278,12 +2484,58 @@ export function QuantityStepperDemo() {
           />
         </div>
       </UI.ConfigProvider>
+      {/* Decimal mode: the value is text ("12.5"), shown with the caller's separator, stepped exactly. */}
+      <UI.ConfigProvider density="handheld" className="hh-frame">
+        <div className="hh-body">
+          <UI.QuantityStepper
+            label="How many kilograms?"
+            labelAs="h2"
+            decimalValue={kg}
+            onDecimalChange={setKg}
+            decimalSeparator=","
+            scale={4}
+            step="0.1"
+            max="500"
+            unit="kg"
+            inputProps={{ "data-testid": "qty-decimal" }}
+          />
+          <span className="text-hh-body text-ink-2" data-testid="qty-decimal-value">
+            Value held: {kg === "" ? "empty" : kg}
+          </span>
+        </div>
+      </UI.ConfigProvider>
     </div>
   );
 }
 export function KeypadDemo() {
   const [digits, setDigits] = useState("20");
+  const [weight, setWeight] = useState("");
   return (
+    <div className="flex flex-wrap justify-center gap-su6 w-full">
+    {/* The decimal key shows the caller's separator; the text it edits holds ".". */}
+    <UI.ConfigProvider density="handheld" className="hh-frame">
+      <div className="hh-body">
+        <UI.QuantityStepper
+          label="Gross weight"
+          decimalValue={weight}
+          onDecimalChange={setWeight}
+          decimalSeparator=","
+          scale={4}
+          unit="kg"
+          inputProps={{ "data-testid": "keypad-decimal-field" }}
+        />
+        <UI.Keypad
+          aria-label="Weight keypad"
+          keys={UI.KEYPAD_DECIMAL_KEYS}
+          decimalSeparator=","
+          decimalLabel="Decimal comma"
+          onKey={(key) => setWeight((w) => UI.applyKeypadKey(w, key, 15, 4))}
+        />
+        <span className="text-hh-body text-ink-2" data-testid="keypad-decimal-value">
+          Value held: {weight === "" ? "empty" : weight}
+        </span>
+      </div>
+    </UI.ConfigProvider>
     <UI.ConfigProvider density="handheld" className="hh-frame">
       <div className="hh-body">
         <UI.QuantityStepper
@@ -2320,6 +2572,7 @@ export function KeypadDemo() {
         </div>
       </div>
     </UI.ConfigProvider>
+    </div>
   );
 }
 export function ResultBandDemo() {

@@ -142,7 +142,7 @@ try {
  {const wide=await axTree();assert.ok(wide.some(n=>n.role==='table'&&n.name==='Stock by location')&&wide.some(n=>n.role==='columnheader'),'at desk width a stack table is a real table with its column headers');}
  await page.setViewportSize({width:390,height:844});await page.goto(BASE+'/#Table');await page.locator('table[role="list"][aria-label="Stock by location"]').waitFor();
  {const narrow=await axTree();const list=narrow.find(n=>n.role==='list'&&n.name==='Stock by location');assert.ok(list,'under its breakpoint a stack table is a list with the same name');
-  assert.deepEqual(narrow.filter(n=>n.role==='table').map(n=>n.name).sort(),['Loading','Projects'],'the stacked table and the table nested in its detail expose no table role (the two tables without stack stay tables)');
+  assert.deepEqual(narrow.filter(n=>n.role==='table').map(n=>n.name).sort(),['Docks','Installed modules','Loading','Projects'],'the stacked table and the table nested in its detail expose no table role (the four tables without stack stay tables)');
   const owned=narrow.filter(n=>n.parent===list.id).map(n=>n.role);assert.ok(owned.length>=5&&owned.every(r=>r==='listitem'),`the list owns list items and nothing else: ${owned}`);
   const nested=narrow.find(n=>n.role==='list'&&n.name==='Pallets in A-01-01-1');assert.ok(nested&&narrow.filter(n=>n.parent===nested.id).every(n=>n.role==='listitem'),'a table nested in a detail follows its parent into the list shape');}
  assert.equal(await page.locator('table[aria-label="Stock by location"]').count(),1,'one tree: the stacked shape is the same <table>');
@@ -192,7 +192,77 @@ try {
 
 
 
- for(const width of [390,820,1440]){await page.setViewportSize({width,height:900});for(const route of ['overview','DatePicker','Table','Transfer','tokens']){await page.goto(`${BASE}/#${route}`);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${route} overflows at ${width}px`);}}
+ // ——— Release B ———
+ const rect=l=>l.evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,r:r.right,b:r.bottom}});
+ await page.setViewportSize({width:1440,height:900});
+ // AutoComplete picker: the value is the option's value, the box at rest draws code (mono 500) + name.
+ await page.goto(BASE+'/#AutoComplete');const pk=page.getByTestId('partner-picker');await pk.waitFor();
+ assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: cust-003');
+ const pair=await page.locator('[data-su-picker-value]').evaluate(e=>{const c=e.querySelector('[data-su-code]'),n=c.nextElementSibling,cs=getComputedStyle(c);const probe=document.createElement('span');probe.style.color='var(--su-ink-2)';e.append(probe);const ink2=getComputedStyle(probe).color;probe.remove();return [c.textContent,cs.fontFamily.split(',')[0].replace(/"/g,''),cs.fontWeight,n.textContent,getComputedStyle(n).color===ink2]});
+ assert.deepEqual(pair,['CUST-003','IBM Plex Mono','500','PetVet Cluj',true],'the picker box at rest draws the code in mono 500 and the name in ink-2');
+ assert.equal(await pk.inputValue(),'CUST-003 PetVet Cluj','the drawn pair is still the input value');
+ await pk.click();assert.deepEqual(await page.getByRole('listbox',{name:'Partners'}).getByRole('option',{selected:true}).allTextContents(),['CUST-003 PetVet Cluj'],'the held option is the selected one, and the list takes its name from listLabel');
+ await page.keyboard.type('supp');assert.equal(await pk.inputValue(),'supp','typing replaces the line at rest');assert.equal(await page.locator('[data-su-picker-value]').count(),0,'the pair gives way to the term');
+ assert.deepEqual(await page.getByRole('option').allTextContents(),['SUPP-012 Bandage Works'],'a picker is searched by code as well as name');
+ await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: supp-012','onChange carries the option value');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works');
+ await pk.fill('zzz');assert.equal(await page.getByRole('listbox',{name:'Partners'}).textContent(),'No partner matches','an empty picker list says notFoundContent');
+ await page.keyboard.press('Tab');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works','a term that picked nothing is dropped on blur');
+ await page.getByRole('button',{name:'Clear the partner'}).click();assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: none');
+ console.log('PASS: AutoComplete picker holds the option value and draws code + name at rest.');
+ // English defaults that are now props.
+ await page.goto(BASE+'/#Select');await page.getByRole('combobox',{name:'Empty list'}).click();await page.getByText('No carriers yet',{exact:true}).waitFor();await page.keyboard.press('Escape');
+ await page.goto(BASE+'/#Menu');await page.getByRole('navigation',{name:'Workspace sections'}).waitFor();
+ console.log('PASS: Select emptyContent, Menu aria-label and the AutoComplete list labels come from the caller.');
+ // Table: header strip, pinned header with the body scrolling in the panel, column gap, wrapping footer.
+ await page.goto(BASE+'/#Table');const mod=page.locator('table[aria-labelledby="modules-title"]');await mod.waitFor();
+ const scroller=mod.locator('xpath=..'),panel=mod.locator('xpath=../..');
+ const strip=await rect(mod.locator('xpath=../preceding-sibling::div'));assert.equal(strip.h,44,'the header strip is 44');assert.ok(strip.y<(await rect(mod.locator('th').first())).y,'the strip sits above the column header');
+ assert.equal((await rect(panel)).h,236,'the panel takes the height its class caps it at');
+ const sc=await scroller.evaluate(e=>({c:e.clientHeight,s:e.scrollHeight}));assert.ok(sc.s>sc.c,'the body scrolls inside the panel');
+ await scroller.evaluate(e=>{e.scrollTop=120});assert.equal(Math.round((await rect(mod.locator('th').first())).y),Math.round((await rect(scroller)).y),'the column header stays pinned while the body scrolls');
+ assert.ok((await rect(mod.locator('tbody tr').last())).y<(await rect(scroller)).b+300,'rows are in the scroller');
+ assert.deepEqual(await mod.locator('tbody tr').first().locator('td').evaluateAll(t=>t.map(e=>[getComputedStyle(e).paddingLeft,getComputedStyle(e).paddingRight])),[['16px','12px'],['12px','12px'],['12px','16px']],'columnGap 24 pads 12 each side and keeps 16 at the edges');
+ assert.deepEqual(await page.getByRole('table',{name:'Projects'}).locator('tbody tr').first().locator('td').evaluateAll(t=>t.map(e=>[getComputedStyle(e).paddingLeft,getComputedStyle(e).paddingRight])),[['16px','8px'],['8px','16px']],'the default column gap is still 16');
+ const noteBox=await rect(page.getByTestId('modules-note')),footBox=await rect(mod.locator('xpath=../following-sibling::div'));assert.ok(noteBox.h>18,'the demo note runs to several lines');assert.ok(noteBox.y-footBox.y>=6&&footBox.b-noteBox.b>=6,'a footer note of several lines keeps block padding');
+ assert.equal((await rect(page.getByRole('table',{name:'Projects'}).locator('xpath=../following-sibling::div').last())).h,44,'a one-line footer is still 44');
+ // headerHidden, Table.Detail startInset and strip.
+ const docks=page.getByRole('table',{name:'Docks'});assert.equal((await rect(docks.locator('thead tr'))).h,0,'a hidden header row takes no height');
+ assert.deepEqual(await docks.getByRole('columnheader').allTextContents(),['Dock','Use','State'],'its cells still name the columns');
+ assert.deepEqual(await docks.locator('tbody tr').first().locator('td').evaluateAll(t=>t.map(e=>e.getBoundingClientRect().width)).then(w=>[w[0],w[2]]),[120,120],'widths set on hidden header cells hold');
+ assert.equal(await page.getByTestId('dock-strip').evaluate(e=>getComputedStyle(e).padding),'12px 16px','Table.Detail startInset and strip');
+ assert.equal(await page.locator('#pallets-A-01-01-1').evaluate(e=>getComputedStyle(e).padding),'12px 16px 16px 56px','the default Table.Detail padding is unchanged');
+ console.log('PASS: Table header strip, pinned header, hidden header, column gap, footer and Detail inset.');
+ // Stacked: stackEnd ends the first line; icon triggers are 44 on touch.
+ const touch=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});const tp=await touch.newPage();
+ await tp.goto(BASE+'/#Table');await tp.getByRole('list',{name:'Arrivals'}).waitFor();
+ const rowB=await rect(tp.getByTestId('arrival-1')),idB=await rect(tp.getByTestId('arrival-1').locator('td').first()),tagB=await rect(tp.getByTestId('arrival-1-state')),nextB=await rect(tp.getByTestId('arrival-1-trailer'));
+ assert.ok(Math.abs(tagB.y-idB.y)<1,'the stackEnd cell is on the first line');assert.ok(Math.abs(rowB.r-16-tagB.r)<1,'and at its end');
+ assert.ok(nextB.y>=tagB.b,'the cells after it start on the next line');assert.ok(Math.abs(nextB.x-idB.x)<1);assert.ok(Math.abs(nextB.y-Math.max(tagB.b,idB.b)-2)<1.5,'2 between the first line and the next');
+ assert.deepEqual(await tp.getByRole('button',{expanded:true}).first().evaluate(e=>{const a=getComputedStyle(e,'::after');return [a.width,a.height]}),['44px','44px'],'Table.Disclosure is a 44 target on touch');
+ assert.equal(await tp.evaluate(()=>document.documentElement.scrollWidth===document.documentElement.clientWidth),true);await touch.close();
+ console.log('PASS: stackEnd ends a stacked record first line; disclosure and facet are 44 targets on touch.');
+ // Handheld: DocketRow wrap / valueProps / rest props, ScanField heading, hint and busy, the exported error line, the handheld Tag.
+ await page.goto(BASE+'/#Docket');await page.getByTestId('docket-pallet').waitFor();
+ assert.equal((await rect(page.getByTestId('docket-location'))).h,56,'a read-only row takes its rest props and is 56');assert.equal((await rect(page.getByTestId('docket-dock'))).h,56,'a wrapping row whose value fits is still 56');
+ assert.deepEqual(await page.getByTestId('docket-pallet-value').evaluate(e=>[e.tagName,e.textContent,e.scrollWidth<=e.clientWidth,getComputedStyle(e).textOverflow]),['DD','359400000000000029',true,'clip'],'valueProps reach the value, which a wrapping row never cuts');
+ await page.goto(BASE+'/#ScanField');const sf=page.getByTestId('scan-busy');await page.getByRole('heading',{name:'Scan the shelf',level:2}).waitFor();
+ assert.equal(await sf.evaluate(e=>e.getAttribute('aria-describedby').split(' ').map(i=>document.getElementById(i)?.textContent).join('|')),'The label on the shelf where the goods go','the hint describes the input');
+ await sf.fill('A-01');await sf.press('Enter');assert.equal(await sf.getAttribute('aria-busy'),'true');await page.getByRole('status').filter({hasText:'Checking the shelf'}).waitFor();
+ await sf.fill('A-02');await sf.press('Enter');assert.equal(await page.getByTestId('scan-reads').textContent(),'Reads taken: 1','a busy field takes no second read');assert.equal(await sf.evaluate(e=>e===document.activeElement),true,'and keeps focus');
+ assert.equal(await page.locator('#weight-error').evaluate(e=>getComputedStyle(e).fontSize),'17px','HandheldErrorLine is exported');
+ await page.goto(BASE+'/#Tag');assert.deepEqual(await page.getByTestId('tag-handheld').evaluate(e=>[e.getBoundingClientRect().height,getComputedStyle(e).fontSize,getComputedStyle(e).lineHeight]),[28,'17px','24px'],'handheld Tag is 28 high, 17/24');
+ console.log('PASS: DocketRow wrap, ScanField heading, hint and busy, HandheldErrorLine and the handheld Tag.');
+ // Decimal entry: text in, text out, exact steps, the caller's separator.
+ await page.goto(BASE+'/#QuantityStepper');const qd=page.getByTestId('qty-decimal');await page.getByRole('heading',{name:'How many kilograms?',level:2}).waitFor();assert.equal(await qd.inputValue(),'0,1');
+ await page.getByRole('button',{name:'Increase by 0.1'}).click();await page.getByRole('button',{name:'Increase by 0.1'}).click();assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 0.3','0.1 + 0.1 + 0.1 is 0.3, not 0.30000000000000004');assert.equal(await qd.inputValue(),'0,3');
+ await qd.fill('12,34567');assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 12.3456','a typed comma is held as a point, cut at the scale');assert.equal(await qd.getAttribute('aria-valuetext'),'12,3456 kg');
+ await qd.fill('900');assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 500','typing past max stops at max');
+ await page.goto(BASE+'/#Keypad');const kp=page.getByRole('group',{name:'Weight keypad'});assert.equal(await kp.getByRole('button',{name:'Decimal comma'}).textContent(),',');
+ for(const k of ['Decimal comma','5','Decimal comma','0','5'])await kp.getByRole('button',{name:k,exact:true}).click();
+ assert.equal(await page.getByTestId('keypad-decimal-value').textContent(),'Value held: 0.505','the decimal key writes one point, "0." from empty');assert.equal(await page.getByTestId('keypad-decimal-field').inputValue(),'0,505');
+ await kp.getByRole('button',{name:'Delete last digit'}).click();assert.equal(await page.getByTestId('keypad-decimal-value').textContent(),'Value held: 0.50');
+ console.log('PASS: QuantityStepper decimal text value and the Keypad decimal key.');
+ for(const width of [390,820,1440]){await page.setViewportSize({width,height:900});for(const route of ['overview','DatePicker','Table','Transfer','tokens','AutoComplete','Docket','ScanField','QuantityStepper','Keypad']){await page.goto(`${BASE}/#${route}`);await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${route} overflows at ${width}px`);}}
  console.log('PASS: no horizontal overflow at mobile, tablet and desktop sizes.');
  assert.deepEqual(errors,[]);console.log('PASS: no browser errors.');
 } finally {await browser.close();}

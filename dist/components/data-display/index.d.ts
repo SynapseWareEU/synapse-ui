@@ -35,7 +35,7 @@ export type { StatusDotProps, StatusDotTone } from "./StatusDot";
 export { Table, TableHead, TableBody, TableRow, TableTh, TableTd, TableGroupRow, TableDisclosure, TableFacet, TableDetail, TableFoldRow, TableMeta, TableSkeletonRow, } from "./Table";
 export type { TableProps, TableSize, TableSort, TableStack, TableRowAttributes, TableCellKind, TableRowProps, TableThProps, TableTdProps, TableDisclosureProps, TableFacetProps, TableDetailProps, TableFoldRowProps, TableMetaProps, TableSkeletonRowProps, } from "./Table";
 export { Tag } from "./Tag";
-export type { TagProps, TagColor } from "./Tag";
+export type { TagProps, TagColor, TagSize } from "./Tag";
 export { Timeline } from "./Timeline";
 export type { TimelineProps, TimelineItem } from "./Timeline";
 export { Tooltip } from "./Tooltip";

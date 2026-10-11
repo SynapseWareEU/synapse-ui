@@ -30,6 +30,36 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
      * Keyset paging: never a total. Page actions are 13/18 500 links (disabled: ink-3).
      */
     footer?: ReactNode;
+    /**
+     * A strip inside the panel, above the column header, with a rule below: a title with its count
+     * and a link (44, padding 0 16), or the summary of a nested table (40, padding 0 15: totals, a
+     * verb, a history link). Items are 12 apart and centred; it wraps rather than cut. It is not
+     * part of the `<table>`: name the table with `aria-label` or point `aria-labelledby` at a
+     * heading inside it. It stays in the stacked shape and above a `stickyHeader` scroll.
+     */
+    header?: ReactNode;
+    /**
+     * Do not draw the column header row, and keep its cells for assistive technology: the row takes
+     * no height, each `Table.Th` holds its label visually hidden, and the columns keep the widths
+     * set on them. For a table whose columns need no naming to a sighted reader. A hidden header
+     * draws no sort button and no facet.
+     */
+    headerHidden?: boolean;
+    /**
+     * Opt-in: the body scrolls inside the panel under a pinned column header, and the `header`
+     * strip, `empty` and `footer` stay in place. The panel becomes a column that can shrink, so
+     * give it a height to fill through `panelClassName` (`flex-1 min-h-0` in a column, `h-full`, or
+     * a `max-h-*`). No effect in the stacked shape, which has no header row and scrolls with the page.
+     */
+    stickyHeader?: boolean;
+    /** Classes for the panel, the table's outer box (`className` reaches the `<table>`). */
+    panelClassName?: string;
+    /**
+     * Gap between columns in px, where a board draws other than the 16 of `--su-table-column-gap`
+     * (24 in a read-out table). The first and last cell keep 16 at the panel's edge. A nested table
+     * takes its own.
+     */
+    columnGap?: number;
     /** Marks the table busy (`aria-busy`). Render `<Table.SkeletonRow>`s of 40 in the body meanwhile. */
     loading?: boolean;
     /**
@@ -48,7 +78,7 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
     stack?: TableStack;
     children?: ReactNode;
 }
-export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, loading, stack, className, children, ...rest }: TableProps): import("react").JSX.Element;
+export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, loading, stack, header, headerHidden, stickyHeader, panelClassName, columnGap, className, style, children, ...rest }: TableProps): import("react").JSX.Element;
 export declare namespace Table {
     var Head: typeof TableHead;
     var Body: typeof TableBody;
@@ -113,8 +143,15 @@ export interface TableTdProps extends TdHTMLAttributes<HTMLTableCellElement> {
      * - `control`: shrinks to its content (the 24 disclosure column). `actions`: the same, at the end.
      */
     kind?: TableCellKind;
+    /**
+     * Stacked shape only: this cell ends the record's first line. It is pushed to the end of the
+     * line (a state tag, or the row's "⋯"), and the cells after it start on the next line. Give the
+     * cell before it `flex-1` to cut or wrap a long name beside it. One per row; cells after it
+     * cannot be reordered with `order-*`. No effect in the table shape.
+     */
+    stackEnd?: boolean;
 }
-export declare function TableTd({ numeric, kind, className, children, rowSpan, ...rest }: TableTdProps): import("react").JSX.Element;
+export declare function TableTd({ numeric, kind, stackEnd, className, children, rowSpan, ...rest }: TableTdProps): import("react").JSX.Element;
 /** Group row, 36: surface-2, 13/18 600 ink. Put a `Table.Disclosure` in the first cell. */
 export declare function TableGroupRow({ className, children, ...rest }: HTMLAttributes<HTMLTableRowElement>): import("react").JSX.Element;
 export interface TableDisclosureProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -143,12 +180,23 @@ export interface TableDetailProps extends TdHTMLAttributes<HTMLTableCellElement>
      * reaches the `<td>` inside it.
      */
     rowProps?: TableRowAttributes;
+    /**
+     * Where the block starts, in px from the row's edge. Default 56, column 2 behind a 24
+     * disclosure column. A table with no disclosure column, or a wider first column, lines the
+     * block up with its own column (16 for the first one). Not used in the stacked shape.
+     */
+    startInset?: number;
+    /**
+     * The inline edit strip under a row: 12 below instead of 16, so one line of 28 controls makes
+     * the strip 52 high (padding 12 16 12 56).
+     */
+    strip?: boolean;
 }
 /**
  * Detail block under an `expanded` row: padding 12 16 16 56 (lines up with column 2 behind the
  * 24 disclosure column), surface-2, bottom rule. Holds a `<Table size="nested">`.
  */
-export declare function TableDetail({ colSpan, rowProps, className, children, ...rest }: TableDetailProps): import("react").JSX.Element;
+export declare function TableDetail({ colSpan, rowProps, startInset, strip, className, style, children, ...rest }: TableDetailProps): import("react").JSX.Element;
 export interface TableFoldRowProps extends HTMLAttributes<HTMLTableRowElement> {
     /** All the table's columns. */
     colSpan: number;

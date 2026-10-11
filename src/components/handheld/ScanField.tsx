@@ -10,6 +10,7 @@ import {
 } from "react";
 import { IconBarcode, IconKeyboard } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
+import { RingSpinner } from "../general/RingSpinner";
 import {
   HH_STROKE,
   HandheldErrorLine,
@@ -24,6 +25,24 @@ export interface ScanFieldProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix" | "children"> {
   /** The question above the field, 28/34 600 ("Scan the location"). Without it, pass `aria-label`. */
   label?: ReactNode;
+  /**
+   * Wraps the question in a heading (`<h1><label>…</label></h1>`): on a handheld step the question
+   * is the screen's title. The look does not change. Default: a bare `<label>`.
+   */
+  labelAs?: "h1" | "h2" | "h3";
+  /**
+   * What to scan, under the field: 17/24 ink-2, 8 below ("The label on the shelf where the goods
+   * go"). It describes the input (`aria-describedby`). An `error` line comes after it.
+   */
+  hint?: ReactNode;
+  /**
+   * A read is being checked: a ring spinner takes the toggle's place, the field is `aria-busy`
+   * and Enter is swallowed, so a second scan cannot start while the first is in flight. The
+   * field keeps focus and its value (`disabled` would drop both).
+   */
+  busy?: boolean;
+  /** What a screen reader hears while `busy`. Default "Checking". */
+  busyLabel?: string;
   /** Error line under the field, 17/24 500 danger-text ("Last scan refused: A-09-01-1"). Implies `invalid`. */
   error?: ReactNode;
   /** Refused state: 2px danger border (it wins over the focus border). Default: `!!error`. */
@@ -56,6 +75,10 @@ export interface ScanFieldProps
 export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function ScanField(
   {
     label,
+    labelAs,
+    hint,
+    busy = false,
+    busyLabel = "Checking",
     error,
     invalid: invalidProp,
     icon,
@@ -79,6 +102,8 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
   const autoId = useId();
   const id = idProp ?? `su-scan-${autoId}`;
   const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const hasHint = hint != null && hint !== false;
   const inputRef = useRef<HTMLInputElement>(null);
   const hasError = error != null && error !== false;
   const invalid =
@@ -104,6 +129,11 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
+    // One read at a time: while the last one is being checked, Enter neither scans nor submits.
+    if (busy && event.key === "Enter") {
+      event.preventDefault();
+      return;
+    }
     if (!onScan || event.defaultPrevented || event.key !== "Enter" || event.nativeEvent.isComposing) {
       return;
     }
@@ -117,15 +147,18 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
 
   const glyph =
     icon === undefined ? <IconBarcode size={24} stroke={HH_STROKE} aria-hidden /> : icon;
-  const showToggle = keyboardToggle && !rest.readOnly;
+  const showToggle = keyboardToggle && !rest.readOnly && !busy;
+  const Heading = labelAs;
+  const question =
+    label != null ? (
+      <label htmlFor={id} className={cn(hhQuestionClass, !Heading && "mb-su3")}>
+        {label}
+      </label>
+    ) : null;
 
   return (
     <div className={cn("flex flex-col font-sans", className)}>
-      {label != null ? (
-        <label htmlFor={id} className={cn(hhQuestionClass, "mb-su3")}>
-          {label}
-        </label>
-      ) : null}
+      {question && Heading ? <Heading className="m-0 mb-su3">{question}</Heading> : question}
       <div
         className={cn(
           "flex items-center gap-su3 h-[var(--su-hh-control-lg)] min-w-0",
@@ -151,7 +184,8 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
           inputMode={inputMode ?? (keyboardOpen ? "text" : "none")}
           disabled={disabled}
           aria-invalid={invalid || undefined}
-          aria-describedby={describedBy(ariaDescribedBy, hasError && errorId)}
+          aria-busy={busy || undefined}
+          aria-describedby={describedBy(ariaDescribedBy, hasHint && hintId, hasError && errorId)}
           onKeyDown={handleKeyDown}
           className={cn(
             "flex-1 min-w-0 h-full m-0 p-0 border-0 rounded-su-row bg-transparent outline-none",
@@ -182,7 +216,18 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
             {keyboardLabel}
           </button>
         ) : null}
+        {busy ? (
+          <span role="status" className="relative inline-flex shrink-0 items-center justify-center size-[var(--su-hit-target)] text-action">
+            <RingSpinner size={24} />
+            <span className="absolute w-px h-px overflow-hidden [clip-path:inset(50%)]">{busyLabel}</span>
+          </span>
+        ) : null}
       </div>
+      {hasHint ? (
+        <p id={hintId} className="mt-su2 mb-0 font-sans text-hh-body text-ink-2">
+          {hint}
+        </p>
+      ) : null}
       {hasError ? <HandheldErrorLine id={errorId}>{error}</HandheldErrorLine> : null}
     </div>
   );

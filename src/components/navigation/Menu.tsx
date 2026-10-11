@@ -41,6 +41,8 @@ export interface MenuProps extends Omit<ComponentPropsWithRef<"nav">, "onSelect"
   /** `event` is the row's click — call `preventDefault()` to keep an `href` item on the page (router navigation). */
   onSelect?: (key: string, event: MouseEvent) => void;
   variant?: MenuVariant;
+  /** Name of the navigation landmark. Default "Menu"; pass the application's words. */
+  "aria-label"?: string;
 }
 
 /** Nesting indent: 12 per level on top of the row's own start padding. */
@@ -308,6 +310,7 @@ export function Menu({
   onSelect,
   variant = "page",
   className,
+  "aria-label": ariaLabel = "Menu",
   ...rest
 }: MenuProps) {
   if (!items.length) return null;
@@ -319,7 +322,7 @@ export function Menu({
         variant === "panel" && "su-popover w-[288px] max-w-full p-su2",
         className,
       )}
-      aria-label="Menu"
+      aria-label={ariaLabel}
       {...rest}
     >
       <MenuList

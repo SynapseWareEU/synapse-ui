@@ -11,6 +11,7 @@ export type SelectVariant = "outlined" | "ghost";
 export interface SelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value" | "defaultValue" | "prefix" | "children" | "name" | "form" | "type"> {
     value?: string;
     defaultValue?: string;
+    /** What an empty trigger reads, in ink-3. Default "Select…". */
     placeholder?: string;
     disabled?: boolean;
     size?: InputSize;
@@ -37,6 +38,8 @@ export interface SelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
      * chevron. It replaces `size`. No effect on an `outlined` trigger.
      */
     compact?: boolean;
+    /** What the list says when there are no `options`. Default "No options". */
+    emptyContent?: ReactNode;
     onValueChange?: (value: string) => void;
 }
 /**
@@ -48,5 +51,5 @@ export declare function SelectOptionLabel({ option, label }: {
     option: SelectOption;
     label?: ReactNode;
 }): import("react").JSX.Element;
-export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, prefix, variant, compact, onValueChange, ...rest }: SelectProps): import("react").JSX.Element;
+export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, prefix, variant, compact, emptyContent, onValueChange, ...rest }: SelectProps): import("react").JSX.Element;
 //# sourceMappingURL=Select.d.ts.map

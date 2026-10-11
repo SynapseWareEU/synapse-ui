@@ -296,6 +296,7 @@
   --su-row-meta: 60px;
   --su-row-nested: 32px;
   --su-row-nested-header: 28px;
+  --su-table-column-gap: 16px; /* between table columns; cells pad half of it each side */
   --su-row-overlay: 32px;
   --su-row-palette: 40px;
   --su-row-exception: 48px;

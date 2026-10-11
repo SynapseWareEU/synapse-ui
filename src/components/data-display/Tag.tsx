@@ -16,8 +16,15 @@ export type TagColor =
   | "warning"
   | "danger";
 
+export type TagSize = "default" | "handheld";
+
 export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   color?: TagColor;
+  /**
+   * `handheld`: the tag at terminal scale, 28 high, 17/24 500, padding 0 10, the same 6 dot. The
+   * default 12px tag is under the handheld's 17px floor. Not for the filter chip (`closable`).
+   */
+  size?: TagSize;
   /** A 6px dot in the tone's solid colour before the text. `accent` has no dot. */
   dot?: boolean;
   /**
@@ -69,6 +76,7 @@ function closeName(removeLabel: string | undefined, filterLabel: ReactNode, chil
 export function Tag({
   color = "default",
   dot = false,
+  size = "default",
   closable = false,
   onClose,
   filterLabel,
@@ -124,7 +132,8 @@ export function Tag({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-[6px] h-[22px] px-[8px] rounded-su-tag font-sans text-micro font-medium whitespace-nowrap",
+        "inline-flex items-center gap-[6px] rounded-su-tag font-sans font-medium whitespace-nowrap",
+        size === "handheld" ? "h-[28px] px-[10px] text-hh-body" : "h-[22px] px-[8px] text-micro",
         toneClass[color],
         forcedBox,
         className,

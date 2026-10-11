@@ -1,8 +1,8 @@
-import { jsx as i } from "react/jsx-runtime";
-import { cn as c } from "../../utils/cn.js";
-import { HH_STROKE as p, hhTransition as b } from "./shared.js";
-import m from "../../vendor/@tabler/icons-react/dist/esm/icons/IconBackspace.js";
-const f = [
+import { jsx as d } from "react/jsx-runtime";
+import { cn as l } from "../../utils/cn.js";
+import { HH_STROKE as b, hhTransition as f } from "./shared.js";
+import h from "../../vendor/@tabler/icons-react/dist/esm/icons/IconBackspace.js";
+const g = [
   "1",
   "2",
   "3",
@@ -15,61 +15,80 @@ const f = [
   "backspace",
   "0",
   "00"
+], _ = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "decimal",
+  "0",
+  "backspace"
 ];
-function D(e, r, a = 9) {
+function w(e, r, s = 9, t) {
   if (r === "backspace") return e.slice(0, -1);
-  const o = (e === "0" ? r : e + r).replace(/^0+(?=\d)/, "");
-  return o.length > a ? e : o;
+  if (r === "decimal")
+    return e.includes(".") || t === 0 ? e : e === "" ? "0." : `${e}.`;
+  const a = (e === "0" ? r : e + r).replace(/^0+(?=\d)/, ""), i = a.indexOf(".");
+  return i !== -1 && t != null && a.length - i - 1 > t || a.length - (i === -1 ? 0 : 1) > s ? e : a;
 }
-const h = (e) => e.preventDefault();
-function w({
+const x = (e) => e.preventDefault();
+function A({
   onKey: e,
-  keys: r = f,
-  disabled: a,
-  backspaceLabel: n = "Delete last digit",
-  className: o,
-  "aria-label": d = "Numeric keypad",
-  ...l
+  keys: r = g,
+  disabled: s,
+  backspaceLabel: t = "Delete last digit",
+  decimalSeparator: c = ".",
+  decimalLabel: a = "Decimal separator",
+  className: i,
+  "aria-label": p = "Numeric keypad",
+  ...m
 }) {
-  return /* @__PURE__ */ i(
+  return /* @__PURE__ */ d(
     "div",
     {
       role: "group",
-      "aria-label": d,
-      className: c(
+      "aria-label": p,
+      className: l(
         "grid grid-cols-3 auto-rows-[var(--su-hh-control-md)] gap-su2 font-sans",
-        o
+        i
       ),
-      ...l,
-      children: r.map((t, u) => {
-        const s = t === "backspace";
-        return /* @__PURE__ */ i(
+      ...m,
+      children: r.map((o, u) => {
+        const n = o === "backspace";
+        return /* @__PURE__ */ d(
           "button",
           {
             type: "button",
-            disabled: a,
-            "aria-label": s ? n : void 0,
-            onMouseDown: h,
-            onClick: () => e == null ? void 0 : e(t),
-            className: c(
+            disabled: s,
+            "aria-label": n ? t : o === "decimal" ? a : void 0,
+            "data-key": o,
+            onMouseDown: x,
+            onClick: () => e == null ? void 0 : e(o),
+            className: l(
               "flex items-center justify-center min-w-0 m-0 p-0 rounded-[var(--su-hh-radius)] bg-fill",
               "text-hh-keypad font-medium su-tabular su-focus-ring cursor-pointer select-none",
               "forced-colors:border forced-colors:border-solid forced-colors:border-[ButtonText]",
               "[@media(hover:hover)]:enabled:hover:bg-border enabled:active:bg-border-strong",
               "disabled:text-ink-3 disabled:cursor-not-allowed",
-              s ? "text-ink-2" : "text-ink",
-              b
+              n ? "text-ink-2" : "text-ink",
+              f
             ),
-            children: s ? /* @__PURE__ */ i(m, { size: 28, stroke: p, "aria-hidden": !0 }) : t
+            children: n ? /* @__PURE__ */ d(h, { size: 28, stroke: b, "aria-hidden": !0 }) : o === "decimal" ? c : o
           },
-          `${t}-${u}`
+          `${o}-${u}`
         );
       })
     }
   );
 }
 export {
-  f as KEYPAD_DEFAULT_KEYS,
-  w as Keypad,
-  D as applyKeypadKey
+  _ as KEYPAD_DECIMAL_KEYS,
+  g as KEYPAD_DEFAULT_KEYS,
+  A as Keypad,
+  w as applyKeypadKey
 };

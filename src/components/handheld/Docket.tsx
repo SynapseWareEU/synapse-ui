@@ -40,7 +40,24 @@ export interface DocketRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
   mono?: boolean;
   /** Read-only row (`<dt>`/`<dd>`, no chevron). Defaults to the enclosing `Docket`'s `readOnly`. */
   readOnly?: boolean;
+  /**
+   * Never cut the answer. The value and the `sub` line wrap, breaking inside an identifier that
+   * has no word to break at (an SSCC, a 50-character bin, a lot), and the row grows from its 56 /
+   * 64 with 12 / 5 above and below instead of keeping a fixed height. Default: one line each,
+   * ending in an ellipsis. A row whose value fits on one line is the same height either way.
+   */
+  wrap?: boolean;
+  /**
+   * Props for the element that holds the value alone (`data-testid`, `id`, `title`): the `<dd>`
+   * of a read-only row, the value's `<span>` of a tappable one.
+   */
+  valueProps?: DocketRowValueAttributes;
 }
+
+/** Attributes for the value element, handed over as an object, so `data-*` is spelled out. */
+export type DocketRowValueAttributes = HTMLAttributes<HTMLElement> & {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
 
 /** Row focus stays inside the full-bleed row: the outline is inset instead of offset. */
 const rowFocus =
@@ -50,7 +67,8 @@ const rowFocus =
  * Docket row (spec §4.7): one-line 56, two-line 64 (grid rows 30 + 22), padding 0 16,
  * `grid: auto 1fr 18px` with a 12 gap, bottom hairline, chevron 18 ink-3.
  * Tappable rows are buttons (inside a `Docket`, each sits in an `<li>`); read-only rows are
- * `<dt>`/`<dd>` pairs 56 tall with no chevron.
+ * `<dt>`/`<dd>` pairs 56 tall with no chevron. The other props (`data-testid`, `id`, `aria-*`)
+ * reach the button, or the row's own `<div>` when it is read-only.
  */
 export function DocketRow({
   label,
@@ -58,6 +76,8 @@ export function DocketRow({
   sub,
   mono = true,
   readOnly: readOnlyProp,
+  wrap = false,
+  valueProps,
   className,
   disabled,
   type = "button",
@@ -67,29 +87,52 @@ export function DocketRow({
   const readOnly = readOnlyProp ?? ctx?.readOnly ?? false;
   const twoLine = sub != null && sub !== false;
 
+  // Wrapping: the answer stays against the end edge and breaks anywhere, since an identifier has
+  // no word boundary; the key keeps to the first line.
+  const cut = wrap ? "text-end [overflow-wrap:anywhere]" : "truncate";
   const valueClass = cn(
-    "justify-self-end max-w-full min-w-0 m-0 truncate text-hh-value font-semibold",
+    "justify-self-end max-w-full min-w-0 m-0 text-hh-value font-semibold",
+    cut,
     mono ? "font-mono" : "font-sans su-tabular",
     disabled ? "text-ink-3" : "text-ink",
   );
-  const subClass =
-    "col-start-1 col-end-3 row-start-2 justify-self-end max-w-full min-w-0 m-0 truncate text-hh-band-line text-ink-2";
-  const labelClass = "col-start-1 row-start-1 self-center m-0 text-hh-key font-medium text-ink-2";
+  const subClass = cn(
+    "col-start-1 col-end-3 row-start-2 justify-self-end max-w-full min-w-0 m-0 text-hh-band-line text-ink-2",
+    cut,
+  );
+  // Wrapping: the key sits on the value's first line (24 in a 30 line), not at the row's middle.
+  const labelClass = cn(
+    "col-start-1 row-start-1 m-0 text-hh-key font-medium text-ink-2",
+    wrap ? "self-start py-[3px]" : "self-center",
+  );
 
   const layout = cn(
     "grid w-full gap-x-su3 px-su4 m-0 bg-surface text-ink text-start font-sans",
     "border-b border-solid border-border rounded-su-row",
-    twoLine
-      ? "h-[var(--su-hh-control-lg)] grid-rows-[30px_22px] content-center"
-      : "h-[var(--su-hh-control-md)] items-center",
+    // Wrapping: the same heights as floors, the padding a one-line row has around its text
+    // (56 = 12 + 30 + 12 + the rule, 64 = 5 + 30 + 22 + 5 + the rule), and rows that take their
+    // content's height.
+    wrap
+      ? twoLine
+        ? "min-h-[var(--su-hh-control-lg)] py-[5px] content-center"
+        : "min-h-[var(--su-hh-control-md)] py-[12px] content-center"
+      : twoLine
+        ? "h-[var(--su-hh-control-lg)] grid-rows-[30px_22px] content-center"
+        : "h-[var(--su-hh-control-md)] items-center",
   );
 
   if (readOnly) {
     // 17/22 sub line: the band-line metrics.
     const row = (
-      <div className={cn(layout, "grid-cols-[auto_minmax(0,1fr)]", className)}>
+      // A read-only row is not a button: of the rest props it takes the ones any element does.
+      <div
+        {...(rest as unknown as HTMLAttributes<HTMLDivElement>)}
+        className={cn(layout, "grid-cols-[auto_minmax(0,1fr)]", className)}
+      >
         <dt className={labelClass}>{label}</dt>
-        <dd className={cn(valueClass, "col-start-2 row-start-1")}>{value}</dd>
+        <dd {...valueProps} className={cn(valueClass, "col-start-2 row-start-1", valueProps?.className)}>
+          {value}
+        </dd>
         {twoLine ? <dd className={subClass}>{sub}</dd> : null}
       </div>
     );
@@ -114,7 +157,9 @@ export function DocketRow({
       {...rest}
     >
       <span className={labelClass}>{label}</span>
-      <span className={cn(valueClass, "col-start-2 row-start-1")}>{value}</span>
+      <span {...valueProps} className={cn(valueClass, "col-start-2 row-start-1", valueProps?.className)}>
+        {value}
+      </span>
       {twoLine ? <span className={subClass}>{sub}</span> : null}
       <IconChevronRight
         size={18}

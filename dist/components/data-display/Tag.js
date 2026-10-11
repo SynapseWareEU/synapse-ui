@@ -1,6 +1,6 @@
 import { jsxs as t, Fragment as f, jsx as n } from "react/jsx-runtime";
 import { cn as i } from "../../utils/cn.js";
-const p = {
+const h = {
   default: "bg-neutral-tint text-neutral-text",
   neutral: "bg-neutral-tint text-neutral-text",
   info: "bg-info-tint text-info-text",
@@ -17,21 +17,22 @@ const p = {
   warning: "bg-warning",
   danger: "bg-danger"
 }, l = "forced-colors:border forced-colors:border-solid forced-colors:border-[CanvasText]";
-function h(e, r, o) {
+function b(e, r, o) {
   return e || (typeof r == "string" ? `Remove the ${r.replace(/:\s*$/, "")} filter` : typeof o == "string" ? `Remove ${o}` : "Remove tag");
 }
-function w({
+function k({
   color: e = "default",
   dot: r = !1,
-  closable: o = !1,
+  size: o = "default",
+  closable: x = !1,
   onClose: g,
   filterLabel: s,
-  removeLabel: x,
+  removeLabel: p,
   className: c,
   children: a,
   ...u
 }) {
-  if (o)
+  if (x)
     return /* @__PURE__ */ t(
       "span",
       {
@@ -55,7 +56,7 @@ function w({
               type: "button",
               className: "inline-flex items-center justify-center shrink-0 size-[20px] p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-action-subtle-hover [@media(hover:none)]:su-hit-44",
               onClick: g,
-              "aria-label": h(x, s, a),
+              "aria-label": b(p, s, a),
               children: /* @__PURE__ */ t(
                 "svg",
                 {
@@ -84,8 +85,9 @@ function w({
     "span",
     {
       className: i(
-        "inline-flex items-center gap-[6px] h-[22px] px-[8px] rounded-su-tag font-sans text-micro font-medium whitespace-nowrap",
-        p[e],
+        "inline-flex items-center gap-[6px] rounded-su-tag font-sans font-medium whitespace-nowrap",
+        o === "handheld" ? "h-[28px] px-[10px] text-hh-body" : "h-[22px] px-[8px] text-micro",
+        h[e],
         l,
         c
       ),
@@ -107,5 +109,5 @@ function w({
   );
 }
 export {
-  w as Tag
+  k as Tag
 };

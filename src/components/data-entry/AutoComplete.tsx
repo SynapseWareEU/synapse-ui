@@ -2,18 +2,40 @@ import {
   useId,
   useRef,
   useState,
+  type ChangeEvent,
   type FocusEvent,
+  type InputHTMLAttributes,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 import { cn } from "../../utils/cn";
 import { useFieldState } from "./Form";
-import { FieldClearButton, Input, fieldClearPadding } from "./Input";
+import { FieldClearButton, Input, fieldClearPadding, inputSizeClass } from "./Input";
 import { SelectOptionLabel } from "./Select";
 import type { InputSize, SelectOption } from "./types";
 
-export interface AutoCompleteProps {
+/**
+ * Anything else (`data-testid`, `autoFocus`, `aria-describedby`, `aria-invalid`, `required`,
+ * `onKeyDown`, `onClick`…) lands on the `<input>`, the `role="combobox"` element.
+ */
+export interface AutoCompleteProps
+  extends Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | "value"
+    | "defaultValue"
+    | "onChange"
+    | "onSelect"
+    | "size"
+    | "prefix"
+    | "children"
+    | "type"
+    | "role"
+    | "autoComplete"
+    | "style"
+  > {
+  /** The visible text. In a `picker`, the chosen option's `value` ("" for none). */
   value?: string;
   defaultValue?: string;
   placeholder?: string;
@@ -38,9 +60,37 @@ export interface AutoCompleteProps {
    * Absent, the option whose `label` is the visible text is.
    */
   selectedValue?: string;
+  /**
+   * The picker form, for a reference to a record (a foreign key): `value` is the chosen option's
+   * `value`, not the visible text, and `onChange` fires with it on a pick and with "" on a clear.
+   * At rest the box draws the chosen option as the list does: its `code` in mono 500, then its
+   * name in ink-2, cut with an ellipsis. Typing searches: the pair gives way to the typed term,
+   * the list is narrowed by code and name (or by the caller, see `onSearch`), and the term is
+   * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
+   * the value. The list opens whenever the box does, and says `notFoundContent` when it has no
+   * rows. Enter never submits the enclosing form. A `value` that is no option's reads as itself:
+   * keep the held option among `options` (it is remembered after a pick).
+   */
+  picker?: boolean;
+  /**
+   * Picker only: every typed term, and "" when the term is dropped. With it the list is the
+   * caller's to narrow (a server search) and `options` are shown as given.
+   */
+  onSearch?: (term: string) => void;
+  /** Name of the list of suggestions. Default "Suggestions". */
+  listLabel?: string;
+  /** The row shown while `loading`. Default "Searching…". */
+  loadingContent?: ReactNode;
+  /** What is announced when the list changes: how many rows it has. Default "{n} suggestions". */
+  countLabel?: (count: number) => string;
+  /** Name of the clear button (`allowClear`). Default "Clear". */
+  clearLabel?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
-  /** Fires with the visible text — including the option's `label` when one is picked. */
+  /**
+   * Fires with the visible text — including the option's `label` when one is picked. In a
+   * `picker`: with the chosen option's `value`, or "" when cleared.
+   */
   onChange?: (value: string) => void;
   /** Fires with the option's `value`; the input shows `label`, so don't feed this back into `value`. */
   onSelect?: (value: string, option: SelectOption) => void;
@@ -52,6 +102,19 @@ export interface AutoCompleteProps {
 function defaultFilter(input: string, option: SelectOption): boolean {
   return option.label.toLowerCase().includes(input.toLowerCase());
 }
+
+/** A picker is searched by what its rows read: the code as well as the name. */
+function pickerFilter(input: string, option: SelectOption): boolean {
+  const term = input.toLowerCase();
+  return option.label.toLowerCase().includes(term) || (option.code ?? "").toLowerCase().includes(term);
+}
+
+/** A picked option as the one line the box holds: "CODE name". The pair is drawn over it. */
+function optionText(option: SelectOption): string {
+  return option.code ? (option.label ? `${option.code} ${option.label}` : option.code) : option.label;
+}
+
+const defaultCountLabel = (count: number) => `${count} suggestions`;
 
 /* Listbox chrome shared with Mentions — one copy so the two can't drift again. */
 
@@ -113,7 +176,7 @@ export function AutoComplete({
   disabled,
   size,
   options = [],
-  filterOption = defaultFilter,
+  filterOption: filterOptionProp,
   className,
   id,
   name,
@@ -121,6 +184,12 @@ export function AutoComplete({
   loading,
   notFoundContent,
   selectedValue,
+  picker = false,
+  onSearch,
+  listLabel = "Suggestions",
+  loadingContent = "Searching…",
+  countLabel = defaultCountLabel,
+  clearLabel,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   onChange,
@@ -128,6 +197,9 @@ export function AutoComplete({
   onClear,
   onFocus,
   onBlur,
+  onKeyDown,
+  onClick,
+  ...rest
 }: AutoCompleteProps) {
   const listId = useId();
   const { size: fieldSize, disabled: isDisabled } = useFieldState(size, disabled);
@@ -138,13 +210,34 @@ export function AutoComplete({
   // false right after a pick, so reopening browses the whole list instead of the one committed label
   const filteringRef = useRef(true);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Picker: what is being typed (`null` at rest, when the box shows the value), the option last
+  // picked (a server search may no longer list it), and whether the box has focus.
+  const [term, setTerm] = useState<string | null>(null);
+  const [picked, setPicked] = useState<SelectOption>();
+  const [focused, setFocused] = useState(false);
+
   const isControlled = valueProp !== undefined;
-  const value = isControlled ? valueProp : internal;
+  const held = isControlled ? valueProp : internal;
+  const current = picker
+    ? (options.find((opt) => opt.value === held) ?? (picked?.value === held ? picked : undefined))
+    : undefined;
+  // The text in the box. Picker: the term while typing, else the held option's line, else the raw value.
+  const value = picker ? (term ?? (current ? optionText(current) : held)) : held;
+  // The pair is drawn over the text only where there is a pair to draw.
+  const paired = picker && term === null && current?.code ? current : undefined;
+  const filterOption = filterOptionProp ?? (picker ? pickerFilter : defaultFilter);
 
   // ponytail: filter on every render — a few dozen substring tests is cheaper than
   // keeping a memo honest about `filteringRef`. Memoise if option counts reach thousands.
-  const filtered =
-    value && filteringRef.current ? options.filter((opt) => filterOption(value, opt)) : options;
+  const filtered = picker
+    ? term && !onSearch
+      ? options.filter((opt) => filterOption(term, opt))
+      : options
+    : value && filteringRef.current
+      ? options.filter((opt) => filterOption(value, opt))
+      : options;
+  const query = picker ? term : value && filteringRef.current ? value : null;
 
   /** Next enabled index from `from`, wrapping; `from = -1, dir = 1` gives the first enabled one. */
   const step = (from: number, dir: 1 | -1) => {
@@ -168,19 +261,63 @@ export function AutoComplete({
     onChange?.(next);
   };
 
+  /** Picker: back to rest. The caller's search goes with the term. */
+  const dropTerm = () => {
+    if (term === null) return;
+    setTerm(null);
+    onSearch?.("");
+  };
+
   const selectOption = (option: SelectOption) => {
     if (option.disabled) return;
     filteringRef.current = false;
-    emitChange(option.label);
+    if (picker) {
+      setPicked(option);
+      dropTerm();
+      emitChange(option.value);
+    } else {
+      emitChange(option.label);
+    }
     onSelect?.(option.value, option);
     setActiveIndex(0);
     setOpen(false);
+  };
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setOpen(true);
+    setActiveIndex(0);
+    if (!picker) {
+      filteringRef.current = true;
+      emitChange(event.target.value);
+      return;
+    }
+    let next = event.target.value;
+    if (term === null && current) {
+      // The first edit of a box at rest replaces the value's line, wherever the caret was: what
+      // was typed is the term, and a deletion asks for the whole list. A value set from outside
+      // (a paste over the selection, a test's fill) carries no `data` and is taken whole.
+      const native = event.nativeEvent as Partial<InputEvent>;
+      if (native.inputType?.startsWith("delete")) next = "";
+      else if (native.inputType === "insertText" && native.data != null) next = native.data;
+    }
+    setTerm(next);
+    onSearch?.(next);
+  };
+
+  /** Picker at rest: the whole line is selected, so typing replaces it. */
+  const selectLine = () => {
+    if (picker && term === null && current) inputRef.current?.select();
   };
 
   // Safari: pressing a non-focusable area doesn't always blur the input, so onBlur alone isn't enough
   useOutsideClick(rootRef, () => setOpen(false), open);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented) return;
+    // A picker's Enter picks, or does nothing: the Enter right after a pick, on a closed list,
+    // would otherwise submit the form the picker stands in.
+    if (picker && event.key === "Enter") event.preventDefault();
     if (!open) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
@@ -207,11 +344,15 @@ export function AutoComplete({
   };
 
   const showClear = Boolean(allowClear && value && !isDisabled);
-  const showPanel = open && (loading || filtered.length > 0 || options.length > 0);
+  // A picker's list always opens: an empty one says so (`notFoundContent`) instead of not showing.
+  const showPanel = open && (picker || loading || filtered.length > 0 || options.length > 0);
+  const padEnd = showClear ? fieldClearPadding(fieldSize) : undefined;
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
       <Input
+        {...rest}
+        ref={inputRef}
         id={id}
         name={name}
         role="combobox"
@@ -221,35 +362,66 @@ export function AutoComplete({
         aria-controls={showPanel ? listId : undefined}
         aria-autocomplete="list"
         aria-activedescendant={showPanel && activeOption ? `${listId}-${active}` : undefined}
-        style={showClear ? { paddingInlineEnd: fieldClearPadding(fieldSize) } : undefined}
+        // Under the drawn pair the same line is still the input's value (what is read out, what a
+        // test reads), only not painted, and neither is its selection.
+        className={paired ? "caret-transparent selection:bg-transparent selection:text-transparent" : undefined}
+        style={
+          paired
+            ? { color: "transparent", paddingInlineEnd: padEnd }
+            : padEnd != null
+              ? { paddingInlineEnd: padEnd }
+              : undefined
+        }
         value={value}
         placeholder={placeholder}
         disabled={isDisabled}
         size={fieldSize}
-        onChange={(e) => {
-          filteringRef.current = true;
-          emitChange(e.target.value);
-          setOpen(true);
-          setActiveIndex(0);
-        }}
+        onChange={handleChange}
         onFocus={(e) => {
           setOpen(true);
+          setFocused(true);
+          selectLine();
           onFocus?.(e);
         }}
-        onClick={() => setOpen(true)}
+        onClick={(e: MouseEvent<HTMLInputElement>) => {
+          setOpen(true);
+          selectLine();
+          onClick?.(e);
+        }}
         onBlur={(e) => {
           if (!rootRef.current?.contains(e.relatedTarget as Node)) setOpen(false);
+          setFocused(false);
+          dropTerm();
           onBlur?.(e);
         }}
         onKeyDown={handleKeyDown}
         autoComplete="off"
       />
+      {paired ? (
+        // The box at rest (§2.2, the reference pair). It sits where the input's text is: the same
+        // padding, border width and type size, so the pair starts at the text's x.
+        <span
+          aria-hidden="true"
+          data-su-picker-value=""
+          className={cn(
+            "absolute inset-0 flex items-center min-w-0 pointer-events-none border border-solid border-transparent font-sans text-ink [[data-density=handheld]_&]:border-2 [[data-density=handheld]_&]:px-su4",
+            inputSizeClass[fieldSize],
+            // Focused at rest, the next key replaces it: stepped back, as a placeholder is.
+            (focused || isDisabled) && "text-ink-3 [&_span]:text-ink-3",
+          )}
+          style={padEnd != null ? { paddingInlineEnd: padEnd } : undefined}
+        >
+          <SelectOptionLabel option={paired} />
+        </span>
+      ) : null}
       {showClear && (
         <FieldClearButton
           size={fieldSize}
+          label={clearLabel}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => {
             filteringRef.current = true;
+            if (picker) dropTerm();
             emitChange("");
             onClear?.();
             setActiveIndex(0);
@@ -261,18 +433,18 @@ export function AutoComplete({
         aria-live="polite"
         className="absolute w-px h-px overflow-hidden [clip-path:inset(50%)]"
       >
-        {open && !loading ? `${filtered.length} suggestions` : ""}
+        {open && !loading ? countLabel(filtered.length) : ""}
       </span>
       {showPanel && (
         <div
           id={listId}
           className={comboboxPanelClass}
           role="listbox"
-          aria-label="Suggestions"
+          aria-label={listLabel}
           aria-busy={loading || undefined}
         >
           {loading ? (
-            <div className={comboboxNoticeClass}>Searching…</div>
+            <div className={comboboxNoticeClass}>{loadingContent}</div>
           ) : filtered.length === 0 ? (
             <div className={comboboxNoticeClass}>{notFoundContent ?? NO_MATCHES}</div>
           ) : (
@@ -292,7 +464,9 @@ export function AutoComplete({
                 aria-selected={
                   selectedValue !== undefined
                     ? option.value === selectedValue
-                    : option.label === value
+                    : picker
+                      ? option.value === held
+                      : option.label === value
                 }
                 data-active={index === active || undefined}
                 aria-disabled={option.disabled || undefined}
@@ -301,10 +475,7 @@ export function AutoComplete({
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => selectOption(option)}
               >
-                <ComboboxOptionContent
-                  option={option}
-                  query={value && filteringRef.current ? value : null}
-                />
+                <ComboboxOptionContent option={option} query={query} />
               </button>
             ))
           )}

@@ -23,12 +23,29 @@ export interface DocketRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
     mono?: boolean;
     /** Read-only row (`<dt>`/`<dd>`, no chevron). Defaults to the enclosing `Docket`'s `readOnly`. */
     readOnly?: boolean;
+    /**
+     * Never cut the answer. The value and the `sub` line wrap, breaking inside an identifier that
+     * has no word to break at (an SSCC, a 50-character bin, a lot), and the row grows from its 56 /
+     * 64 with 12 / 5 above and below instead of keeping a fixed height. Default: one line each,
+     * ending in an ellipsis. A row whose value fits on one line is the same height either way.
+     */
+    wrap?: boolean;
+    /**
+     * Props for the element that holds the value alone (`data-testid`, `id`, `title`): the `<dd>`
+     * of a read-only row, the value's `<span>` of a tappable one.
+     */
+    valueProps?: DocketRowValueAttributes;
 }
+/** Attributes for the value element, handed over as an object, so `data-*` is spelled out. */
+export type DocketRowValueAttributes = HTMLAttributes<HTMLElement> & {
+    [key: `data-${string}`]: string | number | boolean | undefined;
+};
 /**
  * Docket row (spec §4.7): one-line 56, two-line 64 (grid rows 30 + 22), padding 0 16,
  * `grid: auto 1fr 18px` with a 12 gap, bottom hairline, chevron 18 ink-3.
  * Tappable rows are buttons (inside a `Docket`, each sits in an `<li>`); read-only rows are
- * `<dt>`/`<dd>` pairs 56 tall with no chevron.
+ * `<dt>`/`<dd>` pairs 56 tall with no chevron. The other props (`data-testid`, `id`, `aria-*`)
+ * reach the button, or the row's own `<div>` when it is read-only.
  */
-export declare function DocketRow({ label, value, sub, mono, readOnly: readOnlyProp, className, disabled, type, ...rest }: DocketRowProps): import("react").JSX.Element;
+export declare function DocketRow({ label, value, sub, mono, readOnly: readOnlyProp, wrap, valueProps, className, disabled, type, ...rest }: DocketRowProps): import("react").JSX.Element;
 //# sourceMappingURL=Docket.d.ts.map

@@ -3,7 +3,12 @@ import { IconBackspace } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
 import { HH_STROKE, hhTransition } from "./shared";
 
-export type KeypadKey = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "00" | "backspace";
+export type KeypadKey =
+  | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+  | "00"
+  | "backspace"
+  /** The decimal separator. Its face is the caller's `decimalSeparator`; the string it edits holds ".". */
+  | "decimal";
 
 export interface KeypadProps extends HTMLAttributes<HTMLDivElement> {
   /** Called for every key press. Pair it with `applyKeypadKey` to edit a digit string. */
@@ -13,6 +18,13 @@ export interface KeypadProps extends HTMLAttributes<HTMLDivElement> {
   disabled?: boolean;
   /** Accessible name of the backspace key. Default "Delete last digit". */
   backspaceLabel?: string;
+  /**
+   * Face of the `decimal` key: the locale's separator, given by the caller ("," in Romanian).
+   * Default ".". The key still reports `"decimal"`, and `applyKeypadKey` writes "." for it.
+   */
+  decimalSeparator?: string;
+  /** Accessible name of the `decimal` key. Default "Decimal separator". */
+  decimalLabel?: string;
 }
 
 export const KEYPAD_DEFAULT_KEYS: readonly KeypadKey[] = [
@@ -22,15 +34,34 @@ export const KEYPAD_DEFAULT_KEYS: readonly KeypadKey[] = [
   "backspace", "0", "00",
 ];
 
+/** Keys for a decimal quantity: 1–9, the separator, 0, backspace. */
+export const KEYPAD_DECIMAL_KEYS: readonly KeypadKey[] = [
+  "1", "2", "3",
+  "4", "5", "6",
+  "7", "8", "9",
+  "decimal", "0", "backspace",
+];
+
 /**
  * Applies one keypad key to a digit string: appends digits, drops the last one on backspace.
  * Leading zeros collapse ("0" + "5" → "5"); `maxLength` caps the digit count.
+ *
+ * `decimal` appends the one "." a quantity may hold ("" → "0.", "12" → "12."; a second one is
+ * ignored). The string is the canonical decimal, whatever separator the key shows, and is only
+ * ever edited as text: no number is made of it. `scale` caps the digits after the point.
  */
-export function applyKeypadKey(current: string, key: KeypadKey, maxLength = 9): string {
+export function applyKeypadKey(current: string, key: KeypadKey, maxLength = 9, scale?: number): string {
   if (key === "backspace") return current.slice(0, -1);
+  if (key === "decimal") {
+    if (current.includes(".") || scale === 0) return current;
+    return current === "" ? "0." : `${current}.`;
+  }
   const next = current === "0" ? key : current + key;
   const trimmed = next.replace(/^0+(?=\d)/, "");
-  return trimmed.length > maxLength ? current : trimmed;
+  const point = trimmed.indexOf(".");
+  if (point !== -1 && scale != null && trimmed.length - point - 1 > scale) return current;
+  // The point is not a digit: it does not count towards `maxLength`.
+  return trimmed.length - (point === -1 ? 0 : 1) > maxLength ? current : trimmed;
 }
 
 // Keep focus on the field the keypad types into: a tap must not blur the scan/quantity input.
@@ -46,6 +77,8 @@ export function Keypad({
   keys = KEYPAD_DEFAULT_KEYS,
   disabled,
   backspaceLabel = "Delete last digit",
+  decimalSeparator = ".",
+  decimalLabel = "Decimal separator",
   className,
   "aria-label": ariaLabel = "Numeric keypad",
   ...rest
@@ -67,7 +100,8 @@ export function Keypad({
             key={`${key}-${i}`}
             type="button"
             disabled={disabled}
-            aria-label={isBackspace ? backspaceLabel : undefined}
+            aria-label={isBackspace ? backspaceLabel : key === "decimal" ? decimalLabel : undefined}
+            data-key={key}
             onMouseDown={keepFocus}
             onClick={() => onKey?.(key)}
             className={cn(
@@ -80,7 +114,13 @@ export function Keypad({
               hhTransition,
             )}
           >
-            {isBackspace ? <IconBackspace size={28} stroke={HH_STROKE} aria-hidden /> : key}
+            {isBackspace ? (
+              <IconBackspace size={28} stroke={HH_STROKE} aria-hidden />
+            ) : key === "decimal" ? (
+              decimalSeparator
+            ) : (
+              key
+            )}
           </button>
         );
       })}

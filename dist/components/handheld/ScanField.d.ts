@@ -2,6 +2,24 @@ import { type InputHTMLAttributes, type ReactNode } from "react";
 export interface ScanFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix" | "children"> {
     /** The question above the field, 28/34 600 ("Scan the location"). Without it, pass `aria-label`. */
     label?: ReactNode;
+    /**
+     * Wraps the question in a heading (`<h1><label>…</label></h1>`): on a handheld step the question
+     * is the screen's title. The look does not change. Default: a bare `<label>`.
+     */
+    labelAs?: "h1" | "h2" | "h3";
+    /**
+     * What to scan, under the field: 17/24 ink-2, 8 below ("The label on the shelf where the goods
+     * go"). It describes the input (`aria-describedby`). An `error` line comes after it.
+     */
+    hint?: ReactNode;
+    /**
+     * A read is being checked: a ring spinner takes the toggle's place, the field is `aria-busy`
+     * and Enter is swallowed, so a second scan cannot start while the first is in flight. The
+     * field keeps focus and its value (`disabled` would drop both).
+     */
+    busy?: boolean;
+    /** What a screen reader hears while `busy`. Default "Checking". */
+    busyLabel?: string;
     /** Error line under the field, 17/24 500 danger-text ("Last scan refused: A-09-01-1"). Implies `invalid`. */
     error?: ReactNode;
     /** Refused state: 2px danger border (it wins over the focus border). Default: `!!error`. */

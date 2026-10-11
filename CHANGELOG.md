@@ -36,6 +36,27 @@ Nothing is removed. Three fixes change what is drawn; each is noted.
 - **Modal `closeLabel`** names the close button (default "Close"), and **`aria-label`** names a dialog that has no `title` (default "Dialog").
 - **Modal, Message and Notification** (fix): `--su-content-inset-start` now comes off their width as well as moving them, so with a rail's inset set at phone width a toast or a dialog ends inside the viewport. With no inset set, nothing changes.
 
+### Release B: pickers, decimal entry, table and handheld needs (additive, still 0.2.0)
+
+Nothing is removed and no default changes its look, with one exception noted under Table `footer`.
+
+- **AutoComplete `picker`**: the searchable picker for a reference to a record. `value` is the chosen option's `value` and `onChange` fires with it ("" on a clear). At rest the box draws the chosen option as the list does, its `code` in mono 500 and its name in ink-2; the same line is still the input's value. Typing replaces it with the term, which is dropped on a pick, a clear or a blur. The list is narrowed by code and name, or by the caller when **`onSearch`** is given (a server search; it also hears "" when the term is dropped). The list opens even when empty and then says `notFoundContent`; Enter never submits the enclosing form.
+- **AutoComplete** forwards its other props (`data-testid`, `autoFocus`, `aria-describedby`, `onKeyDown`, `onClick`…) to its `<input>`, and its English is now props with the same defaults: **`listLabel`** ("Suggestions"), **`loadingContent`** ("Searching…"), **`countLabel`** (`n => "{n} suggestions"`) and **`clearLabel`** ("Clear").
+- **Select `emptyContent`** replaces "No options" (still the default). **Menu `aria-label`** is a documented prop (default "Menu").
+- **QuantityStepper decimal mode** (`decimalValue`, `defaultDecimalValue`, `onDecimalChange`, `decimalSeparator`, `scale`): the quantity is canonical decimal text ("12.5"), shown with the caller's separator, typed with "," or ".", and stepped and bounded as text, so no floating point number is made of it. `min`, `max` and `step` also take decimal text. `inputProps` accepts `data-*` keys. `cleanDecimal`, `compareDecimal`, `stepDecimal` and `showDecimal` are exported.
+- **Keypad `"decimal"` key**, with **`decimalSeparator`** for its face and **`decimalLabel`** for its name, and `KEYPAD_DECIMAL_KEYS` (1 to 9, separator, 0, backspace). `applyKeypadKey` writes one "." for it and takes a fourth argument, `scale`.
+- **ScanField and QuantityStepper `labelAs`** (`"h1" | "h2" | "h3"`): the question as a heading around its label. **ScanField `hint`**: a 17/24 ink-2 line under the field, tied to the input. **ScanField `busy`** (and `busyLabel`): a ring spinner in the toggle's place, `aria-busy`, and Enter swallowed, with focus and value kept.
+- **DocketRow `wrap`**: the value and the sub line wrap and break inside an identifier instead of ending in an ellipsis; the row grows from its 56 / 64. **`valueProps`** reach the value's element, and a read-only row now takes its other props (`data-testid`).
+- **`HandheldErrorLine`** is exported (it takes `className` and the other `<p>` props; `id` is optional), and **Tag `size="handheld"`** is the tag at terminal scale: 28 high, 17/24 500.
+- **Table `stickyHeader`** and **`panelClassName`**: the body scrolls inside the panel under a pinned column header, and the strip, `empty` and `footer` stay; give the panel its height through `panelClassName`.
+- **Table `header`**: a strip inside the panel above the column header (44, or 40 in a nested table), for a title with its count and link or a nested table's summary.
+- **Table `headerHidden`**: the header row is not drawn and takes no height; its cells stay for assistive technology and keep the columns' widths.
+- **Table `columnGap`** and the token **`--su-table-column-gap`** (16px): the gap between columns. Cells pad half of it; the edges keep 16.
+- **Table.Detail `startInset`** (px, default 56) and **`strip`** (12 below instead of 16, the inline edit strip).
+- **Table.Td `stackEnd`**: in the stacked shape that cell ends the record's first line (a state tag, or the "⋯"), and the cells after it start on the next line.
+- **Table `footer`** (changed): it now has 6 above and below and wraps its parts. A one-line footer is still 44 (a note, or a control up to 32 high); a note of several lines no longer touches the rules. A footer holding a control taller than 32 grows by the difference.
+- **Table.Disclosure and Table.Facet** are 44 targets under `(hover: none)`; their drawn size does not change.
+
 ### Breaking changes
 
 1. **`--su-bg` changes meaning.** It is now the grey app ground (`#f4f5f7`), so `body` and `Surface tone="system"` turn grey. Use `--su-surface` (or `bg-surface`) for white panels.

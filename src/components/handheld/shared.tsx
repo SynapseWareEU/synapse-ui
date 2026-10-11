@@ -1,4 +1,4 @@
-import type { ReactNode, Ref, RefCallback } from "react";
+import type { HTMLAttributes, ReactNode, Ref, RefCallback } from "react";
 import { IconCircleX } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
 
@@ -47,18 +47,29 @@ export function hhFieldBorder({
   return "border-border-strong bg-surface text-ink focus-within:border-action";
 }
 
+export interface HandheldErrorLineProps extends HTMLAttributes<HTMLParagraphElement> {
+  /** Point the field's `aria-describedby` at it. */
+  id?: string;
+  children: ReactNode;
+}
+
 /**
  * Error line under a handheld field: 17/24 500 danger-text + a 20 icon, 8 below the field.
  * Identifiers inside it go in `<code>` or a `su-id` span: mono 0.9em 600 (the caller's markup).
+ * `ScanField` and `QuantityStepper` draw it for their `error`; it is exported for a handheld field
+ * the library does not draw (a form's `Input` at handheld density), so every refusal under a
+ * field reads the same.
  */
-export function HandheldErrorLine({ id, children }: { id: string; children: ReactNode }) {
+export function HandheldErrorLine({ id, className, children, ...rest }: HandheldErrorLineProps) {
   return (
     <p
       id={id}
+      {...rest}
       className={cn(
         "flex items-center gap-su2 mt-su2 mb-0 min-h-su6",
         "font-sans text-hh-body font-medium text-danger-text",
         "[&_code]:font-mono [&_code]:text-[0.9em] [&_code]:font-semibold",
+        className,
       )}
     >
       <IconCircleX size={20} stroke={HH_STROKE} aria-hidden className="shrink-0" />

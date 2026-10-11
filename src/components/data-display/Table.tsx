@@ -5,8 +5,10 @@ import {
   isValidElement,
   useCallback,
   useContext,
+  useMemo,
   useSyncExternalStore,
   type ButtonHTMLAttributes,
+  type CSSProperties,
   type HTMLAttributes,
   type ReactNode,
   type TdHTMLAttributes,
@@ -18,7 +20,8 @@ import { statusDotToneClass, type StatusDotTone } from "./StatusDot";
 /*
  * Lattice UI v2 table: always a Panel (surface, 1px border, radius 8). Native <table> with
  * separate borders, so every row height includes its own 1px bottom rule (40 means 40).
- * Column gap 16: cells pad 8 inline, the first and last cell pad 16 at the edge.
+ * Column gap 16 (`--su-table-column-gap`, or `columnGap`): cells pad half of it inline, the first
+ * and last cell pad 16 at the edge.
  *
  * `stack` is the narrow shape: below the breakpoint the SAME tree is drawn as a list of records
  * (no header row, a row is a wrapping block, a meta line folds into its row) and takes list roles,
@@ -59,6 +62,8 @@ const RowContext = createContext<{ line: Line; expanded: boolean }>({
 });
 /** True while the table is in its stacked (list) shape. A nested table inherits it. */
 const StackedContext = createContext(false);
+/** What the header row of this table does: `hidden` keeps its cells for assistive technology only, `sticky` pins it. */
+const HeadContext = createContext<{ hidden: boolean; sticky: boolean }>({ hidden: false, sticky: false });
 
 const stackWidth: Record<TableStack, number> = { sm: 640, md: 768, lg: 1024, xl: 1280 };
 const noSubscription = () => () => {};
@@ -110,10 +115,12 @@ function Glyph({ size, children, className }: { size: number; children: ReactNod
 }
 
 // ——— shared cell classes ———
+// Half the column gap on each side. `--su-table-gap` is set by every `<table>` on itself, so a
+// nested table never inherits the gap of the table it sits in.
 const cellInline = (size: TableSize) =>
   size === "nested"
-    ? "px-su2 first:ps-[15px] last:pe-[15px]"
-    : "px-su2 first:ps-su4 last:pe-su4";
+    ? "px-[calc(var(--su-table-gap)/2)] first:ps-[15px] last:pe-[15px]"
+    : "px-[calc(var(--su-table-gap)/2)] first:ps-su4 last:pe-su4";
 const ruleBottom = "border-b border-solid border-border";
 
 // ——— stacked shape (below the `stack` breakpoint) ———
@@ -124,6 +131,11 @@ const stackedRule = "border-b border-solid border-border last:border-b-0";
 // A cell with nothing in it (a spacer under a lost column) is not a value: it takes no place, so
 // it adds no 12 gap either.
 const stackedCell = "block min-w-0 p-0 empty:hidden";
+// A record with a `stackEnd` cell: an empty full-width item after that cell breaks the line, and
+// the cells after it are ordered past the break. The break is a line of its own, of no height,
+// so the 2 between lines would count twice there; the first line's cells give 2 back.
+const stackedFirstLine =
+  "[&:has(>[data-su-stack-end])]:before:content-empty [&:has(>[data-su-stack-end])]:before:order-1 [&:has(>[data-su-stack-end])]:before:basis-full [&>[data-su-stack-end]~*]:order-2 [&:has(>[data-su-stack-end])>:not([data-su-stack-end]~*)]:-mb-[2px]";
 
 /**
  * Block padding and the bottom rule of a body cell. The first line of a meta row has no rule and
@@ -157,6 +169,36 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
    * Keyset paging: never a total. Page actions are 13/18 500 links (disabled: ink-3).
    */
   footer?: ReactNode;
+  /**
+   * A strip inside the panel, above the column header, with a rule below: a title with its count
+   * and a link (44, padding 0 16), or the summary of a nested table (40, padding 0 15: totals, a
+   * verb, a history link). Items are 12 apart and centred; it wraps rather than cut. It is not
+   * part of the `<table>`: name the table with `aria-label` or point `aria-labelledby` at a
+   * heading inside it. It stays in the stacked shape and above a `stickyHeader` scroll.
+   */
+  header?: ReactNode;
+  /**
+   * Do not draw the column header row, and keep its cells for assistive technology: the row takes
+   * no height, each `Table.Th` holds its label visually hidden, and the columns keep the widths
+   * set on them. For a table whose columns need no naming to a sighted reader. A hidden header
+   * draws no sort button and no facet.
+   */
+  headerHidden?: boolean;
+  /**
+   * Opt-in: the body scrolls inside the panel under a pinned column header, and the `header`
+   * strip, `empty` and `footer` stay in place. The panel becomes a column that can shrink, so
+   * give it a height to fill through `panelClassName` (`flex-1 min-h-0` in a column, `h-full`, or
+   * a `max-h-*`). No effect in the stacked shape, which has no header row and scrolls with the page.
+   */
+  stickyHeader?: boolean;
+  /** Classes for the panel, the table's outer box (`className` reaches the `<table>`). */
+  panelClassName?: string;
+  /**
+   * Gap between columns in px, where a board draws other than the 16 of `--su-table-column-gap`
+   * (24 in a read-out table). The first and last cell keep 16 at the panel's edge. A nested table
+   * takes its own.
+   */
+  columnGap?: number;
   /** Marks the table busy (`aria-busy`). Render `<Table.SkeletonRow>`s of 40 in the body meanwhile. */
   loading?: boolean;
   /**
@@ -184,25 +226,54 @@ export function Table({
   footer,
   loading = false,
   stack,
+  header,
+  headerHidden = false,
+  stickyHeader = false,
+  panelClassName,
+  columnGap,
   className,
+  style,
   children,
   ...rest
 }: TableProps) {
   const below = useBelow(stack);
   const inherited = useContext(StackedContext);
   const stacked = stack ? below : inherited;
+  const sticky = stickyHeader && !stacked;
+  const head = useMemo(() => ({ hidden: headerHidden, sticky }), [headerHidden, sticky]);
   return (
     <TableContext.Provider value={size}>
       <SectionContext.Provider value={undefined}>
         <StackedContext.Provider value={stacked}>
-          <div className="su-panel font-sans text-ink">
+         <HeadContext.Provider value={head}>
+          <div className={cn("su-panel font-sans text-ink", sticky && "flex flex-col min-h-0", panelClassName)}>
+            {header != null ? (
+              <div
+                className={cn(
+                  "flex flex-wrap items-center gap-x-su3 gap-y-su1 shrink-0 py-[6px] border-b border-solid border-border text-body text-ink",
+                  size === "nested" ? "min-h-[40px] px-[15px]" : "min-h-[var(--su-panel-header)] px-su4",
+                )}
+              >
+                {header}
+              </div>
+            ) : null}
             {/* `relative`: the scroller is the containing block for absolutely positioned cell
                 content (an `sr-only` header label), so it cannot escape the scroll and widen the page.
                 Stacked, nothing is wider than the panel, so there is no scroller. */}
-            <div className={stacked ? "relative" : "relative overflow-x-auto"}>
+            <div
+              className={
+                stacked ? "relative" : sticky ? "relative flex-1 min-h-0 overflow-auto" : "relative overflow-x-auto"
+              }
+            >
               <table
                 aria-busy={loading || undefined}
                 role={stacked ? "list" : undefined}
+                style={
+                  {
+                    "--su-table-gap": columnGap != null ? `${columnGap}px` : "var(--su-table-column-gap)",
+                    ...style,
+                  } as CSSProperties
+                }
                 className={cn(
                   stacked
                     ? "block w-full text-start"
@@ -217,11 +288,15 @@ export function Table({
             </div>
             {empty}
             {footer != null ? (
-              <div className="flex items-center gap-su2 min-h-[var(--su-panel-footer)] px-su4 border-t border-solid border-border text-small text-ink-2">
+              // 6 above and below: a one-line footer is still 44 (a note of 18, a control up to
+              // 32), and a note that runs to several lines no longer touches the rules. Parts that
+              // do not fit side by side wrap, 4 between the lines.
+              <div className="flex flex-wrap items-center gap-x-su2 gap-y-su1 shrink-0 min-h-[var(--su-panel-footer)] px-su4 py-[6px] border-t border-solid border-border text-small text-ink-2">
                 {footer}
               </div>
             ) : null}
           </div>
+         </HeadContext.Provider>
         </StackedContext.Provider>
       </SectionContext.Provider>
     </TableContext.Provider>
@@ -298,12 +373,18 @@ export function TableRow({
   const section = useContext(SectionContext);
   const size = useContext(TableContext);
   const stacked = useContext(StackedContext);
+  const head = useContext(HeadContext);
 
   if (section === "head") {
     return (
       <tr
         className={cn(
-          size === "nested" ? "h-[var(--su-row-nested-header)]" : "h-[var(--su-row-header)]",
+          // A hidden header row takes no height; its cells are still the columns' headers.
+          head.hidden
+            ? undefined
+            : size === "nested"
+              ? "h-[var(--su-row-nested-header)]"
+              : "h-[var(--su-row-header)]",
           className,
         )}
         {...rest}
@@ -332,6 +413,7 @@ export function TableRow({
           data-state={selected ? "selected" : undefined}
           className={cn(
             "flex flex-wrap items-baseline gap-x-su3 gap-y-[2px] py-su2",
+            stackedFirstLine,
             stackedInline(size),
             expanded ? undefined : stackedRule,
             tone,
@@ -444,6 +526,7 @@ export function TableTh({
   const size = useContext(TableContext);
   const { line, expanded } = useContext(RowContext);
   const stacked = useContext(StackedContext);
+  const head = useContext(HeadContext);
 
   // A <th scope="row"> inside the body reads as a body cell, not a header.
   if (section === "body") {
@@ -459,6 +542,18 @@ export function TableTh({
         {...rest}
       >
         {children}
+      </th>
+    );
+  }
+
+  if (head.hidden) {
+    // Not drawn, still the column's header: no box of its own, and the label where only
+    // assistive technology finds it. `className` stays, so a width set on the column holds.
+    return (
+      <th aria-sort={sort} className={cn("h-0 p-0 border-0 font-normal text-start", className)} {...rest}>
+        <span className="absolute w-px h-px overflow-hidden whitespace-nowrap [clip-path:inset(50%)]">
+          {children}
+        </span>
       </th>
     );
   }
@@ -504,6 +599,8 @@ export function TableTh({
       className={cn(
         cellInline(size),
         "py-[4px] align-middle bg-surface-2 font-sans font-medium whitespace-nowrap",
+        // Pinned to the top of the panel's scroller; the rule travels with the cell.
+        head.sticky && "sticky top-0 z-[1]",
         ruleBottom,
         size === "nested" ? "text-micro" : "text-small",
         sorted ? "text-ink" : "text-ink-2",
@@ -534,6 +631,13 @@ export interface TableTdProps extends TdHTMLAttributes<HTMLTableCellElement> {
    * - `control`: shrinks to its content (the 24 disclosure column). `actions`: the same, at the end.
    */
   kind?: TableCellKind;
+  /**
+   * Stacked shape only: this cell ends the record's first line. It is pushed to the end of the
+   * line (a state tag, or the row's "⋯"), and the cells after it start on the next line. Give the
+   * cell before it `flex-1` to cut or wrap a long name beside it. One per row; cells after it
+   * cannot be reordered with `order-*`. No effect in the table shape.
+   */
+  stackEnd?: boolean;
 }
 
 const kindClass: Record<TableCellKind, string | undefined> = {
@@ -565,6 +669,7 @@ const stackedKindClass: Record<TableCellKind, string | undefined> = {
 export function TableTd({
   numeric = false,
   kind = "text",
+  stackEnd = false,
   className,
   children,
   rowSpan,
@@ -579,9 +684,11 @@ export function TableTd({
     return (
       <td
         rowSpan={rowSpan}
+        data-su-stack-end={stackEnd ? "" : undefined}
         className={cn(
           stackedCell,
           stackedKindClass[kind],
+          stackEnd && "shrink-0 ms-auto",
           numeric && kind !== "number" ? `su-tabular ${stackedBreak}` : undefined,
           className,
         )}
@@ -658,7 +765,8 @@ export const TableDisclosure = forwardRef<HTMLButtonElement, TableDisclosureProp
         type={type}
         aria-expanded={expanded}
         className={cn(
-          "inline-flex items-center justify-center shrink-0 size-[24px] p-0 border-none rounded-su-tag bg-transparent text-ink-3 cursor-pointer align-middle su-focus-ring",
+          // On a touch screen the 24 box is a 44 target, as on Button.
+          "inline-flex items-center justify-center shrink-0 size-[24px] p-0 border-none rounded-su-tag bg-transparent text-ink-3 cursor-pointer align-middle su-focus-ring [@media(hover:none)]:su-hit-44",
           "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
           "[@media(hover:hover)]:hover:bg-fill [@media(hover:hover)]:hover:text-ink",
           className,
@@ -695,7 +803,7 @@ export const TableFacet = forwardRef<HTMLButtonElement, TableFacetProps>(functio
       ref={ref}
       type={type}
       className={cn(
-        "inline-flex items-center shrink-0 h-[24px] p-0 border-none rounded-su-tag font-sans cursor-pointer align-middle su-focus-ring",
+        "inline-flex items-center shrink-0 h-[24px] p-0 border-none rounded-su-tag font-sans cursor-pointer align-middle su-focus-ring [@media(hover:none)]:su-hit-44",
         "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
         on
           ? "gap-[2px] ps-[5px] pe-[6px] bg-action-subtle text-action-text [@media(hover:hover)]:hover:bg-action-subtle-hover"
@@ -722,13 +830,33 @@ export interface TableDetailProps extends TdHTMLAttributes<HTMLTableCellElement>
    * reaches the `<td>` inside it.
    */
   rowProps?: TableRowAttributes;
+  /**
+   * Where the block starts, in px from the row's edge. Default 56, column 2 behind a 24
+   * disclosure column. A table with no disclosure column, or a wider first column, lines the
+   * block up with its own column (16 for the first one). Not used in the stacked shape.
+   */
+  startInset?: number;
+  /**
+   * The inline edit strip under a row: 12 below instead of 16, so one line of 28 controls makes
+   * the strip 52 high (padding 12 16 12 56).
+   */
+  strip?: boolean;
 }
 
 /**
  * Detail block under an `expanded` row: padding 12 16 16 56 (lines up with column 2 behind the
  * 24 disclosure column), surface-2, bottom rule. Holds a `<Table size="nested">`.
  */
-export function TableDetail({ colSpan, rowProps, className, children, ...rest }: TableDetailProps) {
+export function TableDetail({
+  colSpan,
+  rowProps,
+  startInset,
+  strip = false,
+  className,
+  style,
+  children,
+  ...rest
+}: TableDetailProps) {
   const size = useContext(TableContext);
   const stacked = useContext(StackedContext);
   return (
@@ -742,12 +870,14 @@ export function TableDetail({ colSpan, rowProps, className, children, ...rest }:
         colSpan={colSpan}
         className={cn(
           // Stacked: no disclosure column to line up behind, so the block starts at the row's edge.
-          stacked ? "block pt-su3 pb-su4" : "pt-su3 pb-su4 ps-[56px] pe-su4",
+          stacked ? "block pt-su3" : "pt-su3 ps-[56px] pe-su4",
+          strip ? "pb-su3" : "pb-su4",
           stacked ? stackedInline(size) : undefined,
           "bg-surface-2",
           ruleBottom,
           className,
         )}
+        style={startInset != null && !stacked ? { paddingInlineStart: startInset, ...style } : style}
         {...rest}
       >
         {children}

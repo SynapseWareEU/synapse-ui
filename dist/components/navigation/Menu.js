@@ -2,7 +2,7 @@ import { jsx as a, jsxs as u, Fragment as M } from "react/jsx-runtime";
 import { useState as O, useEffect as j } from "react";
 import { Root as z, Trigger as B, Content as I } from "../../vendor/@radix-ui/react-collapsible/dist/index.js";
 import { Icon as w } from "../general/Icon.js";
-import { cn as d } from "../../utils/cn.js";
+import { cn as i } from "../../utils/cn.js";
 import L from "../../vendor/@tabler/icons-react/dist/esm/icons/IconChevronDown.js";
 const k = {
   page: "ps-[calc(var(--su-space-3)+var(--su-menu-depth)*var(--su-space-3))] pe-su3",
@@ -12,11 +12,11 @@ const k = {
   panel: "min-h-[var(--su-row)] [@media(hover:none)]:min-h-[var(--su-hit-target)] rounded-su-tag font-normal"
 }, D = "group relative flex items-center gap-su2 w-full m-0 font-sans text-body text-start no-underline cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none disabled:cursor-not-allowed";
 function N(e, r) {
-  const t = r.disabled ? "bg-transparent text-ink-3" : r.selected ? "bg-action-subtle text-action-text [@media(hover:hover)]:hover:bg-action-subtle-hover forced-colors:outline forced-colors:outline-2 forced-colors:outline-offset-[-2px] forced-colors:outline-[Highlight]" : d(
+  const t = r.disabled ? "bg-transparent text-ink-3" : r.selected ? "bg-action-subtle text-action-text [@media(hover:hover)]:hover:bg-action-subtle-hover forced-colors:outline forced-colors:outline-2 forced-colors:outline-offset-[-2px] forced-colors:outline-[Highlight]" : i(
     "bg-transparent [@media(hover:hover)]:hover:bg-surface-hover [@media(hover:none)]:active:bg-surface-hover",
     r.danger ? "text-danger-text" : r.trail ? "text-action-text" : "text-ink"
   );
-  return d(D, T[e], k[e], t);
+  return i(D, T[e], k[e], t);
 }
 function E(e) {
   return e.disabled || e.danger ? "text-current" : e.selected ? "text-action-text" : "text-ink-2";
@@ -31,13 +31,13 @@ const m = (e) => e != null && e !== !1;
 function C(e, r, t) {
   const s = m(e.count);
   return /* @__PURE__ */ u(M, { children: [
-    e.icon && /* @__PURE__ */ a(w, { size: "md", className: d("shrink-0", E({ ...t, danger: e.danger })), children: e.icon }),
+    e.icon && /* @__PURE__ */ a(w, { size: "md", className: i("shrink-0", E({ ...t, danger: e.danger })), children: e.icon }),
     /* @__PURE__ */ a("span", { className: "flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap", children: e.label }),
     m(e.exception) ? /* @__PURE__ */ a("span", { className: "shrink-0 whitespace-nowrap text-small font-medium text-danger-text", children: e.exception }) : null,
     s || r === "panel" ? /* @__PURE__ */ a(
       "span",
       {
-        className: d(
+        className: i(
           "shrink-0 whitespace-nowrap text-small font-normal su-tabular",
           r === "panel" && "w-[40px] text-end",
           t.selected ? "text-action-text" : t.disabled ? "text-ink-3" : "text-ink-2",
@@ -60,15 +60,15 @@ function H({
   variant: s,
   onSelect: o
 }) {
-  const l = y(e.children ?? [], r) && !e.disabled, [i, n] = O(l);
+  const l = y(e.children ?? [], r) && !e.disabled, [d, n] = O(l);
   return j(() => {
     l && n(!0);
-  }, [l]), /* @__PURE__ */ u(z, { open: i, onOpenChange: n, disabled: e.disabled, children: [
+  }, [l]), /* @__PURE__ */ u(z, { open: d, onOpenChange: n, disabled: e.disabled, children: [
     /* @__PURE__ */ u(
       B,
       {
         className: N(s, {
-          trail: l && !i,
+          trail: l && !d,
           danger: e.danger,
           disabled: e.disabled
         }),
@@ -100,23 +100,23 @@ function H({
   ] });
 }
 function f({ items: e, selectedKey: r, depth: t, variant: s, onSelect: o, className: l }) {
-  const i = { "--su-menu-depth": t };
+  const d = { "--su-menu-depth": t };
   return /* @__PURE__ */ a(
     "ul",
     {
-      className: d(
+      className: i(
         "flex flex-col m-0 p-0 list-none",
         s === "page" && "gap-[2px]",
         l
       ),
-      style: i,
+      style: d,
       children: e.map((n) => {
         var b, v;
         if (n.type === "divider")
           return /* @__PURE__ */ a("li", { role: "separator", className: "h-px my-su1 su-rule" }, n.key);
         if (n.type === "group")
           return /* @__PURE__ */ u("li", { children: [
-            /* @__PURE__ */ a("span", { className: d(F, k[s]), children: n.label }),
+            /* @__PURE__ */ a("span", { className: i(F, k[s]), children: n.label }),
             (b = n.children) != null && b.length ? /* @__PURE__ */ a(
               f,
               {
@@ -179,18 +179,19 @@ function P({
   onSelect: t,
   variant: s = "page",
   className: o,
-  ...l
+  "aria-label": l = "Menu",
+  ...d
 }) {
   return e.length ? /* @__PURE__ */ a(
     "nav",
     {
-      className: d(
+      className: i(
         "font-sans text-ink",
         s === "panel" && "su-popover w-[288px] max-w-full p-su2",
         o
       ),
-      "aria-label": "Menu",
-      ...l,
+      "aria-label": l,
+      ...d,
       children: /* @__PURE__ */ a(
         f,
         {

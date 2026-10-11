@@ -22,6 +22,7 @@ export interface SelectProps
   > {
   value?: string;
   defaultValue?: string;
+  /** What an empty trigger reads, in ink-3. Default "Select…". */
   placeholder?: string;
   disabled?: boolean;
   size?: InputSize;
@@ -48,6 +49,8 @@ export interface SelectProps
    * chevron. It replaces `size`. No effect on an `outlined` trigger.
    */
   compact?: boolean;
+  /** What the list says when there are no `options`. Default "No options". */
+  emptyContent?: ReactNode;
   onValueChange?: (value: string) => void;
 }
 
@@ -127,6 +130,7 @@ export function Select({
   prefix,
   variant = "outlined",
   compact = false,
+  emptyContent = "No options",
   onValueChange,
   ...rest
 }: SelectProps) {
@@ -190,7 +194,7 @@ export function Select({
             {children ??
               (options.length === 0 ? (
                 // A blank popover reads as broken; say it's empty on purpose.
-                <div className="p-su2 text-small text-ink-2 text-start">No options</div>
+                <div className="p-su2 text-small text-ink-2 text-start">{emptyContent}</div>
               ) : (
                 options.map((option) => (
                   <SelectPrimitive.Item

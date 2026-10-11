@@ -1,6 +1,11 @@
-import { type FocusEvent, type ReactNode } from "react";
+import { type FocusEvent, type InputHTMLAttributes, type ReactNode } from "react";
 import type { InputSize, SelectOption } from "./types";
-export interface AutoCompleteProps {
+/**
+ * Anything else (`data-testid`, `autoFocus`, `aria-describedby`, `aria-invalid`, `required`,
+ * `onKeyDown`, `onClick`…) lands on the `<input>`, the `role="combobox"` element.
+ */
+export interface AutoCompleteProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange" | "onSelect" | "size" | "prefix" | "children" | "type" | "role" | "autoComplete" | "style"> {
+    /** The visible text. In a `picker`, the chosen option's `value` ("" for none). */
     value?: string;
     defaultValue?: string;
     placeholder?: string;
@@ -25,9 +30,37 @@ export interface AutoCompleteProps {
      * Absent, the option whose `label` is the visible text is.
      */
     selectedValue?: string;
+    /**
+     * The picker form, for a reference to a record (a foreign key): `value` is the chosen option's
+     * `value`, not the visible text, and `onChange` fires with it on a pick and with "" on a clear.
+     * At rest the box draws the chosen option as the list does: its `code` in mono 500, then its
+     * name in ink-2, cut with an ellipsis. Typing searches: the pair gives way to the typed term,
+     * the list is narrowed by code and name (or by the caller, see `onSearch`), and the term is
+     * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
+     * the value. The list opens whenever the box does, and says `notFoundContent` when it has no
+     * rows. Enter never submits the enclosing form. A `value` that is no option's reads as itself:
+     * keep the held option among `options` (it is remembered after a pick).
+     */
+    picker?: boolean;
+    /**
+     * Picker only: every typed term, and "" when the term is dropped. With it the list is the
+     * caller's to narrow (a server search) and `options` are shown as given.
+     */
+    onSearch?: (term: string) => void;
+    /** Name of the list of suggestions. Default "Suggestions". */
+    listLabel?: string;
+    /** The row shown while `loading`. Default "Searching…". */
+    loadingContent?: ReactNode;
+    /** What is announced when the list changes: how many rows it has. Default "{n} suggestions". */
+    countLabel?: (count: number) => string;
+    /** Name of the clear button (`allowClear`). Default "Clear". */
+    clearLabel?: string;
     "aria-label"?: string;
     "aria-labelledby"?: string;
-    /** Fires with the visible text — including the option's `label` when one is picked. */
+    /**
+     * Fires with the visible text — including the option's `label` when one is picked. In a
+     * `picker`: with the chosen option's `value`, or "" when cleared.
+     */
     onChange?: (value: string) => void;
     /** Fires with the option's `value`; the input shows `label`, so don't feed this back into `value`. */
     onSelect?: (value: string, option: SelectOption) => void;
@@ -53,5 +86,5 @@ export declare function ComboboxOptionContent({ option, query }: {
 }): import("react").JSX.Element;
 /** Default empty-state copy, shared so both components say the same thing. */
 export declare const NO_MATCHES = "No matches";
-export declare function AutoComplete({ value: valueProp, defaultValue, placeholder, disabled, size, options, filterOption, className, id, name, allowClear, loading, notFoundContent, selectedValue, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, onChange, onSelect, onClear, onFocus, onBlur, }: AutoCompleteProps): import("react").JSX.Element;
+export declare function AutoComplete({ value: valueProp, defaultValue, placeholder, disabled, size, options, filterOption: filterOptionProp, className, id, name, allowClear, loading, notFoundContent, selectedValue, picker, onSearch, listLabel, loadingContent, countLabel, clearLabel, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, onChange, onSelect, onClear, onFocus, onBlur, onKeyDown, onClick, ...rest }: AutoCompleteProps): import("react").JSX.Element;
 //# sourceMappingURL=AutoComplete.d.ts.map

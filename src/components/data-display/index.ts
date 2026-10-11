@@ -83,7 +83,7 @@ export type {
 } from "./Table";
 
 export { Tag } from "./Tag";
-export type { TagProps, TagColor } from "./Tag";
+export type { TagProps, TagColor, TagSize } from "./Tag";
 
 export { Timeline } from "./Timeline";
 export type { TimelineProps, TimelineItem } from "./Timeline";

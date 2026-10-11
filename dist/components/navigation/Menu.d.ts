@@ -33,10 +33,12 @@ export interface MenuProps extends Omit<ComponentPropsWithRef<"nav">, "onSelect"
     /** `event` is the row's click — call `preventDefault()` to keep an `href` item on the page (router navigation). */
     onSelect?: (key: string, event: MouseEvent) => void;
     variant?: MenuVariant;
+    /** Name of the navigation landmark. Default "Menu"; pass the application's words. */
+    "aria-label"?: string;
 }
 /**
  * Navigation list. The page nav has no box of its own: it sits on the ground (or in a panel)
  * and the current row is the only fill. The panel variant is the rail's section flyout.
  */
-export declare function Menu({ items, selectedKey, onSelect, variant, className, ...rest }: MenuProps): import("react").JSX.Element | null;
+export declare function Menu({ items, selectedKey, onSelect, variant, className, "aria-label": ariaLabel, ...rest }: MenuProps): import("react").JSX.Element | null;
 //# sourceMappingURL=Menu.d.ts.map
