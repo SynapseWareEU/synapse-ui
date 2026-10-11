@@ -73,6 +73,20 @@ export function ButtonDemo() {
         </div>
       </div>
       <div>
+        <span className="demo-caption">wrap: a label that has to be read whole grows the button instead of being cut</span>
+        <div className="demo-row" style={{ width: 240 }}>
+          <UI.Button block data-testid="button-cut">
+            Bin A-01-03-2 cannot take the goods
+          </UI.Button>
+          <UI.Button block wrap data-testid="button-wrap">
+            Bin A-01-03-2 cannot take the goods
+          </UI.Button>
+          <UI.Button block wrap data-testid="button-wrap-short">
+            Pause
+          </UI.Button>
+        </div>
+      </div>
+      <div>
         <span className="demo-caption">Icon-only buttons are square: 24 · 32 · 44</span>
         <div className="demo-row">
           <UI.Button variant="ghost" size="sm" icon={<IconDots {...UI.iconDefaults} />} aria-label="Row actions" />

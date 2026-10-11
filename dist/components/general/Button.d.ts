@@ -34,6 +34,13 @@ export interface ButtonProps extends Omit<NativeButtonProps, "type" | "children"
     inset?: "default" | "tight";
     /** Opt-in trailing arrow (marketing text links). Off by default. */
     arrow?: boolean;
+    /**
+     * Never cut the label. It wraps at words, centred, and the button grows from its height, which
+     * becomes a floor, with at least 4 above and below the text (8 on a handheld). For an action whose label names an
+     * identifier and has to be read whole (a handheld's "Bin A-01-03-2 cannot take the goods").
+     * Default: one line ending in an ellipsis. No effect on `text` or icon-only buttons.
+     */
+    wrap?: boolean;
     /** @deprecated No effect. v2 draws no scan end-cell; kept so existing callers compile. */
     hideEndCell?: boolean;
     /** Render as anchor when set (same as Ant Design `href`). */

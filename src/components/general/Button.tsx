@@ -67,6 +67,13 @@ export interface ButtonProps
   inset?: "default" | "tight";
   /** Opt-in trailing arrow (marketing text links). Off by default. */
   arrow?: boolean;
+  /**
+   * Never cut the label. It wraps at words, centred, and the button grows from its height, which
+   * becomes a floor, with at least 4 above and below the text (8 on a handheld). For an action whose label names an
+   * identifier and has to be read whole (a handheld's "Bin A-01-03-2 cannot take the goods").
+   * Default: one line ending in an ellipsis. No effect on `text` or icon-only buttons.
+   */
+  wrap?: boolean;
   /** @deprecated No effect. v2 draws no scan end-cell; kept so existing callers compile. */
   hideEndCell?: boolean;
   /** Render as anchor when set (same as Ant Design `href`). */
@@ -101,7 +108,7 @@ const VARIANT_BY_TYPE: Record<string, Skin> = {
 
 const baseClass =
   "group relative box-border inline-flex flex-[0_0_auto] max-w-full items-center justify-center " +
-  "gap-[var(--su-btn-gap)] font-sans font-medium tracking-normal whitespace-nowrap [text-decoration-line:none] " +
+  "gap-[var(--su-btn-gap)] font-sans font-medium tracking-normal [text-decoration-line:none] " +
   "cursor-pointer aria-busy:cursor-wait disabled:cursor-not-allowed aria-disabled:cursor-not-allowed " +
   "bg-[var(--su-btn-bg)] text-[var(--su-btn-fg)] border-[color:var(--su-btn-bd)] " +
   "transition-[background-color,color,border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] " +
@@ -256,6 +263,8 @@ const contentClass =
   "inline-flex min-w-0 max-w-full items-center justify-center gap-[var(--su-btn-gap)]";
 
 const labelTextClass = "block min-w-0 truncate";
+/** `wrap`: whole words on as many lines as it takes; a word wider than the button breaks. */
+const labelWrapClass = "block min-w-0 break-words text-center";
 
 /* Marketing link (`arrow`): the underline draws in under the label. */
 const underlineDraw =
@@ -304,6 +313,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     iconPlacement = "start",
     inset = "default",
     arrow = false,
+    wrap = false,
     hideEndCell: _hideEndCell,
     href,
     target,
@@ -358,6 +368,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const isText = skin === "text";
   const hasLabel = children != null && children !== false;
   const iconOnly = !isText && !hasLabel && (icon != null || loadingBool);
+  // One of the two, never both: the height and the white-space of a wrapping button are its own
+  // utilities, so nothing rests on which of two competing classes UnoCSS emits last.
+  const wraps = wrap && !isText && !iconOnly;
 
   const iconBox = iconOnly
     ? "size-[var(--su-btn-icon-only)] text-[var(--su-btn-ic,currentColor)]"
@@ -398,7 +411,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     asChild ? (
       <Slottable key="label">{children}</Slottable>
     ) : hasLabel ? (
-      <span key="label" className={cn(labelTextClass, isText && arrow && underlineDraw)}>
+      <span key="label" className={cn(wraps ? labelWrapClass : labelTextClass, isText && arrow && underlineDraw)}>
         {children}
       </span>
     ) : null,
@@ -425,7 +438,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
           fontClass[size],
         )
       : cn(
-          "h-[var(--su-btn-h)] border rounded-su-control",
+          wraps ? "min-h-[var(--su-btn-h)] py-su1 [[data-density=handheld]_&]:py-su2 border rounded-su-control" : "h-[var(--su-btn-h)] border rounded-su-control",
           block ? "w-full" : "w-max",
           // The handheld primary spans the screen.
           size === "lg" && !block && "[[data-density=handheld]_&]:w-full",
@@ -438,6 +451,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     ref,
     className: cn(
       baseClass,
+      wraps ? "whitespace-normal" : "whitespace-nowrap",
       stateClass,
       !isText && pressedClass,
       hitPadClass,

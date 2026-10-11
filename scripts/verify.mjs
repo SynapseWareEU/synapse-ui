@@ -289,6 +289,11 @@ try {
  assert.equal(await page.locator('#weight-error').evaluate(e=>getComputedStyle(e).fontSize),'17px','HandheldErrorLine is exported');
  await page.goto(BASE+'/#Tag');assert.deepEqual(await page.getByTestId('tag-handheld').evaluate(e=>[e.getBoundingClientRect().height,getComputedStyle(e).fontSize,getComputedStyle(e).lineHeight]),[28,'17px','24px'],'handheld Tag is 28 high, 17/24');
  console.log('PASS: DocketRow wrap, ScanField heading, hint and busy, HandheldErrorLine and the handheld Tag.');
+ // Button wrap: the label is never cut and the button grows; a short label keeps the size's height; the default still cuts on one line.
+ await page.goto(BASE+'/#Button');await page.getByTestId('button-wrap').waitFor();
+ {const m=async id=>page.getByTestId(id).evaluate(b=>{const l=b.querySelector('span span')??b.querySelector('span');return {h:Math.round(b.getBoundingClientRect().height),cut:l.scrollWidth>l.clientWidth,ws:getComputedStyle(b).whiteSpace}});const cut=await m('button-cut'),wrapped=await m('button-wrap'),short=await m('button-wrap-short');
+ assert.deepEqual([cut.h,cut.cut,cut.ws],[36,true,'nowrap'],'without wrap a long label is one line, cut, in a 36 button');assert.ok(wrapped.h>36&&!wrapped.cut&&wrapped.ws==='normal',`a wrapping button grows and shows its whole label: ${JSON.stringify(wrapped)}`);assert.equal(short.h,36,'a wrapping button whose label fits keeps its height');}
+ console.log('PASS: Button wrap.');
  // Decimal entry: text in, text out, exact steps, the caller's separator.
  await page.goto(BASE+'/#QuantityStepper');const qd=page.getByTestId('qty-decimal');await page.getByRole('heading',{name:'How many kilograms?',level:2}).waitFor();assert.equal(await qd.inputValue(),'0,1');
  await page.getByRole('button',{name:'Increase by 0.1'}).click();await page.getByRole('button',{name:'Increase by 0.1'}).click();assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 0.3','0.1 + 0.1 + 0.1 is 0.3, not 0.30000000000000004');assert.equal(await qd.inputValue(),'0,3');
