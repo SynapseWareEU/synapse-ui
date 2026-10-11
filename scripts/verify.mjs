@@ -207,7 +207,13 @@ try {
  await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: supp-012','onChange carries the option value');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works');
  await pk.fill('zzz');assert.equal(await page.getByRole('listbox',{name:'Partners'}).textContent(),'No partner matches','an empty picker list says notFoundContent');
  await page.keyboard.press('Tab');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works','a term that picked nothing is dropped on blur');
+ await pk.click();await page.keyboard.type('q');await page.keyboard.press('Escape');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works','Escape drops the term with the list');assert.equal(await pk.getAttribute('aria-expanded'),'false');
  await page.getByRole('button',{name:'Clear the partner'}).click();assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: none');
+ // While loading, the options held are the search before's: Enter must not pick a row that is not on screen.
+ const cp=page.getByTestId('carrier-picker');await cp.focus();await page.keyboard.type('zzz');
+ assert.equal(await page.getByRole('listbox',{name:'Carriers'}).textContent(),'Searching…');assert.equal(await cp.getAttribute('aria-activedescendant'),null,'no active row while loading');
+ await page.keyboard.press('Enter');assert.equal(await page.getByTestId('carrier-value').textContent(),'Value held: none','Enter picks nothing while loading');assert.equal(await cp.inputValue(),'zzz');assert.equal(await cp.getAttribute('aria-expanded'),'true','the searching list stays open');
+ await page.getByRole('listbox',{name:'Carriers'}).getByRole('option').first().waitFor();await page.keyboard.press('Enter');assert.equal(await page.getByTestId('carrier-value').textContent(),'Value held: cust-001','once the rows are shown Enter picks the active one');
  console.log('PASS: AutoComplete picker holds the option value and draws code + name at rest.');
  // English defaults that are now props.
  await page.goto(BASE+'/#Select');await page.getByRole('combobox',{name:'Empty list'}).click();await page.getByText('No carriers yet',{exact:true}).waitFor();await page.keyboard.press('Escape');
@@ -216,15 +222,21 @@ try {
  // Table: header strip, pinned header with the body scrolling in the panel, column gap, wrapping footer.
  await page.goto(BASE+'/#Table');const mod=page.locator('table[aria-labelledby="modules-title"]');await mod.waitFor();
  const scroller=mod.locator('xpath=..'),panel=mod.locator('xpath=../..');
- const strip=await rect(mod.locator('xpath=../preceding-sibling::div'));assert.equal(strip.h,44,'the header strip is 44');assert.ok(strip.y<(await rect(mod.locator('th').first())).y,'the strip sits above the column header');
+ const strip=await rect(mod.locator('xpath=../preceding-sibling::div'));assert.equal(strip.h,44,'the header strip is 44, holding a 32 control');assert.equal((await rect(page.getByRole('combobox',{name:'Modules shown'}))).h,32);assert.ok(strip.y<(await rect(mod.locator('th').first())).y,'the strip sits above the column header');
  assert.equal((await rect(panel)).h,236,'the panel takes the height its class caps it at');
  const sc=await scroller.evaluate(e=>({c:e.clientHeight,s:e.scrollHeight}));assert.ok(sc.s>sc.c,'the body scrolls inside the panel');
  await scroller.evaluate(e=>{e.scrollTop=120});assert.equal(Math.round((await rect(mod.locator('th').first())).y),Math.round((await rect(scroller)).y),'the column header stays pinned while the body scrolls');
  assert.ok((await rect(mod.locator('tbody tr').last())).y<(await rect(scroller)).b+300,'rows are in the scroller');
  assert.deepEqual(await mod.locator('tbody tr').first().locator('td').evaluateAll(t=>t.map(e=>[getComputedStyle(e).paddingLeft,getComputedStyle(e).paddingRight])),[['16px','12px'],['12px','12px'],['12px','16px']],'columnGap 24 pads 12 each side and keeps 16 at the edges');
  assert.deepEqual(await page.getByRole('table',{name:'Projects'}).locator('tbody tr').first().locator('td').evaluateAll(t=>t.map(e=>[getComputedStyle(e).paddingLeft,getComputedStyle(e).paddingRight])),[['16px','8px'],['8px','16px']],'the default column gap is still 16');
- const noteBox=await rect(page.getByTestId('modules-note')),footBox=await rect(mod.locator('xpath=../following-sibling::div'));assert.ok(noteBox.h>18,'the demo note runs to several lines');assert.ok(noteBox.y-footBox.y>=6&&footBox.b-noteBox.b>=6,'a footer note of several lines keeps block padding');
+ const noteBox=await rect(page.getByTestId('modules-note')),footBox=await rect(mod.locator('xpath=../following-sibling::div'));assert.ok(noteBox.h>18,'the demo note runs to several lines');assert.ok(noteBox.y-footBox.y>=5&&footBox.b-noteBox.b>=5,'a footerWrap note of several lines keeps block padding');
  assert.equal((await rect(page.getByRole('table',{name:'Projects'}).locator('xpath=../following-sibling::div').last())).h,44,'a one-line footer is still 44');
+ // The default footer adds no block padding: content that pads itself (a pager) keeps its height.
+ assert.deepEqual(await page.getByRole('table',{name:'Projects'}).locator('xpath=../following-sibling::div').last().evaluate(e=>{const c=getComputedStyle(e);return [c.paddingTop,c.paddingBottom,c.flexWrap]}),['0px','0px','nowrap'],'the default footer is as in release A');
+ // Nested: a 28 button in the 40 strip, a 32 control in the 44 footerWrap footer.
+ await page.getByRole('button',{name:'History',exact:true}).first().waitFor();const nested=page.locator('table[aria-label^="Pallets in"]').first();
+ assert.equal((await rect(page.getByRole('button',{name:'History',exact:true}).first())).h,28);assert.equal((await rect(nested.locator('xpath=../preceding-sibling::div'))).h,40,'a nested strip holding a 28 button is 40');
+ assert.equal((await rect(page.getByRole('combobox',{name:'Pallet order'}).first())).h,32);assert.equal((await rect(nested.locator('xpath=../following-sibling::div'))).h,44,'a footerWrap footer holding a 32 control is 44');
  // headerHidden, Table.Detail startInset and strip.
  const docks=page.getByRole('table',{name:'Docks'});assert.equal((await rect(docks.locator('thead tr'))).h,0,'a hidden header row takes no height');
  assert.deepEqual(await docks.getByRole('columnheader').allTextContents(),['Dock','Use','State'],'its cells still name the columns');

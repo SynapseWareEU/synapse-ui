@@ -170,6 +170,13 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
    */
   footer?: ReactNode;
   /**
+   * Opt-in, for a footer that holds prose: 5 above and below, so a note that runs to several
+   * lines does not touch the rules, and parts that do not fit side by side wrap, 4 between the
+   * lines. One line is still 44 (a note of 18, a control up to 32). Leave it off for content that
+   * pads itself (a pager), which would grow by the padding. Default: off, one centred line.
+   */
+  footerWrap?: boolean;
+  /**
    * A strip inside the panel, above the column header, with a rule below: a title with its count
    * and a link (44, padding 0 16), or the summary of a nested table (40, padding 0 15: totals, a
    * verb, a history link). Items are 12 apart and centred; it wraps rather than cut. It is not
@@ -224,6 +231,7 @@ export function Table({
   size = "default",
   empty,
   footer,
+  footerWrap = false,
   loading = false,
   stack,
   header,
@@ -250,7 +258,9 @@ export function Table({
             {header != null ? (
               <div
                 className={cn(
-                  "flex flex-wrap items-center gap-x-su3 gap-y-su1 shrink-0 py-[6px] border-b border-solid border-border text-body text-ink",
+                  // 5 above and below, not 6: with the 1px rule that leaves 28 of the nested 40 and
+                  // 32 of the 44, so a small button or a 32 control does not grow the strip.
+                  "flex flex-wrap items-center gap-x-su3 gap-y-su1 shrink-0 py-[5px] border-b border-solid border-border text-body text-ink",
                   size === "nested" ? "min-h-[40px] px-[15px]" : "min-h-[var(--su-panel-header)] px-su4",
                 )}
               >
@@ -288,10 +298,14 @@ export function Table({
             </div>
             {empty}
             {footer != null ? (
-              // 6 above and below: a one-line footer is still 44 (a note of 18, a control up to
-              // 32), and a note that runs to several lines no longer touches the rules. Parts that
-              // do not fit side by side wrap, 4 between the lines.
-              <div className="flex flex-wrap items-center gap-x-su2 gap-y-su1 shrink-0 min-h-[var(--su-panel-footer)] px-su4 py-[6px] border-t border-solid border-border text-small text-ink-2">
+              // The block padding is opt-in: a footer that pads itself (the app's pager) would grow
+              // by it. 5 with the 1px rule leaves 33 of the 44, so a 32 control still fits one line.
+              <div
+                className={cn(
+                  "flex items-center gap-x-su2 shrink-0 min-h-[var(--su-panel-footer)] px-su4 border-t border-solid border-border text-small text-ink-2",
+                  footerWrap && "flex-wrap gap-y-su1 py-[5px]",
+                )}
+              >
                 {footer}
               </div>
             ) : null}

@@ -1,14 +1,14 @@
 import { jsx as t, jsxs as u, Fragment as T } from "react/jsx-runtime";
-import { useContext as d, useMemo as J, forwardRef as W, useCallback as O, useSyncExternalStore as Q, createContext as S, Children as U, isValidElement as X } from "react";
+import { useContext as d, useMemo as O, forwardRef as q, useCallback as Q, useSyncExternalStore as U, createContext as S, Children as X, isValidElement as Y } from "react";
 import { cn as o } from "../../utils/cn.js";
-import { statusDotToneClass as G } from "./StatusDot.js";
+import { statusDotToneClass as I } from "./StatusDot.js";
 const y = S("default"), j = S(void 0), w = S({
   line: "single",
   expanded: !1
-}), b = S(!1), _ = S({ hidden: !1, sticky: !1 }), Y = { sm: 640, md: 768, lg: 1024, xl: 1280 }, Z = () => () => {
+}), b = S(!1), _ = S({ hidden: !1, sticky: !1 }), Z = { sm: 640, md: 768, lg: 1024, xl: 1280 }, ee = () => () => {
 };
-function ee(n) {
-  const e = n ? `(min-width: ${Y[n]}px)` : void 0, a = O(
+function te(n) {
+  const e = n ? `(min-width: ${Z[n]}px)` : void 0, a = Q(
     (r) => {
       if (!e || typeof window > "u" || !window.matchMedia) return () => {
       };
@@ -17,8 +17,8 @@ function ee(n) {
     },
     [e]
   );
-  return Q(
-    e ? a : Z,
+  return U(
+    e ? a : ee,
     () => e != null && typeof window < "u" && window.matchMedia ? !window.matchMedia(e).matches : !1,
     () => !1
   );
@@ -41,8 +41,8 @@ function E({ size: n, children: e, className: a }) {
     }
   );
 }
-const R = (n) => n === "nested" ? "px-[calc(var(--su-table-gap)/2)] first:ps-[15px] last:pe-[15px]" : "px-[calc(var(--su-table-gap)/2)] first:ps-su4 last:pe-su4", $ = "border-b border-solid border-border", F = (n) => n === "nested" ? "px-[15px]" : "px-su4", A = "border-b border-solid border-border last:border-b-0", P = "block min-w-0 p-0 empty:hidden", te = "[&:has(>[data-su-stack-end])]:before:content-empty [&:has(>[data-su-stack-end])]:before:order-1 [&:has(>[data-su-stack-end])]:before:basis-full [&>[data-su-stack-end]~*]:order-2 [&:has(>[data-su-stack-end])>:not([data-su-stack-end]~*)]:-mb-[2px]";
-function q(n, e, a) {
+const R = (n) => n === "nested" ? "px-[calc(var(--su-table-gap)/2)] first:ps-[15px] last:pe-[15px]" : "px-[calc(var(--su-table-gap)/2)] first:ps-su4 last:pe-su4", $ = "border-b border-solid border-border", F = (n) => n === "nested" ? "px-[15px]" : "px-su4", A = "border-b border-solid border-border last:border-b-0", P = "block min-w-0 p-0 empty:hidden", ne = "[&:has(>[data-su-stack-end])]:before:content-empty [&:has(>[data-su-stack-end])]:before:order-1 [&:has(>[data-su-stack-end])]:before:basis-full [&>[data-su-stack-end]~*]:order-2 [&:has(>[data-su-stack-end])>:not([data-su-stack-end]~*)]:-mb-[2px]";
+function K(n, e, a) {
   return o(n === "first" && !a ? "pt-[10px] pb-0 align-top" : n === "meta" ? "pt-0 pb-[9px] align-top" : "py-[3px] align-middle", n === "first" && !a || e ? void 0 : $);
 }
 function x({
@@ -51,28 +51,31 @@ function x({
   size: a = "default",
   empty: r,
   footer: s,
-  loading: l = !1,
-  stack: i,
-  header: c,
+  footerWrap: l = !1,
+  loading: i = !1,
+  stack: c,
+  header: p,
   headerHidden: h = !1,
-  stickyHeader: p = !1,
+  stickyHeader: v = !1,
   panelClassName: g,
-  columnGap: v,
-  className: m,
-  style: f,
-  children: k,
-  ...M
+  columnGap: m,
+  className: f,
+  style: k,
+  children: M,
+  ...D
 }) {
-  const D = ee(i), B = d(b), N = i ? D : B, C = p && !N, H = J(() => ({ hidden: h, sticky: C }), [h, C]);
-  return /* @__PURE__ */ t(y.Provider, { value: a, children: /* @__PURE__ */ t(j.Provider, { value: void 0, children: /* @__PURE__ */ t(b.Provider, { value: N, children: /* @__PURE__ */ t(_.Provider, { value: H, children: /* @__PURE__ */ u("div", { className: o("su-panel font-sans text-ink", C && "flex flex-col min-h-0", g), children: [
-    c != null ? /* @__PURE__ */ t(
+  const B = te(c), H = d(b), N = c ? B : H, C = v && !N, G = O(() => ({ hidden: h, sticky: C }), [h, C]);
+  return /* @__PURE__ */ t(y.Provider, { value: a, children: /* @__PURE__ */ t(j.Provider, { value: void 0, children: /* @__PURE__ */ t(b.Provider, { value: N, children: /* @__PURE__ */ t(_.Provider, { value: G, children: /* @__PURE__ */ u("div", { className: o("su-panel font-sans text-ink", C && "flex flex-col min-h-0", g), children: [
+    p != null ? /* @__PURE__ */ t(
       "div",
       {
         className: o(
-          "flex flex-wrap items-center gap-x-su3 gap-y-su1 shrink-0 py-[6px] border-b border-solid border-border text-body text-ink",
+          // 5 above and below, not 6: with the 1px rule that leaves 28 of the nested 40 and
+          // 32 of the 44, so a small button or a 32 control does not grow the strip.
+          "flex flex-wrap items-center gap-x-su3 gap-y-su1 shrink-0 py-[5px] border-b border-solid border-border text-body text-ink",
           a === "nested" ? "min-h-[40px] px-[15px]" : "min-h-[var(--su-panel-header)] px-su4"
         ),
-        children: c
+        children: p
       }
     ) : null,
     /* @__PURE__ */ t(
@@ -82,49 +85,57 @@ function x({
         children: /* @__PURE__ */ t(
           "table",
           {
-            "aria-busy": l || void 0,
+            "aria-busy": i || void 0,
             role: N ? "list" : void 0,
             style: {
-              "--su-table-gap": v != null ? `${v}px` : "var(--su-table-column-gap)",
-              ...f
+              "--su-table-gap": m != null ? `${m}px` : "var(--su-table-column-gap)",
+              ...k
             },
             className: o(
               N ? "block w-full text-start" : "w-full border-separate [border-spacing:0] text-start",
               a === "nested" ? "text-small" : "text-body",
-              m
+              f
             ),
-            ...M,
-            children: k
+            ...D,
+            children: M
           }
         )
       }
     ),
     r,
     s != null ? (
-      // 6 above and below: a one-line footer is still 44 (a note of 18, a control up to
-      // 32), and a note that runs to several lines no longer touches the rules. Parts that
-      // do not fit side by side wrap, 4 between the lines.
-      /* @__PURE__ */ t("div", { className: "flex flex-wrap items-center gap-x-su2 gap-y-su1 shrink-0 min-h-[var(--su-panel-footer)] px-su4 py-[6px] border-t border-solid border-border text-small text-ink-2", children: s })
+      // The block padding is opt-in: a footer that pads itself (the app's pager) would grow
+      // by it. 5 with the 1px rule leaves 33 of the 44, so a 32 control still fits one line.
+      /* @__PURE__ */ t(
+        "div",
+        {
+          className: o(
+            "flex items-center gap-x-su2 shrink-0 min-h-[var(--su-panel-footer)] px-su4 border-t border-solid border-border text-small text-ink-2",
+            l && "flex-wrap gap-y-su1 py-[5px]"
+          ),
+          children: s
+        }
+      )
     ) : null
   ] }) }) }) }) });
 }
-function ne({ className: n, children: e, ...a }) {
+function ae({ className: n, children: e, ...a }) {
   const r = d(b);
   return /* @__PURE__ */ t(j.Provider, { value: "head", children: /* @__PURE__ */ t("thead", { className: o(r && "hidden", n), ...a, children: e }) });
 }
-function ae({ className: n, children: e, ...a }) {
+function se({ className: n, children: e, ...a }) {
   const r = d(b);
   return /* @__PURE__ */ t(j.Provider, { value: "body", children: /* @__PURE__ */ t("tbody", { role: r ? "none" : void 0, className: o(r && "block", n), ...a, children: e }) });
 }
-function se(n) {
+function re(n) {
   let e = 0, a = 0;
-  return U.forEach(n, (r) => {
-    if (!X(r)) return;
+  return X.forEach(n, (r) => {
+    if (!Y(r)) return;
     const s = Math.max(1, r.props.colSpan ?? 1);
     e += s, (r.props.rowSpan ?? 1) > 1 && (a += s);
   }), { total: e, spanned: a };
 }
-function re({
+function oe({
   selected: n = !1,
   expanded: e = !1,
   meta: a,
@@ -134,22 +145,22 @@ function re({
   children: i,
   ...c
 }) {
-  const h = d(j), p = d(y), g = d(b), v = d(_);
-  if (h === "head")
+  const p = d(j), h = d(y), v = d(b), g = d(_);
+  if (p === "head")
     return /* @__PURE__ */ t(
       "tr",
       {
         className: o(
           // A hidden header row takes no height; its cells are still the columns' headers.
-          v.hidden ? void 0 : p === "nested" ? "h-[var(--su-row-nested-header)]" : "h-[var(--su-row-header)]",
+          g.hidden ? void 0 : h === "nested" ? "h-[var(--su-row-nested-header)]" : "h-[var(--su-row-header)]",
           l
         ),
         ...c,
         children: i
       }
     );
-  const m = n ? "bg-action-subtle [@media(hover:hover)]:hover:bg-action-subtle-hover" : e ? "bg-surface-2 [@media(hover:hover)]:hover:bg-surface-hover" : "[@media(hover:hover)]:hover:bg-surface-hover", f = "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none", k = p === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]";
-  if (g)
+  const m = n ? "bg-action-subtle [@media(hover:hover)]:hover:bg-action-subtle-hover" : e ? "bg-surface-2 [@media(hover:hover)]:hover:bg-surface-hover" : "[@media(hover:hover)]:hover:bg-surface-hover", f = "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none", k = h === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]";
+  if (v)
     return /* @__PURE__ */ t(w.Provider, { value: { line: "single", expanded: e }, children: /* @__PURE__ */ u(
       "tr",
       {
@@ -157,8 +168,8 @@ function re({
         "data-state": n ? "selected" : void 0,
         className: o(
           "flex flex-wrap items-baseline gap-x-su3 gap-y-[2px] py-su2",
-          te,
-          F(p),
+          ne,
+          F(h),
           e ? void 0 : A,
           m,
           f,
@@ -181,7 +192,7 @@ function re({
         children: i
       }
     ) });
-  const { total: M, spanned: D } = se(i), B = Math.max(0, Math.min(r - 1, M - 1)), N = Math.max(1, M - B - D), C = n ? "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-surface-hover", H = n ? "[@media(hover:hover)]:[&:hover+tr]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:hover+tr]:bg-surface-hover";
+  const { total: M, spanned: D } = re(i), B = Math.max(0, Math.min(r - 1, M - 1)), H = Math.max(1, M - B - D), N = n ? "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-surface-hover", C = n ? "[@media(hover:hover)]:[&:hover+tr]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:hover+tr]:bg-surface-hover";
   return /* @__PURE__ */ u(T, { children: [
     /* @__PURE__ */ t(w.Provider, { value: { line: "first", expanded: e }, children: /* @__PURE__ */ t(
       "tr",
@@ -190,8 +201,8 @@ function re({
         className: o(
           "h-[30px] [&:nth-last-child(2)>*]:border-b-0",
           m,
+          N,
           C,
-          H,
           f,
           l
         ),
@@ -212,14 +223,14 @@ function re({
           s == null ? void 0 : s.className
         ),
         children: [
-          Array.from({ length: B }, (be, V) => /* @__PURE__ */ t(z, {}, V)),
-          /* @__PURE__ */ t(z, { colSpan: N, children: a })
+          Array.from({ length: B }, (G, J) => /* @__PURE__ */ t(z, {}, J)),
+          /* @__PURE__ */ t(z, { colSpan: H, children: a })
         ]
       }
     ) })
   ] });
 }
-function oe({
+function le({
   numeric: n = !1,
   sort: e,
   onSort: a,
@@ -228,16 +239,16 @@ function oe({
   children: l,
   ...i
 }) {
-  const c = d(j), h = d(y), { line: p, expanded: g } = d(w), v = d(b), m = d(_);
+  const c = d(j), p = d(y), { line: h, expanded: v } = d(w), g = d(b), m = d(_);
   if (c === "body")
     return /* @__PURE__ */ t(
       "th",
       {
         className: o(
-          v ? P : R(h),
-          v ? void 0 : q(p, g, (i.rowSpan ?? 1) > 1),
+          g ? P : R(p),
+          g ? void 0 : K(h, v, (i.rowSpan ?? 1) > 1),
           "[font-weight:inherit]",
-          n && !v ? "text-end" : "text-start",
+          n && !g ? "text-end" : "text-start",
           s
         ),
         ...i,
@@ -275,12 +286,12 @@ function oe({
     {
       "aria-sort": e,
       className: o(
-        R(h),
+        R(p),
         "py-[4px] align-middle bg-surface-2 font-sans font-medium whitespace-nowrap",
         // Pinned to the top of the panel's scroller; the rule travels with the cell.
         m.sticky && "sticky top-0 z-[1]",
         $,
-        h === "nested" ? "text-micro" : "text-small",
+        p === "nested" ? "text-micro" : "text-small",
         f ? "text-ink" : "text-ink-2",
         n ? "text-end" : "text-start",
         s
@@ -293,7 +304,7 @@ function oe({
     }
   );
 }
-const K = {
+const V = {
   text: void 0,
   id: "su-id whitespace-nowrap",
   idSecondary: "font-mono text-small text-ink-2 whitespace-nowrap",
@@ -302,8 +313,8 @@ const K = {
   empty: "text-ink-3",
   control: "w-px whitespace-nowrap",
   actions: "w-px whitespace-nowrap"
-}, L = "max-w-full [overflow-wrap:anywhere]", le = {
-  ...K,
+}, L = "max-w-full [overflow-wrap:anywhere]", ie = {
+  ...V,
   id: `su-id ${L}`,
   idSecondary: `font-mono text-small text-ink-2 ${L}`,
   number: `su-tabular ${L}`,
@@ -319,8 +330,8 @@ function z({
   rowSpan: l,
   ...i
 }) {
-  const c = d(y), { line: h, expanded: p } = d(w), g = d(b), v = n || e === "number" || e === "actions", m = e === "empty" && s == null ? "—" : s;
-  if (g)
+  const c = d(y), { line: p, expanded: h } = d(w), v = d(b), g = n || e === "number" || e === "actions", m = e === "empty" && s == null ? "—" : s;
+  if (v)
     return /* @__PURE__ */ t(
       "td",
       {
@@ -328,7 +339,7 @@ function z({
         "data-su-stack-end": a ? "" : void 0,
         className: o(
           P,
-          le[e],
+          ie[e],
           a && "shrink-0 ms-auto",
           n && e !== "number" ? `su-tabular ${L}` : void 0,
           r
@@ -337,17 +348,17 @@ function z({
         children: m
       }
     );
-  const f = h === "first" && (l ?? 1) <= 1 && (e === "control" || e === "actions");
+  const f = p === "first" && (l ?? 1) <= 1 && (e === "control" || e === "actions");
   return /* @__PURE__ */ t(
     "td",
     {
       rowSpan: l,
       className: o(
         R(c),
-        q(h, p, (l ?? 1) > 1),
-        K[e],
+        K(p, h, (l ?? 1) > 1),
+        V[e],
         n && e !== "number" ? "su-tabular whitespace-nowrap" : void 0,
-        v ? "text-end" : void 0,
+        g ? "text-end" : void 0,
         r
       ),
       ...i,
@@ -355,7 +366,7 @@ function z({
     }
   );
 }
-function ie({ className: n, children: e, ...a }) {
+function de({ className: n, children: e, ...a }) {
   const r = d(y), s = d(b);
   return /* @__PURE__ */ t(w.Provider, { value: { line: "single", expanded: !1 }, children: /* @__PURE__ */ t(
     "tr",
@@ -373,7 +384,7 @@ function ie({ className: n, children: e, ...a }) {
     }
   ) });
 }
-const de = W(
+const ce = q(
   function({ expanded: e = !1, type: a = "button", className: r, ...s }, l) {
     return /* @__PURE__ */ t(
       "button",
@@ -393,7 +404,7 @@ const de = W(
       }
     );
   }
-), ce = W(function({ count: e, active: a = !1, type: r = "button", className: s, ...l }, i) {
+), ue = q(function({ count: e, active: a = !1, type: r = "button", className: s, ...l }, i) {
   const c = a || (e ?? 0) > 0;
   return /* @__PURE__ */ u(
     "button",
@@ -414,7 +425,7 @@ const de = W(
     }
   );
 });
-function ue({
+function he({
   colSpan: n,
   rowProps: e,
   startInset: a,
@@ -424,27 +435,27 @@ function ue({
   children: i,
   ...c
 }) {
-  const h = d(y), p = d(b);
+  const p = d(y), h = d(b);
   return /* @__PURE__ */ t(
     "tr",
     {
-      role: p ? "listitem" : void 0,
+      role: h ? "listitem" : void 0,
       ...e,
-      className: o(p && "block", "[&:last-child>*]:border-b-0", e == null ? void 0 : e.className),
+      className: o(h && "block", "[&:last-child>*]:border-b-0", e == null ? void 0 : e.className),
       children: /* @__PURE__ */ t(
         "td",
         {
           colSpan: n,
           className: o(
             // Stacked: no disclosure column to line up behind, so the block starts at the row's edge.
-            p ? "block pt-su3" : "pt-su3 ps-[56px] pe-su4",
+            h ? "block pt-su3" : "pt-su3 ps-[56px] pe-su4",
             r ? "pb-su3" : "pb-su4",
-            p ? F(h) : void 0,
+            h ? F(p) : void 0,
             "bg-surface-2",
             $,
             s
           ),
-          style: a != null && !p ? { paddingInlineStart: a, ...l } : l,
+          style: a != null && !h ? { paddingInlineStart: a, ...l } : l,
           ...c,
           children: i
         }
@@ -452,7 +463,7 @@ function ue({
     }
   );
 }
-function he({
+function pe({
   colSpan: n,
   startColumn: e = 1,
   action: a,
@@ -460,7 +471,7 @@ function he({
   children: s,
   ...l
 }) {
-  const i = d(y), c = d(b), h = c ? 0 : Math.max(0, Math.min(e - 1, n - 1));
+  const i = d(y), c = d(b), p = c ? 0 : Math.max(0, Math.min(e - 1, n - 1));
   return /* @__PURE__ */ t(w.Provider, { value: { line: "single", expanded: !1 }, children: /* @__PURE__ */ u(
     "tr",
     {
@@ -472,11 +483,11 @@ function he({
       ),
       ...l,
       children: [
-        Array.from({ length: h }, (p, g) => /* @__PURE__ */ t(z, {}, g)),
+        Array.from({ length: p }, (h, v) => /* @__PURE__ */ t(z, {}, v)),
         /* @__PURE__ */ t(
           "td",
           {
-            colSpan: n - h,
+            colSpan: n - p,
             className: o(
               // Stacked: 9 + 18 + 9 keeps the fold line at 36.
               c ? "block py-[9px]" : "py-[4px] align-middle",
@@ -493,14 +504,14 @@ function he({
     }
   ) });
 }
-const I = {
+const W = {
   neutral: "text-neutral-text",
   info: "text-info-text",
   success: "text-success-text",
   warning: "text-warning-text",
   danger: "text-danger-text"
 };
-function pe({ tone: n, lead: e, action: a, className: r, children: s, ...l }) {
+function me({ tone: n, lead: e, action: a, className: r, children: s, ...l }) {
   return d(b) ? /* @__PURE__ */ u("span", { className: o("block min-w-0 break-words text-small text-ink-2", r), ...l, children: [
     n ? /* @__PURE__ */ t(
       "span",
@@ -508,12 +519,12 @@ function pe({ tone: n, lead: e, action: a, className: r, children: s, ...l }) {
         "aria-hidden": "true",
         className: o(
           "inline-block size-[6px] me-[6px] align-middle rounded-su-round forced-colors:[forced-color-adjust:none]",
-          G[n]
+          I[n]
         )
       }
     ) : null,
     e != null ? /* @__PURE__ */ u(T, { children: [
-      /* @__PURE__ */ t("span", { className: o("font-medium", n ? I[n] : "text-ink"), children: e }),
+      /* @__PURE__ */ t("span", { className: o("font-medium", n ? W[n] : "text-ink"), children: e }),
       " "
     ] }) : null,
     s,
@@ -538,11 +549,11 @@ function pe({ tone: n, lead: e, action: a, className: r, children: s, ...l }) {
             "aria-hidden": "true",
             className: o(
               "inline-block shrink-0 size-[6px] rounded-su-round forced-colors:[forced-color-adjust:none]",
-              G[n]
+              I[n]
             )
           }
         ) : null,
-        e != null ? /* @__PURE__ */ t("span", { className: o("shrink-0 font-medium", n ? I[n] : "text-ink"), children: e }) : null,
+        e != null ? /* @__PURE__ */ t("span", { className: o("shrink-0 font-medium", n ? W[n] : "text-ink"), children: e }) : null,
         s != null ? /* @__PURE__ */ t("span", { className: "min-w-0 truncate", children: s }) : null,
         a != null ? /* @__PURE__ */ u(T, { children: [
           /* @__PURE__ */ t("span", { "aria-hidden": "true", children: "·" }),
@@ -552,7 +563,7 @@ function pe({ tone: n, lead: e, action: a, className: r, children: s, ...l }) {
     }
   );
 }
-function me({ columns: n, className: e, ...a }) {
+function be({ columns: n, className: e, ...a }) {
   const r = d(y), s = d(b);
   return /* @__PURE__ */ t(w.Provider, { value: { line: "single", expanded: !1 }, children: /* @__PURE__ */ t(
     "tr",
@@ -570,30 +581,30 @@ function me({ columns: n, className: e, ...a }) {
     }
   ) });
 }
-x.Head = ne;
-x.Body = ae;
-x.Row = re;
-x.Th = oe;
+x.Head = ae;
+x.Body = se;
+x.Row = oe;
+x.Th = le;
 x.Td = z;
-x.GroupRow = ie;
-x.Disclosure = de;
-x.Facet = ce;
-x.Detail = ue;
-x.FoldRow = he;
-x.Meta = pe;
-x.SkeletonRow = me;
+x.GroupRow = de;
+x.Disclosure = ce;
+x.Facet = ue;
+x.Detail = he;
+x.FoldRow = pe;
+x.Meta = me;
+x.SkeletonRow = be;
 export {
   x as Table,
-  ae as TableBody,
-  ue as TableDetail,
-  de as TableDisclosure,
-  ce as TableFacet,
-  he as TableFoldRow,
-  ie as TableGroupRow,
-  ne as TableHead,
-  pe as TableMeta,
-  re as TableRow,
-  me as TableSkeletonRow,
+  se as TableBody,
+  he as TableDetail,
+  ce as TableDisclosure,
+  ue as TableFacet,
+  pe as TableFoldRow,
+  de as TableGroupRow,
+  ae as TableHead,
+  me as TableMeta,
+  oe as TableRow,
+  be as TableSkeletonRow,
   z as TableTd,
-  oe as TableTh
+  le as TableTh
 };

@@ -651,6 +651,13 @@ export function AutoCompleteDemo() {
     { value: "cust-007", code: "CUST-007", label: "Agro Farm Iasi, north depot and returns desk" },
     { value: "supp-012", code: "SUPP-012", label: "Bandage Works" },
   ];
+  // A server search stood in for: the rows of the term before stay held while the next are fetched.
+  const [carrier, setCarrier] = useState("");
+  const [searching, setSearching] = useState(false);
+  const searchCarriers = (term: string) => {
+    setSearching(term !== "");
+    if (term !== "") window.setTimeout(() => setSearching(false), 1500);
+  };
   return (
     <div className="demo-stack" style={{ width: 320, maxWidth: "100%" }}>
     {/* picker: the value is the option's value, and the box at rest draws the code + name pair. */}
@@ -670,6 +677,22 @@ export function AutoCompleteDemo() {
       />
       <span className="text-small text-ink-2" data-testid="partner-value">
         Value held: <span className="su-id-2">{partner || "none"}</span>
+      </span>
+    </UI.FormItem>
+    <UI.FormItem label="Carrier (server search)">
+      <UI.AutoComplete
+        picker
+        data-testid="carrier-picker"
+        placeholder="Search carriers"
+        listLabel="Carriers"
+        value={carrier}
+        onChange={setCarrier}
+        onSearch={searchCarriers}
+        loading={searching}
+        options={partners}
+      />
+      <span className="text-small text-ink-2" data-testid="carrier-value">
+        Value held: <span className="su-id-2">{carrier || "none"}</span>
       </span>
     </UI.FormItem>
     <UI.FormItem label="Bay code">
@@ -1589,8 +1612,21 @@ export function TableDemo() {
             <a href="#Table" className="ms-auto text-small font-medium text-action-text">
               Module log
             </a>
+            {/* A 32 control: the strip stays 44. */}
+            <div className="w-[140px]">
+              <UI.Select
+                size="sm"
+                aria-label="Modules shown"
+                defaultValue="all"
+                options={[
+                  { value: "all", label: "All modules" },
+                  { value: "active", label: "Active only" },
+                ]}
+              />
+            </div>
           </>
         }
+        footerWrap
         footer={
           <span data-testid="modules-note">
             Modules are installed from the server, not from this screen. Run the install command on
@@ -1798,7 +1834,36 @@ export function TableDemo() {
                       // rowProps reach the detail's own <tr>; the rest reach its <td>.
                       rowProps={{ "data-testid": `stock-${row.id}-detail` }}
                     >
-                      <UI.Table size="nested" aria-label={`Pallets in ${row.id}`}>
+                      <UI.Table
+                        size="nested"
+                        aria-label={`Pallets in ${row.id}`}
+                        // A 28 button in the 40 strip, a 32 control in the 44 footer: neither grows.
+                        header={
+                          <>
+                            <span>2 pallets, 240 on hand</span>
+                            <UI.Button size="sm" className="ms-auto">
+                              History
+                            </UI.Button>
+                          </>
+                        }
+                        footerWrap
+                        footer={
+                          <>
+                            <span>Sorted by</span>
+                            <div className="w-[140px]">
+                              <UI.Select
+                                size="sm"
+                                aria-label="Pallet order"
+                                defaultValue="received"
+                                options={[
+                                  { value: "received", label: "Received" },
+                                  { value: "quantity", label: "Quantity" },
+                                ]}
+                              />
+                            </div>
+                          </>
+                        }
+                      >
                         <UI.Table.Head>
                           <UI.Table.Row>
                             <UI.Table.Th>Pallet</UI.Table.Th>

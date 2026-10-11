@@ -38,9 +38,9 @@ Nothing is removed. Three fixes change what is drawn; each is noted.
 
 ### Release B: pickers, decimal entry, table and handheld needs (additive, still 0.2.0)
 
-Nothing is removed and no default changes its look, with one exception noted under Table `footer`.
+Nothing is removed and no default changes its look.
 
-- **AutoComplete `picker`**: the searchable picker for a reference to a record. `value` is the chosen option's `value` and `onChange` fires with it ("" on a clear). At rest the box draws the chosen option as the list does, its `code` in mono 500 and its name in ink-2; the same line is still the input's value. Typing replaces it with the term, which is dropped on a pick, a clear or a blur. The list is narrowed by code and name, or by the caller when **`onSearch`** is given (a server search; it also hears "" when the term is dropped). The list opens even when empty and then says `notFoundContent`; Enter never submits the enclosing form.
+- **AutoComplete `picker`**: the searchable picker for a reference to a record. `value` is the chosen option's `value` and `onChange` fires with it ("" on a clear). At rest the box draws the chosen option as the list does, its `code` in mono 500 and its name in ink-2; the same line is still the input's value. Typing replaces it with the term, which is dropped on a pick, a clear, a blur or Escape. The list is narrowed by code and name, or by the caller when **`onSearch`** is given (a server search; it also hears "" when the term is dropped). The list opens even when empty and then says `notFoundContent`; Enter never submits the enclosing form, and picks nothing while `loading` (in the plain AutoComplete too): the options held then are not the rows on screen.
 - **AutoComplete** forwards its other props (`data-testid`, `autoFocus`, `aria-describedby`, `onKeyDown`, `onClick`…) to its `<input>`, and its English is now props with the same defaults: **`listLabel`** ("Suggestions"), **`loadingContent`** ("Searching…"), **`countLabel`** (`n => "{n} suggestions"`) and **`clearLabel`** ("Clear").
 - **Select `emptyContent`** replaces "No options" (still the default). **Menu `aria-label`** is a documented prop (default "Menu").
 - **QuantityStepper decimal mode** (`decimalValue`, `defaultDecimalValue`, `onDecimalChange`, `decimalSeparator`, `scale`): the quantity is canonical decimal text ("12.5"), shown with the caller's separator, typed with "," or ".", and stepped and bounded as text, so no floating point number is made of it. `min`, `max` and `step` also take decimal text. `inputProps` accepts `data-*` keys. `cleanDecimal`, `compareDecimal`, `stepDecimal` and `showDecimal` are exported.
@@ -49,12 +49,12 @@ Nothing is removed and no default changes its look, with one exception noted und
 - **DocketRow `wrap`**: the value and the sub line wrap and break inside an identifier instead of ending in an ellipsis; the row grows from its 56 / 64. **`valueProps`** reach the value's element, and a read-only row now takes its other props (`data-testid`).
 - **`HandheldErrorLine`** is exported (it takes `className` and the other `<p>` props; `id` is optional), and **Tag `size="handheld"`** is the tag at terminal scale: 28 high, 17/24 500.
 - **Table `stickyHeader`** and **`panelClassName`**: the body scrolls inside the panel under a pinned column header, and the strip, `empty` and `footer` stay; give the panel its height through `panelClassName`.
-- **Table `header`**: a strip inside the panel above the column header (44, or 40 in a nested table), for a title with its count and link or a nested table's summary.
+- **Table `header`**: a strip inside the panel above the column header (44, or 40 in a nested table), for a title with its count and link or a nested table's summary. It has 5 above and below, so the 40 strip holds a 28 button and the 44 strip a 32 control without growing.
 - **Table `headerHidden`**: the header row is not drawn and takes no height; its cells stay for assistive technology and keep the columns' widths.
 - **Table `columnGap`** and the token **`--su-table-column-gap`** (16px): the gap between columns. Cells pad half of it; the edges keep 16.
 - **Table.Detail `startInset`** (px, default 56) and **`strip`** (12 below instead of 16, the inline edit strip).
 - **Table.Td `stackEnd`**: in the stacked shape that cell ends the record's first line (a state tag, or the "⋯"), and the cells after it start on the next line.
-- **Table `footer`** (changed): it now has 6 above and below and wraps its parts. A one-line footer is still 44 (a note, or a control up to 32 high); a note of several lines no longer touches the rules. A footer holding a control taller than 32 grows by the difference.
+- **Table `footerWrap`**: opt-in, for a footer that holds prose. It has 5 above and below and wraps its parts, so a note of several lines no longer touches the rules. A one-line footer is still 44 with a note or a control up to 32 high (the box is 44 with its 1px rule, so 33 of content fit); a taller control grows it by the difference. Without it the footer is as in release A: no block padding and one line, so content that pads itself (a pager) keeps its height.
 - **Table.Disclosure and Table.Facet** are 44 targets under `(hover: none)`; their drawn size does not change.
 
 ### Breaking changes

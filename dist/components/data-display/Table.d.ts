@@ -31,6 +31,13 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
      */
     footer?: ReactNode;
     /**
+     * Opt-in, for a footer that holds prose: 5 above and below, so a note that runs to several
+     * lines does not touch the rules, and parts that do not fit side by side wrap, 4 between the
+     * lines. One line is still 44 (a note of 18, a control up to 32). Leave it off for content that
+     * pads itself (a pager), which would grow by the padding. Default: off, one centred line.
+     */
+    footerWrap?: boolean;
+    /**
      * A strip inside the panel, above the column header, with a rule below: a title with its count
      * and a link (44, padding 0 16), or the summary of a nested table (40, padding 0 15: totals, a
      * verb, a history link). Items are 12 apart and centred; it wraps rather than cut. It is not
@@ -78,7 +85,7 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
     stack?: TableStack;
     children?: ReactNode;
 }
-export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, loading, stack, header, headerHidden, stickyHeader, panelClassName, columnGap, className, style, children, ...rest }: TableProps): import("react").JSX.Element;
+export declare function Table({ striped: _striped, bordered: _bordered, size, empty, footer, footerWrap, loading, stack, header, headerHidden, stickyHeader, panelClassName, columnGap, className, style, children, ...rest }: TableProps): import("react").JSX.Element;
 export declare namespace Table {
     var Head: typeof TableHead;
     var Body: typeof TableBody;

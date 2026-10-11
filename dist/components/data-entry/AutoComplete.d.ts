@@ -37,8 +37,9 @@ export interface AutoCompleteProps extends Omit<InputHTMLAttributes<HTMLInputEle
      * name in ink-2, cut with an ellipsis. Typing searches: the pair gives way to the typed term,
      * the list is narrowed by code and name (or by the caller, see `onSearch`), and the term is
      * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
-     * the value. The list opens whenever the box does, and says `notFoundContent` when it has no
-     * rows. Enter never submits the enclosing form. A `value` that is no option's reads as itself:
+     * the value (Escape closes the list and drops the term too). The list opens whenever the box
+     * does, and says `notFoundContent` when it has no rows. Enter never submits the enclosing form,
+     * and picks nothing while `loading`: the rows of the search before are not the ones on screen. A `value` that is no option's reads as itself:
      * keep the held option among `options` (it is remembered after a pick).
      */
     picker?: boolean;

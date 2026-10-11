@@ -67,8 +67,9 @@ export interface AutoCompleteProps
    * name in ink-2, cut with an ellipsis. Typing searches: the pair gives way to the typed term,
    * the list is narrowed by code and name (or by the caller, see `onSearch`), and the term is
    * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
-   * the value. The list opens whenever the box does, and says `notFoundContent` when it has no
-   * rows. Enter never submits the enclosing form. A `value` that is no option's reads as itself:
+   * the value (Escape closes the list and drops the term too). The list opens whenever the box
+   * does, and says `notFoundContent` when it has no rows. Enter never submits the enclosing form,
+   * and picks nothing while `loading`: the rows of the search before are not the ones on screen. A `value` that is no option's reads as itself:
    * keep the held option among `options` (it is remembered after a pick).
    */
   picker?: boolean;
@@ -254,7 +255,9 @@ export function AutoComplete({
   // activeIndex can outlive the list it was picked in (async options, a new filter)
   const clamped = Math.max(0, Math.min(activeIndex, filtered.length - 1));
   const active = filtered[clamped]?.disabled ? step(clamped, 1) : clamped;
-  const activeOption = filtered[active];
+  // While loading the list reads the searching row: the options held are the search before's,
+  // and nothing the user cannot see may be picked or announced as active.
+  const activeOption = loading ? undefined : filtered[active];
 
   const emitChange = (next: string) => {
     if (!isControlled) setInternal(next);
@@ -294,11 +297,11 @@ export function AutoComplete({
     let next = event.target.value;
     if (term === null && current) {
       // The first edit of a box at rest replaces the value's line, wherever the caret was: what
-      // was typed is the term, and a deletion asks for the whole list. A value set from outside
-      // (a paste over the selection, a test's fill) carries no `data` and is taken whole.
+      // was typed, pasted, composed or put in by autocorrect is the term, and a deletion asks for
+      // the whole list. A value set from outside (a test's fill) carries no `data` and is taken whole.
       const native = event.nativeEvent as Partial<InputEvent>;
       if (native.inputType?.startsWith("delete")) next = "";
-      else if (native.inputType === "insertText" && native.data != null) next = native.data;
+      else if (native.inputType?.startsWith("insert") && native.data != null) next = native.data;
     }
     setTerm(next);
     onSearch?.(next);
@@ -334,12 +337,14 @@ export function AutoComplete({
       setActiveIndex(step(active, -1));
     } else if (event.key === "Enter") {
       event.preventDefault(); // never let an open list submit the enclosing form
+      if (loading) return;
       if (activeOption && !activeOption.disabled) selectOption(activeOption);
       else setOpen(false);
     } else if (event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation(); // otherwise the same key also dismisses the surrounding Modal/Drawer
       setOpen(false);
+      if (picker) dropTerm();
     }
   };
 
