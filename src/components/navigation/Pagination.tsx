@@ -17,6 +17,12 @@ export interface PaginationLabels {
   next?: string;
   /** Keyset page-size note, e.g. `(n) => \`${n} pe pagină\``. */
   perPage?: (pageSize: number) => ReactNode;
+  /**
+   * Keyset: what is announced after a move, in place of "Page 3". Pass your locale's words, or
+   * `null` to announce nothing: a cursor list that keeps no count of its pages has no number to
+   * say, and the table's own `aria-busy` already says the rows changed.
+   */
+  page?: ((page: number) => string) | null;
 }
 
 export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
@@ -188,7 +194,11 @@ export function Pagination({
         >
           {nextLabel}
         </button>
-        <span className="sr-only" aria-live="polite">{`Page ${page}`}</span>
+        {labels?.page === null ? null : (
+          <span className="sr-only" aria-live="polite">
+            {labels?.page ? labels.page(page) : `Page ${page}`}
+          </span>
+        )}
       </nav>
     );
   }

@@ -225,7 +225,7 @@ function te({
     {
       type: "button",
       onClick: s,
-      className: "inline-flex items-center gap-su1 p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer whitespace-nowrap su-focus-ring [@media(hover:hover)]:hover:text-ink",
+      className: "inline-flex items-center gap-su1 min-w-0 p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer whitespace-nowrap su-focus-ring [@media(hover:hover)]:hover:text-ink",
       children: [
         l,
         N
@@ -249,7 +249,7 @@ function te({
         r
       ),
       ...i,
-      children: a != null || N || s ? /* @__PURE__ */ u("span", { className: "inline-flex items-center gap-su1 align-middle", children: [
+      children: a != null || N || s ? /* @__PURE__ */ u("span", { className: "inline-flex items-center gap-su1 min-w-0 max-w-full align-middle", children: [
         C,
         a
       ] }) : l

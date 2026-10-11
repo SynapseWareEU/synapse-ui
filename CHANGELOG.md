@@ -16,6 +16,10 @@ Nothing is removed and no default changes its look. Two fixes change behaviour, 
 - **HandheldTopBar**: `backDisabled` and `sessionDisabled` disable the two buttons in place (ink-3); `flowAs="h1" | "h2" | "h3"` renders the flow name as a heading (default `span`); and the session block now shrinks and cuts a long site or operator with an ellipsis instead of widening the page (fix).
 - **Popover `sideOffset`** (px, default 4, as before): the distance from the trigger, for a trigger inside a frame the overlay must clear, such as a rail tile whose panel opens 8 past the rail's edge.
 - **AutoComplete `selectedValue`**: the `value` of the option the caller holds. That option is marked `aria-selected`, whatever the box reads. Without it the option whose `label` equals the visible text is marked, as before, which a box showing a code + name pair on one line never matched.
+- **Popover `aria-label`** names the overlay, which is a `dialog` and had no name unless its content held a heading. And a fix: the overlay's scroller is now its whole padding box, so a focus ring at the content's edge (a search field at the top of a facet panel) is no longer cut on three sides, and a rule inside may reach the border with `-mx-su2`. The box, its padding and its height are as before.
+- **Pagination `labels.page`** (keyset): the sentence announced after a move, in place of the English "Page 3". `null` announces nothing, for a cursor list that keeps no count of its pages. Left out, the announcement is as before.
+- **Checkbox `row` and `trailing`**: the overlay-row form (full width, 32 high and 44 on touch, padding 0 8, radius 6, hover ground, label cut with an ellipsis) and a count at the end of the line (13/18 ink-2, tabular). For the values of a facet popover.
+- **Table.Th** (fix): the row a header lays its label, sort arrow and facet out in no longer outgrows its track in a fixed-layout table, so a label that cuts itself ends in an ellipsis with the arrow and the funnel still in view.
 - **Token `--su-inverse-ink-2`** (`text-inverse-ink-2`): secondary text on the inverse surface, `#cdd2d9` in light and `#525866` in dark.
 
 ### Breaking changes

@@ -14,6 +14,11 @@ export interface PopoverProps
    */
   sideOffset?: number;
   contentClassName?: string;
+  /**
+   * The accessible name of the overlay, which is a `dialog`: what it is for ("Filter by zone").
+   * Give one whenever the content has no heading of its own.
+   */
+  "aria-label"?: string;
   /** Portal target; defaults to document.body. For shadow DOM / iframe hosts. */
   container?: HTMLElement | null;
 }
@@ -30,6 +35,7 @@ export function Popover({
   sideOffset = 4,
   contentClassName,
   container,
+  "aria-label": ariaLabel,
   ...rest
 }: PopoverProps) {
   return (
@@ -42,6 +48,7 @@ export function Popover({
           side={side}
           align={align}
           sideOffset={sideOffset}
+          aria-label={ariaLabel}
           className={cn(
             "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",
             "font-sans text-body text-ink su-focus-ring",
@@ -51,7 +58,10 @@ export function Popover({
           )}
         >
           {/* No arrow (v2): the overlay shadow and the 4px offset already tie it to its trigger. */}
-          <div className="max-h-[calc(var(--radix-popover-content-available-height)-2*var(--su-space-2)-2px)] overflow-y-auto">
+          {/* The scroller is the whole padding box (the padding is taken back and given again
+              inside it), so a focus ring at the content's edge is drawn in the padding instead of
+              being cut by the scroller, and a rule may bleed to the border with `-mx-su2`. */}
+          <div className="-m-su2 p-su2 max-h-[calc(var(--radix-popover-content-available-height)-2px)] overflow-y-auto rounded-[inherit]">
             {content}
           </div>
         </RadixPopover.Content>

@@ -423,6 +423,10 @@ export interface TableThProps extends ThHTMLAttributes<HTMLTableCellElement> {
   /**
    * Facet control after the label (gap 4): a `<Table.Facet>`, usually as a Popover trigger.
    * Line the facet popover up with the column: its option text sits at the column label's x.
+   *
+   * In a fixed-layout table the label gives way before the arrow and the funnel do: the header's
+   * row never outgrows its track, so a label that cuts itself (`min-w-0 truncate`) ends in an
+   * ellipsis with both still in view.
    */
   facet?: ReactNode;
 }
@@ -480,7 +484,7 @@ export function TableTh({
     <button
       type="button"
       onClick={onSort}
-      className="inline-flex items-center gap-su1 p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer whitespace-nowrap su-focus-ring [@media(hover:hover)]:hover:text-ink"
+      className="inline-flex items-center gap-su1 min-w-0 p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer whitespace-nowrap su-focus-ring [@media(hover:hover)]:hover:text-ink"
     >
       {children}
       {arrow}
@@ -509,7 +513,7 @@ export function TableTh({
       {...rest}
     >
       {facet != null || arrow || onSort ? (
-        <span className="inline-flex items-center gap-su1 align-middle">
+        <span className="inline-flex items-center gap-su1 min-w-0 max-w-full align-middle">
           {label}
           {facet}
         </span>

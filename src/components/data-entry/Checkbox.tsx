@@ -18,6 +18,14 @@ export interface CheckboxProps {
   id?: string;
   className?: string;
   children?: ReactNode;
+  /**
+   * The overlay-row form, for a value in a facet popover or a menu of choices: the checkbox is a
+   * full-width row 32 high (44 on touch), padding 0 8, radius 6, with the hover ground of an
+   * overlay row. The label fills the line and is cut with an ellipsis.
+   */
+  row?: boolean;
+  /** After the label, at the end of the line: a count, 13/18 ink-2 in tabular figures. */
+  trailing?: ReactNode;
   /** `checked` collapses `"indeterminate"` to `false`; read `state` for the raw tri-state. */
   onCheckedChange?: (checked: boolean, state: CheckboxState) => void;
 }
@@ -137,6 +145,8 @@ export function Checkbox({
   id: idProp,
   className,
   children,
+  row = false,
+  trailing,
   onCheckedChange,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
@@ -151,7 +161,10 @@ export function Checkbox({
       className={cn(
         // The whole row is the target: box + 8 + label 14/20. Desk keeps the visual size;
         // touch gets the 44px floor.
-        "group/cb inline-flex items-center gap-su2",
+        "group/cb items-center gap-su2",
+        row
+          ? "flex w-full min-w-0 px-su2 rounded-su-control [@media(hover:hover)]:h-[var(--su-row-overlay)] [@media(hover:hover)]:hover:bg-surface-hover"
+          : "inline-flex",
         "[@media(hover:none)]:min-h-[var(--su-hit-target)] [@media(hover:none)]:min-w-[var(--su-hit-target)]",
         isDisabled ? "cursor-not-allowed" : "cursor-pointer",
         className,
@@ -179,10 +192,21 @@ export function Checkbox({
         </CheckboxPrimitive.Indicator>
       </CheckboxPrimitive.Root>
       {children && (
-        <span className={cn("text-body select-none", isDisabled ? "text-ink-3" : "text-ink")}>
+        <span
+          className={cn(
+            "text-body select-none",
+            row && "min-w-0 flex-1 truncate",
+            isDisabled ? "text-ink-3" : "text-ink",
+          )}
+        >
           {children}
         </span>
       )}
+      {trailing != null ? (
+        <span className={cn("shrink-0 su-tabular text-small", isDisabled ? "text-ink-3" : "text-ink-2")}>
+          {trailing}
+        </span>
+      ) : null}
     </label>
   );
 }
