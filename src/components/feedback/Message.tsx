@@ -132,7 +132,7 @@ export function MessageProvider({
             </Toast.Root>
           );
         })}
-        <Toast.Viewport className="fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] m-0 p-0 list-none flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-page-pad-x)*2))] outline-none" />
+        <Toast.Viewport className="fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] m-0 p-0 list-none flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-content-inset-start,0px)-var(--su-page-pad-x)*2))] outline-none" />
       </Toast.Provider>
     </MessageContext.Provider>
   );

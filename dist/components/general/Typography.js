@@ -4,8 +4,8 @@ import { cn as w } from "../../utils/cn.js";
 const T = {
   largeTitle: "font-sans text-display text-balance",
   // 32/40, −0.01em
-  title1: "font-sans text-title text-balance",
-  // 24/32, −0.01em
+  // 24/32, and the phone title below `sm`: 22/28. −0.01em at both sizes (−0.24px, −0.22px).
+  title1: "font-sans text-title-phone tracking-[var(--su-tracking-tight)] sm:text-title text-balance",
   title2: "font-sans text-title-phone text-balance",
   // 22/28
   title3: "font-sans text-section text-balance",

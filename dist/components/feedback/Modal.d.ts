@@ -21,6 +21,10 @@ export interface ModalProps extends ComponentPropsWithoutRef<typeof Dialog.Root>
     trigger?: ReactNode;
     /** Set false to hide the close icon (mandatory-choice dialogs). */
     closable?: boolean;
+    /** Name of the close button. Default: "Close". */
+    closeLabel?: string;
+    /** Name of a dialog that has no `title`. Default: "Dialog". */
+    "aria-label"?: string;
 }
 /**
  * Dialog (spec §4.4). Top-anchored 96px from the top, not vertically centred; centred on the
@@ -29,5 +33,5 @@ export interface ModalProps extends ComponentPropsWithoutRef<typeof Dialog.Root>
  * hairline, 8px radius, overlay shadow; the body scrolls past `100vh − 192px`. Enters with a
  * fade and a 4px rise over 150ms.
  */
-export declare function Modal({ title, description, showDescription, footer, size, width, children, trigger, closable, onEscapeKeyDown, onPointerDownOutside, onInteractOutside, onOpenAutoFocus, onCloseAutoFocus, ...rest }: ModalProps): import("react").JSX.Element;
+export declare function Modal({ title, description, showDescription, footer, size, width, children, trigger, closable, closeLabel, "aria-label": ariaLabel, onEscapeKeyDown, onPointerDownOutside, onInteractOutside, onOpenAutoFocus, onCloseAutoFocus, ...rest }: ModalProps): import("react").JSX.Element;
 //# sourceMappingURL=Modal.d.ts.map

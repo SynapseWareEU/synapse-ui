@@ -36,6 +36,10 @@ export interface ModalProps
   trigger?: ReactNode;
   /** Set false to hide the close icon (mandatory-choice dialogs). */
   closable?: boolean;
+  /** Name of the close button. Default: "Close". */
+  closeLabel?: string;
+  /** Name of a dialog that has no `title`. Default: "Dialog". */
+  "aria-label"?: string;
 }
 
 const sizeClass: Record<ModalSize, string> = {
@@ -61,6 +65,8 @@ export function Modal({
   children,
   trigger,
   closable = true,
+  closeLabel = "Close",
+  "aria-label": ariaLabel = "Dialog",
   onEscapeKeyDown,
   onPointerDownOutside,
   onInteractOutside,
@@ -74,7 +80,7 @@ export function Modal({
       {title}
     </Dialog.Title>
   ) : (
-    <Dialog.Title className="sr-only">Dialog</Dialog.Title>
+    <Dialog.Title className="sr-only">{ariaLabel}</Dialog.Title>
   );
   const visibleDescription = Boolean(description) && showDescription;
   return (
@@ -87,7 +93,9 @@ export function Modal({
             // `start`/`end` + auto margins centre it without a transform, so the rise keyframe
             // (which animates `transform`) cannot knock it off centre.
             "fixed top-[var(--su-modal-top)] start-[var(--su-content-inset-start,0px)] end-0 mx-auto z-[var(--su-z-modal)] box-border",
-            "max-w-[calc(100vw-var(--su-space-8))] max-h-[calc(100vh-var(--su-modal-top)*2)] flex flex-col overflow-hidden",
+            // The inset comes off the width too: a rail at phone width must not push the dialog
+            // past the far edge.
+            "max-w-[calc(100vw-var(--su-content-inset-start,0px)-var(--su-space-8))] max-h-[calc(100vh-var(--su-modal-top)*2)] flex flex-col overflow-hidden",
             "rounded-su-surface border border-solid border-border bg-surface-overlay text-ink font-sans shadow-su-overlay outline-none",
             "animate-su-scale-in motion-reduce:animate-none",
             width === undefined && sizeClass[size],
@@ -106,7 +114,7 @@ export function Modal({
               {titleNode}
               {closable ? (
                 <Dialog.Close asChild>
-                  <button type="button" className={cn(closeButtonClass, "ms-auto")} aria-label="Close">
+                  <button type="button" className={cn(closeButtonClass, "ms-auto")} aria-label={closeLabel}>
                     <IconX size={18} {...iconDefaults} />
                   </button>
                 </Dialog.Close>

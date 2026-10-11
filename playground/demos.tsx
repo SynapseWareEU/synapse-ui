@@ -822,7 +822,18 @@ export function InputDemo() {
       <UI.Input aria-label="Location" mono placeholder="A-09-01-1" />
       <UI.Input aria-label="Weight" placeholder="Weight" suffix="kg" />
       <UI.Input aria-label="Password" type="password" defaultValue="receiving" />
+      <UI.Input
+        aria-label="New password"
+        type="password"
+        defaultValue="receiving"
+        revealLabel="Reveal the new password"
+      />
       <UI.Input aria-label="Bin" size="sm" allowClear defaultValue="A-12" />
+      <UI.Input aria-label="Aisle" allowClear clearLabel="Clear the aisle" defaultValue="A-12" />
+      <UI.FormItem label="Reason" help="Shown on the adjustment's history.">
+        <UI.TextArea rows={3} placeholder="Why the count differs" />
+      </UI.FormItem>
+      <UI.TextArea aria-label="Settings value" mono rows={3} defaultValue={'{ "max_sessions": 3 }'} />
       <UI.Input aria-label="Large" size="lg" placeholder="Large (48)" />
       <UI.FormItem label="Lot code" error="Lot code is required.">
         <UI.Input placeholder="LOT 24-118" mono />
@@ -1313,6 +1324,8 @@ export function PanelDemo() {
     <UI.Space vertical block size="large">
       <UI.Panel
         title="Exceptions"
+        // The page's own section: an h2 with the same 16/24 600 look.
+        titleAs="h2"
         count={3}
         extra={
           <>
@@ -1653,6 +1666,31 @@ export function TableDemo() {
           </UI.Table.FoldRow>
         </UI.Table.Body>
       </UI.Table>
+      {/* Stacked, a value wider than the record breaks inside it: nothing scrolls to reach it. */}
+      <UI.Table aria-label="Serial numbers" stack="lg">
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th>Pallet</UI.Table.Th>
+            <UI.Table.Th>Lot</UI.Table.Th>
+            <UI.Table.Th numeric>Quantity</UI.Table.Th>
+            <UI.Table.Th numeric>Weight</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          <UI.Table.Row data-testid="serial-long">
+            <UI.Table.Td kind="id">359400000000000029359400000000000036359400000000000043</UI.Table.Td>
+            <UI.Table.Td kind="idSecondary">LOT-2026-09-12-000000000000000000000000000000000118</UI.Table.Td>
+            <UI.Table.Td kind="number">1234567890123456789012345678901234567890123456789012345</UI.Table.Td>
+            <UI.Table.Td numeric>9876543210987654321098765432109876543210987654321098765</UI.Table.Td>
+          </UI.Table.Row>
+          <UI.Table.Row data-testid="serial-short">
+            <UI.Table.Td kind="id">359400000000000029</UI.Table.Td>
+            <UI.Table.Td kind="idSecondary">LOT 24-118</UI.Table.Td>
+            <UI.Table.Td kind="number">160</UI.Table.Td>
+            <UI.Table.Td numeric>412,5</UI.Table.Td>
+          </UI.Table.Row>
+        </UI.Table.Body>
+      </UI.Table>
       <UI.Table aria-label="Loading" loading>
         <UI.Table.Head>
           <UI.Table.Row>
@@ -1957,6 +1995,14 @@ export function ModalDemo() {
       >
         <p>Your latest edits will be saved to this project.</p>
       </UI.Modal>
+      {/* No title: `aria-label` names the dialog, `closeLabel` its close button. */}
+      <UI.Modal
+        trigger={<UI.Button>Open untitled modal</UI.Button>}
+        aria-label="Keyboard shortcuts"
+        closeLabel="Close shortcuts"
+      >
+        <p>Press / to search, g then s to open stock.</p>
+      </UI.Modal>
     </>
   );
 }
@@ -2050,6 +2096,10 @@ export function SkeletonDemo() {
       <UI.Skeleton width="65%" height={24} />
       <UI.Skeleton rows={3} height={14} />
       <UI.Skeleton circle height={40} />
+      {/* `label`: the application's own words for the state. */}
+      <UI.Skeleton rows={2} label="Loading the stock list" data-testid="skeleton-named" />
+      {/* `label={null}`: decoration only, for a caller that announces the state itself. */}
+      <UI.Skeleton rows={2} label={null} data-testid="skeleton-decorative" />
       <UI.Skeleton loading={false}>Loaded content.</UI.Skeleton>
     </UI.Space>
   );

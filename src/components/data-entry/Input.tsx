@@ -29,6 +29,13 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    * the placeholder stays sans.
    */
   mono?: boolean;
+  /**
+   * Name of the reveal button of a `type="password"` field, as its `aria-label` and tooltip.
+   * The button is a toggle (`aria-pressed`), so one name serves both states. Default: "Show password".
+   */
+  revealLabel?: string;
+  /** Name of the clear button (`allowClear`). Default: "Clear". */
+  clearLabel?: string;
   ref?: Ref<HTMLInputElement>;
 }
 
@@ -183,6 +190,8 @@ export function Input({
   fullWidth = true,
   allowClear,
   mono,
+  revealLabel = "Show password",
+  clearLabel,
   disabled,
   className,
   style,
@@ -295,8 +304,8 @@ export function Input({
         <span className="absolute top-[2px] bottom-[2px] end-[2px] flex">
           <button
             type="button"
-            aria-label="Show password"
-            title="Show password"
+            aria-label={revealLabel}
+            title={revealLabel}
             aria-pressed={revealed}
             aria-controls={inputId}
             disabled={isDisabled}
@@ -316,7 +325,7 @@ export function Input({
           </button>
         </span>
       ) : showClear ? (
-        <FieldClearButton size={size} onClick={clear} />
+        <FieldClearButton size={size} onClick={clear} label={clearLabel} />
       ) : (
         hasSuffix && (
           <span

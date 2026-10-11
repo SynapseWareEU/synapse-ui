@@ -9,9 +9,9 @@ function h({
   description: e,
   icon: o,
   action: i,
-  onClose: l,
+  onClose: n,
   className: m,
-  children: n,
+  children: l,
   ...d
 }) {
   const f = x[t];
@@ -35,15 +35,15 @@ function h({
         ),
         /* @__PURE__ */ c("div", { className: "flex-1 min-w-0 [overflow-wrap:anywhere]", children: [
           a ? /* @__PURE__ */ s("div", { className: "text-body font-medium text-ink", children: a }) : null,
-          e || n ? /* @__PURE__ */ s("div", { className: "text-small text-ink-2", children: e ?? n }) : null,
+          e || l ? /* @__PURE__ */ s("div", { className: "text-small text-ink-2", children: e ?? l }) : null,
           i ? /* @__PURE__ */ s("div", { className: "mt-su2 flex flex-wrap items-center gap-su2", children: i }) : null
         ] }),
-        l ? /* @__PURE__ */ s(
+        n ? /* @__PURE__ */ s(
           "button",
           {
             type: "button",
             className: r(v, "-m-su1"),
-            onClick: l,
+            onClick: n,
             "aria-label": "Dismiss notification",
             children: /* @__PURE__ */ s(b, { size: 16, ...u })
           }
@@ -57,7 +57,7 @@ function N({ className: t, children: a, ...e }) {
     "div",
     {
       className: r(
-        "fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-page-pad-x)*2))]",
+        "fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-content-inset-start,0px)-var(--su-page-pad-x)*2))]",
         t
       ),
       ...e,

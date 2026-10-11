@@ -14,6 +14,13 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
      * the placeholder stays sans.
      */
     mono?: boolean;
+    /**
+     * Name of the reveal button of a `type="password"` field, as its `aria-label` and tooltip.
+     * The button is a toggle (`aria-pressed`), so one name serves both states. Default: "Show password".
+     */
+    revealLabel?: string;
+    /** Name of the clear button (`allowClear`). Default: "Clear". */
+    clearLabel?: string;
     ref?: Ref<HTMLInputElement>;
 }
 /** Shared control field surface: Input, DatePicker, TimePicker, InputNumber, Mentions. */
@@ -45,5 +52,5 @@ export interface FieldClearButtonProps {
 }
 /** The field's clear control: a 24 icon button with a 16 ink-3 ×. The parent must be `relative`. */
 export declare function FieldClearButton({ size, onClick, onMouseDown, label }: FieldClearButtonProps): import("react").JSX.Element;
-export declare function Input({ size: sizeProp, prefix, suffix, fullWidth, allowClear, mono, disabled, className, style, id: idProp, ref, onChange, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, ...rest }: InputProps): import("react").JSX.Element;
+export declare function Input({ size: sizeProp, prefix, suffix, fullWidth, allowClear, mono, revealLabel, clearLabel, disabled, className, style, id: idProp, ref, onChange, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, ...rest }: InputProps): import("react").JSX.Element;
 //# sourceMappingURL=Input.d.ts.map

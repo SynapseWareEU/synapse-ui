@@ -31,6 +31,12 @@ export interface SelectProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
      * content; cap it with a `max-w-*` class. On a touch screen its hit area is 44 tall.
      */
     variant?: SelectVariant;
+    /**
+     * The phone form of a `ghost` trigger (a phone header's site switcher): the chosen option's
+     * `code` alone, its name left to the list, in a 44 tall box with padding 0 8 and 6 before the
+     * chevron. It replaces `size`. No effect on an `outlined` trigger.
+     */
+    compact?: boolean;
     onValueChange?: (value: string) => void;
 }
 /**
@@ -42,5 +48,5 @@ export declare function SelectOptionLabel({ option, label }: {
     option: SelectOption;
     label?: ReactNode;
 }): import("react").JSX.Element;
-export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, prefix, variant, onValueChange, ...rest }: SelectProps): import("react").JSX.Element;
+export declare function Select({ value, defaultValue, placeholder, disabled, size: sizeProp, options, className, children, prefix, variant, compact, onValueChange, ...rest }: SelectProps): import("react").JSX.Element;
 //# sourceMappingURL=Select.d.ts.map

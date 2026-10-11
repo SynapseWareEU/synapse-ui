@@ -94,7 +94,7 @@ The v1 keys (`bg-paper`, `border-rule`, `text-label`, `text-accent`…) still wo
 | General | Button, FloatButton, Icon / SvgIcon, **Kbd**, Typography (Title, Text, Paragraph) |
 | Layout | Divider, Flex, Grid (Row / Col), Layout (Header / Sider / Content / Footer), Masonry, Space, Splitter |
 | Navigation | Anchor, Breadcrumb, Dropdown, Menu, Pagination, Steps, Tabs |
-| Data Entry | AutoComplete, Cascader, Checkbox, ColorPicker, DatePicker / DateRangePicker, Form (FormItem, FormLabel, **FormSection**, **FormActions**), Input, InputNumber, Mentions, Radio, Rate, Select, Slider, Switch, TimePicker, Transfer, TreeSelect, Upload |
+| Data Entry | AutoComplete, Cascader, Checkbox, ColorPicker, DatePicker / DateRangePicker, Form (FormItem, FormLabel, **FormSection**, **FormActions**), Input, InputNumber, Mentions, Radio, Rate, Select, Slider, Switch, **TextArea**, TimePicker, Transfer, TreeSelect, Upload |
 | Data Display | Avatar, Badge, Calendar, Card, Carousel, Collapse, Descriptions, Empty, Image, List, Listy, **Panel**, Popover, QRCode, Segmented, Statistic, **StatusDot**, Table (Head, Body, Row, Th, Td, **GroupRow**, **Disclosure**, **Facet**, **Detail**, **FoldRow**, **Meta**, **SkeletonRow**), Tag, Timeline, Tooltip, Tour, Tree |
 | Feedback | Alert, Drawer, Message, Modal, Notification, Popconfirm, Progress, Result, Skeleton, Spin, Watermark |
 | Handheld | **HandheldTopBar**, **Docket** / DocketRow, **ScanField**, **QuantityStepper**, **Keypad** (with `applyKeypadKey`), **ResultBand** |

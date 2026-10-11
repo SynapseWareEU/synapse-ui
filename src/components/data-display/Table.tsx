@@ -549,8 +549,15 @@ const kindClass: Record<TableCellKind, string | undefined> = {
 
 // Stacked: the same faces, without the column behaviour (shrink-to-content tracks, right
 // alignment). The actions go to the end of whichever line they are on.
+// An identifier or a number keeps to one line while it fits; one wider than the record breaks
+// inside it (anywhere, since an SSCC or a lot has no word to break at) instead of running past
+// the panel's edge, where nothing scrolls to reach it.
+const stackedBreak = "max-w-full [overflow-wrap:anywhere]";
 const stackedKindClass: Record<TableCellKind, string | undefined> = {
   ...kindClass,
+  id: `su-id ${stackedBreak}`,
+  idSecondary: `font-mono text-small text-ink-2 ${stackedBreak}`,
+  number: `su-tabular ${stackedBreak}`,
   control: "shrink-0 whitespace-nowrap",
   actions: "shrink-0 ms-auto whitespace-nowrap",
 };
@@ -575,7 +582,7 @@ export function TableTd({
         className={cn(
           stackedCell,
           stackedKindClass[kind],
-          numeric && kind !== "number" ? "su-tabular whitespace-nowrap" : undefined,
+          numeric && kind !== "number" ? `su-tabular ${stackedBreak}` : undefined,
           className,
         )}
         {...rest}

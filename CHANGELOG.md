@@ -23,6 +23,19 @@ Nothing is removed and no default changes its look. Two fixes change behaviour, 
 - **Table.Th** (fix): the row a header lays its label, sort arrow and facet out in no longer outgrows its track in a fixed-layout table, so a label that cuts itself ends in an ellipsis with the arrow and the funnel still in view.
 - **Token `--su-inverse-ink-2`** (`text-inverse-ink-2`): secondary text on the inverse surface, `#cdd2d9` in light and `#525866` in dark.
 
+### Release A2: fix-ups from the first Lattice screens (additive, still 0.2.0)
+
+Nothing is removed. Three fixes change what is drawn; each is noted.
+
+- **Table `stack`** (fix): in the stacked shape an identifier or number cell (`kind="id"`, `"idSecondary"`, `"number"`, or `numeric`) no longer keeps `white-space: nowrap`. It is capped at the record's width and breaks anywhere, so a value wider than the record (an SSCC, a long lot) wraps inside it instead of being cut at the panel's edge, where nothing scrolls. A value that fits still sits on one line, and at desk width these cells keep to one line as before.
+- **Skeleton `label`**: what a screen reader hears, in place of the English "Loading" (still the default). `label={null}` makes the skeleton decoration only, for a caller that announces the state itself: `aria-hidden`, no `status` role, no `aria-busy`, no text in the DOM.
+- **Typography `title1`** (fix): below `sm` (640) it takes the phone title on its own, 22/28 600 at −0.01em (−0.22px). From `sm` up it is 24/32 as before. A caller's `max-sm:!text-title-phone` override still works and is no longer needed.
+- **Panel `titleAs`** (`"h2"` … `"h6"`, default `"h3"`): the title's heading element, so a page's main section can be an `h2`. The look and the panel's name do not change.
+- **Input `revealLabel`** names the reveal button of a password field (default "Show password"), and **`clearLabel`** the clear button (default "Clear").
+- **TextArea**: a multi-line field with the Input's look (`size`, `mono`, every `<textarea>` attribute). In a `FormItem` it takes its id, required mark, description and error from it. `inputClass` and `inputSizeClass` are exported for a field the library does not draw.
+- **Modal `closeLabel`** names the close button (default "Close"), and **`aria-label`** names a dialog that has no `title` (default "Dialog").
+- **Modal, Message and Notification** (fix): `--su-content-inset-start` now comes off their width as well as moving them, so with a rail's inset set at phone width a toast or a dialog ends inside the viewport. With no inset set, nothing changes.
+
 ### Breaking changes
 
 1. **`--su-bg` changes meaning.** It is now the grey app ground (`#f4f5f7`), so `body` and `Surface tone="system"` turn grey. Use `--su-surface` (or `bg-surface`) for white panels.

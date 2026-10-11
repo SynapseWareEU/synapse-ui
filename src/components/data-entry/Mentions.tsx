@@ -19,6 +19,7 @@ import {
 } from "./AutoComplete";
 import { useFieldState, useFormItemContext } from "./Form";
 import { inputClass } from "./Input";
+import { textareaSizeClass } from "./TextArea";
 import type { InputSize, SelectOption } from "./types";
 
 export interface MentionsProps {
@@ -47,12 +48,6 @@ function getMentionQuery(value: string, cursor: number, prefix: string): string 
   return /\s/.test(rest) ? null : rest;
 }
 
-/** Textarea (§4.2, D): the Input field look, padding 8 12 (md), 14/20, min-height 80, resize vertical. */
-const textareaSize: Record<InputSize, string> = {
-  sm: "min-h-[72px] px-su2 py-su2 text-control",
-  md: "min-h-[80px] px-su3 py-su2 text-control",
-  lg: "min-h-[88px] px-[14px] py-su2 text-section",
-};
 
 export function Mentions({
   value: valueProp,
@@ -199,7 +194,7 @@ export function Mentions({
           setCursor(pos);
           updateMentionState(value, pos);
         }}
-        className={cn(inputClass, "block m-0 resize-y", textareaSize[size])}
+        className={cn(inputClass, "block m-0 resize-y", textareaSizeClass[size])}
         required={item?.required}
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}

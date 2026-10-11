@@ -5,6 +5,11 @@ import { Badge } from "./Badge";
 export interface PanelProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   /** Section title, 16/24 600. Names the panel (`aria-labelledby`). */
   title?: ReactNode;
+  /**
+   * The title's heading element, so the panel fits the page's outline (an `h2` under the page
+   * title). The look does not change. Default: `h3`.
+   */
+  titleAs?: "h2" | "h3" | "h4" | "h5" | "h6";
   /** Count pill after the title. A number renders the neutral pill; pass a `<Badge>` for a tone. */
   count?: ReactNode;
   /** Actions at the end of the header (28 buttons, 8 apart). */
@@ -24,6 +29,7 @@ export interface PanelProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
  */
 export function Panel({
   title,
+  titleAs: TitleTag = "h3",
   count,
   extra,
   footer,
@@ -45,12 +51,12 @@ export function Panel({
       {hasHeader ? (
         <div className="flex items-center gap-su2 min-h-[var(--su-panel-header)] px-su4 border-b border-solid border-border">
           {title != null ? (
-            <h3
+            <TitleTag
               id={titleId}
               className="m-0 min-w-0 truncate text-section font-semibold text-ink"
             >
               {title}
-            </h3>
+            </TitleTag>
           ) : null}
           {count != null ? (
             typeof count === "number" ? (

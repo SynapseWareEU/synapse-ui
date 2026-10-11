@@ -31,8 +31,11 @@ export type {
   FormLayout,
 } from "./Form";
 
-export { Input } from "./Input";
+export { Input, inputClass, inputSizeClass } from "./Input";
 export type { InputProps } from "./Input";
+
+export { TextArea } from "./TextArea";
+export type { TextAreaProps } from "./TextArea";
 
 export { InputNumber } from "./InputNumber";
 export type { InputNumberProps } from "./InputNumber";

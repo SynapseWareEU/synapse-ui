@@ -15,6 +15,12 @@ export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   rows?: number;
   /** When explicitly `false`, render `children` instead of the placeholder. */
   loading?: boolean;
+  /**
+   * What a screen reader hears while the placeholder is shown. Default: "Loading". Pass the
+   * application's own words, or `null` when the caller announces the state itself: the skeleton
+   * is then decoration only (`aria-hidden`, no `status` role, no text in the DOM).
+   */
+  label?: string | null;
   children?: ReactNode;
 }
 
@@ -32,6 +38,7 @@ export function Skeleton({
   circle = false,
   rows,
   loading,
+  label = "Loading",
   children,
   className,
   style,
@@ -40,18 +47,22 @@ export function Skeleton({
   if (loading === false) return <>{children}</>;
 
   const block = cn("bg-fill", radiusFor(height, circle), active && "su-skeleton-active");
-  const label = <span className="sr-only">Loading</span>;
+  // Named: a live `status` that says so. Unnamed: hidden, so nothing is announced twice.
+  const state =
+    label == null
+      ? ({ "aria-hidden": true } as const)
+      : ({ role: "status", "aria-busy": true } as const);
+  const text = label == null ? null : <span className="sr-only">{label}</span>;
 
   if (rows && rows > 1) {
     return (
       <div
         className={cn("w-full flex flex-col gap-su2", className)}
         style={style}
-        role="status"
-        aria-busy="true"
+        {...state}
         {...rest}
       >
-        {label}
+        {text}
         {Array.from({ length: rows }).map((_, i) => (
           <div
             key={i}
@@ -69,11 +80,10 @@ export function Skeleton({
     <div
       className={cn(block, className)}
       style={{ width: circle ? height : width, height, ...style }}
-      role="status"
-      aria-busy="true"
+      {...state}
       {...rest}
     >
-      {label}
+      {text}
     </div>
   );
 }

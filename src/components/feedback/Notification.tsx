@@ -85,7 +85,7 @@ export function NotificationStack({ className, children, ...rest }: Notification
   return (
     <div
       className={cn(
-        "fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-page-pad-x)*2))]",
+        "fixed bottom-su6 start-[calc(var(--su-content-inset-start,0px)+var(--su-page-pad-x))] z-[var(--su-z-toast)] flex flex-col gap-su2 w-[min(var(--su-toast-width),calc(100vw-var(--su-content-inset-start,0px)-var(--su-page-pad-x)*2))]",
         className,
       )}
       {...rest}

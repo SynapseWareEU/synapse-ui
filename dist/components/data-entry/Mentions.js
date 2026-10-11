@@ -2,69 +2,65 @@ import { jsxs as Y, jsx as f } from "react/jsx-runtime";
 import { useId as Z, useState as b, useRef as j, useMemo as ee, useCallback as te } from "react";
 import { useOutsideClick as se } from "../../hooks/useOutsideClick.js";
 import { cn as B } from "../../utils/cn.js";
-import { comboboxPanelClass as ne, NO_MATCHES as oe, comboboxNoticeClass as re, comboboxOptionClass as ae, ComboboxOptionContent as le } from "./AutoComplete.js";
+import { comboboxPanelClass as oe, NO_MATCHES as re, comboboxNoticeClass as ne, comboboxOptionClass as ae, ComboboxOptionContent as le } from "./AutoComplete.js";
 import { useFormItemContext as ie, useFieldState as ce } from "./Form.js";
-import { inputClass as ue } from "./Input.js";
-function de(m, C, p) {
-  const r = m.slice(0, C), x = r.lastIndexOf(p);
-  if (x === -1) return null;
-  const h = r.slice(x + p.length);
-  return /\s/.test(h) ? null : h;
+import { inputClass as de } from "./Input.js";
+import { textareaSizeClass as ue } from "./TextArea.js";
+function fe(m, g, p) {
+  const n = m.slice(0, g), v = n.lastIndexOf(p);
+  if (v === -1) return null;
+  const x = n.slice(v + p.length);
+  return /\s/.test(x) ? null : x;
 }
-const fe = {
-  sm: "min-h-[72px] px-su2 py-su2 text-control",
-  md: "min-h-[80px] px-su3 py-su2 text-control",
-  lg: "min-h-[88px] px-[14px] py-su2 text-section"
-};
 function ge({
   value: m,
-  defaultValue: C = "",
+  defaultValue: g = "",
   placeholder: p,
-  prefix: r = "@",
-  disabled: x,
-  size: h,
+  prefix: n = "@",
+  disabled: v,
+  size: x,
   options: N = [],
   className: K,
-  onChange: v,
+  onChange: h,
   onSelect: k
 }) {
   var Q;
-  const n = ie(), { size: L, disabled: H } = ce(h, x), y = Z(), [P, U] = b(C), [l, q] = b(!1), [u, A] = b(null), [_, I] = b(0), [S, z] = b(0), M = j(null), R = j(null), w = m !== void 0, i = w ? m : P, o = ee(() => {
-    if (u == null) return [];
-    const e = u.toLowerCase();
+  const o = ie(), { size: L, disabled: H } = ce(x, v), C = Z(), [P, U] = b(g), [l, q] = b(!1), [d, A] = b(null), [_, I] = b(0), [S, z] = b(0), M = j(null), R = j(null), w = m !== void 0, i = w ? m : P, r = ee(() => {
+    if (d == null) return [];
+    const e = d.toLowerCase();
     return N.filter((t) => t.label.toLowerCase().includes(e));
-  }, [u, N]), D = (e, t) => {
-    const s = o.length;
+  }, [d, N]), D = (e, t) => {
+    const s = r.length;
     if (!s) return 0;
     let c = e;
-    for (let d = 0; d < s; d++)
-      if (c = (c + t + s) % s, !o[c].disabled) return c;
+    for (let u = 0; u < s; u++)
+      if (c = (c + t + s) % s, !r[c].disabled) return c;
     return Math.max(e, 0);
-  }, O = Math.max(0, Math.min(_, o.length - 1)), a = (Q = o[O]) != null && Q.disabled ? D(O, 1) : O, $ = o[a], T = te(
+  }, O = Math.max(0, Math.min(_, r.length - 1)), a = (Q = r[O]) != null && Q.disabled ? D(O, 1) : O, $ = r[a], T = te(
     (e) => {
-      w || U(e), v == null || v(e);
+      w || U(e), h == null || h(e);
     },
-    [w, v]
-  ), g = () => {
+    [w, h]
+  ), y = () => {
     q(!1), A(null);
   };
-  se(M, g, l);
+  se(M, y, l);
   const E = (e, t) => {
-    const s = de(e, t, r);
+    const s = fe(e, t, n);
     A(s), q(s != null), I(0);
   }, G = (e) => {
     const t = e.target.value, s = e.target.selectionStart ?? t.length;
     T(t), z(s), E(t, s);
   }, F = (e) => {
     const t = R.current;
-    if (!t || u == null || e.disabled) return;
-    const s = i.slice(0, S), c = i.slice(S), d = s.lastIndexOf(r), X = `${i.slice(0, d)}${r}${e.label} ${c}`;
-    T(X), k == null || k(e), g(), requestAnimationFrame(() => {
-      const V = d + r.length + e.label.length + 1;
+    if (!t || d == null || e.disabled) return;
+    const s = i.slice(0, S), c = i.slice(S), u = s.lastIndexOf(n), X = `${i.slice(0, u)}${n}${e.label} ${c}`;
+    T(X), k == null || k(e), y(), requestAnimationFrame(() => {
+      const V = u + n.length + e.label.length + 1;
       t.focus(), t.setSelectionRange(V, V);
     });
   }, J = (e) => {
-    if (!(!l || o.length === 0))
+    if (!(!l || r.length === 0))
       if (e.key === "ArrowDown")
         e.preventDefault(), I(D(a, 1));
       else if (e.key === "ArrowUp")
@@ -72,25 +68,25 @@ function ge({
       else if (e.key === "Enter" || e.key === "Tab") {
         if (!$) return;
         e.preventDefault(), F($);
-      } else e.key === "Escape" && (e.preventDefault(), e.stopPropagation(), g());
+      } else e.key === "Escape" && (e.preventDefault(), e.stopPropagation(), y());
   }, W = (e) => {
     var t;
-    (t = M.current) != null && t.contains(e.relatedTarget) || g();
+    (t = M.current) != null && t.contains(e.relatedTarget) || y();
   };
   return /* @__PURE__ */ Y("div", { ref: M, className: B("relative w-full", K), children: [
     /* @__PURE__ */ f(
       "textarea",
       {
         ref: R,
-        id: n == null ? void 0 : n.id,
+        id: o == null ? void 0 : o.id,
         value: i,
         placeholder: p,
         disabled: H,
         role: "combobox",
         "aria-expanded": l,
-        "aria-controls": l ? y : void 0,
+        "aria-controls": l ? C : void 0,
         "aria-autocomplete": "list",
-        "aria-activedescendant": l && $ ? `${y}-${a}` : void 0,
+        "aria-activedescendant": l && $ ? `${C}-${a}` : void 0,
         onChange: G,
         onKeyDown: J,
         onBlur: W,
@@ -98,16 +94,16 @@ function ge({
           const t = e.currentTarget.selectionStart ?? i.length;
           z(t), E(i, t);
         },
-        className: B(ue, "block m-0 resize-y", fe[L]),
-        required: n == null ? void 0 : n.required,
-        "aria-describedby": n == null ? void 0 : n.descriptionId,
-        "aria-invalid": n != null && n.error ? !0 : void 0
+        className: B(de, "block m-0 resize-y", ue[L]),
+        required: o == null ? void 0 : o.required,
+        "aria-describedby": o == null ? void 0 : o.descriptionId,
+        "aria-invalid": o != null && o.error ? !0 : void 0
       }
     ),
-    l && /* @__PURE__ */ f("div", { id: y, className: ne, role: "listbox", "aria-label": "Mentions", children: o.length === 0 ? /* @__PURE__ */ f("div", { className: re, children: oe }) : o.map((e, t) => /* @__PURE__ */ f(
+    l && /* @__PURE__ */ f("div", { id: C, className: oe, role: "listbox", "aria-label": "Mentions", children: r.length === 0 ? /* @__PURE__ */ f("div", { className: ne, children: re }) : r.map((e, t) => /* @__PURE__ */ f(
       "button",
       {
-        id: `${y}-${t}`,
+        id: `${C}-${t}`,
         ref: t === a ? (s) => void (s == null ? void 0 : s.scrollIntoView({ block: "nearest" })) : void 0,
         tabIndex: -1,
         type: "button",
@@ -119,7 +115,7 @@ function ge({
         className: ae,
         onMouseDown: (s) => s.preventDefault(),
         onClick: () => F(e),
-        children: /* @__PURE__ */ f(le, { option: e, query: u })
+        children: /* @__PURE__ */ f(le, { option: e, query: d })
       },
       e.value
     )) })

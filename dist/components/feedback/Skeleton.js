@@ -1,55 +1,54 @@
-import { jsx as u, Fragment as b, jsxs as y } from "react/jsx-runtime";
-import { cn as t } from "../../utils/cn.js";
-function x(r, a) {
-  return a ? "rounded-su-round" : typeof r == "number" && r <= 16 ? "rounded-su-tag" : "rounded-su-control";
+import { jsx as t, Fragment as v, jsxs as k } from "react/jsx-runtime";
+import { cn as s } from "../../utils/cn.js";
+function N(n, u) {
+  return u ? "rounded-su-round" : typeof n == "number" && n <= 16 ? "rounded-su-tag" : "rounded-su-control";
 }
-function g({
-  active: r = !0,
-  width: a,
-  height: e = 12,
-  circle: l = !1,
-  rows: n,
-  loading: m,
-  children: p,
-  className: s,
-  style: o,
-  ...d
+function F({
+  active: n = !0,
+  width: u,
+  height: r = 12,
+  circle: a = !1,
+  rows: e,
+  loading: x,
+  label: l = "Loading",
+  children: y,
+  className: o,
+  style: d,
+  ...i
 }) {
-  if (m === !1) return /* @__PURE__ */ u(b, { children: p });
-  const i = t("bg-fill", x(e, l), r && "su-skeleton-active"), f = /* @__PURE__ */ u("span", { className: "sr-only", children: "Loading" });
-  return n && n > 1 ? /* @__PURE__ */ y(
+  if (x === !1) return /* @__PURE__ */ t(v, { children: y });
+  const f = s("bg-fill", N(r, a), n && "su-skeleton-active"), c = l == null ? { "aria-hidden": !0 } : { role: "status", "aria-busy": !0 }, m = l == null ? null : /* @__PURE__ */ t("span", { className: "sr-only", children: l });
+  return e && e > 1 ? /* @__PURE__ */ k(
     "div",
     {
-      className: t("w-full flex flex-col gap-su2", s),
-      style: o,
-      role: "status",
-      "aria-busy": "true",
-      ...d,
+      className: s("w-full flex flex-col gap-su2", o),
+      style: d,
+      ...c,
+      ...i,
       children: [
-        f,
-        Array.from({ length: n }).map((v, c) => /* @__PURE__ */ u(
+        m,
+        Array.from({ length: e }).map((b, p) => /* @__PURE__ */ t(
           "div",
           {
             "aria-hidden": "true",
-            className: i,
-            style: { width: c === n - 1 ? "70%" : "100%", height: e }
+            className: f,
+            style: { width: p === e - 1 ? "70%" : "100%", height: r }
           },
-          c
+          p
         ))
       ]
     }
-  ) : /* @__PURE__ */ u(
+  ) : /* @__PURE__ */ t(
     "div",
     {
-      className: t(i, s),
-      style: { width: l ? e : a, height: e, ...o },
-      role: "status",
-      "aria-busy": "true",
-      ...d,
-      children: f
+      className: s(f, o),
+      style: { width: a ? r : u, height: r, ...d },
+      ...c,
+      ...i,
+      children: m
     }
   );
 }
 export {
-  g as Skeleton
+  F as Skeleton
 };
