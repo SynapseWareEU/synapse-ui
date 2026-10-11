@@ -959,7 +959,7 @@ export function SelectDemo() {
         ]}
       />
       {/* A ghost in a row with no room: the name is cut, then the neighbour, never the code. */}
-      <div className="flex w-[200px] min-w-0 items-center gap-su2">
+      <div className="flex w-[160px] min-w-0 items-center gap-su2">
         <UI.Select
           variant="ghost"
           aria-label="Warehouse, tight row"

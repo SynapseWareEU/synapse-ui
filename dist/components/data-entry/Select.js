@@ -32,7 +32,7 @@ function ne({
   disabled: f,
   size: v,
   options: h = [],
-  className: u,
+  className: m,
   children: b,
   prefix: r,
   variant: w = "outlined",
@@ -40,7 +40,7 @@ function ne({
   onValueChange: S,
   ...N
 }) {
-  const a = $(), { size: m, disabled: C } = O(v, f), c = r != null && r !== !1 && r !== "", d = w === "ghost";
+  const a = $(), { size: u, disabled: C } = O(v, f), c = r != null && r !== !1 && r !== "", d = w === "ghost";
   return /* @__PURE__ */ n(
     I,
     {
@@ -53,17 +53,17 @@ function ne({
           y,
           {
             id: a == null ? void 0 : a.id,
-            className: d ? l(E, k ? J : l(G[m], H), u) : l(
+            className: d ? l(E, k ? J : l(G[u], H), m) : l(
               R,
-              L[m],
+              L[u],
               c ? "w-auto max-w-full whitespace-nowrap" : "w-full",
-              u
+              m
             ),
             "aria-describedby": a == null ? void 0 : a.descriptionId,
             "aria-invalid": a != null && a.error ? !0 : void 0,
             ...N,
             children: [
-              c && d ? /* @__PURE__ */ e("span", { className: "inline-flex items-center shrink-0 text-ink-2", children: r }) : null,
+              c && d ? /* @__PURE__ */ e("span", { className: "inline-flex items-center shrink-0 text-ink-2 [&>svg]:max-w-none", children: r }) : null,
               /* @__PURE__ */ n("span", { className: "flex-1 min-w-0 truncate", children: [
                 c && !d && /* @__PURE__ */ n(p, { children: [
                   /* @__PURE__ */ e("span", { className: "text-ink-2", children: r }),
@@ -71,7 +71,7 @@ function ne({
                 ] }),
                 /* @__PURE__ */ e(T, { placeholder: /* @__PURE__ */ e("span", { className: "text-ink-3", children: o }) })
               ] }),
-              /* @__PURE__ */ e(z, { className: "flex shrink-0 text-ink-3", children: /* @__PURE__ */ e(g, { size: 16, stroke: 1.75, "aria-hidden": "true" }) })
+              /* @__PURE__ */ e(z, { className: "flex shrink-0 text-ink-3", children: /* @__PURE__ */ e(g, { size: 16, stroke: 1.75, "aria-hidden": "true", className: "max-w-none" }) })
             ]
           }
         ),

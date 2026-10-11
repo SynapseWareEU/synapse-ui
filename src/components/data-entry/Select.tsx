@@ -159,8 +159,11 @@ export function Select({
         {...rest}
       >
         {/* Radix's SelectValue drops className, so the truncation lives on a wrapper. */}
+        {/* `max-w-none` on the two icons: under a host reset's `svg { max-width: 100% }` (Lattice's)
+            each icon counted as 0 in the trigger's min-content width, and the ghost floor came out
+            32 short of the code. */}
         {hasPrefix && ghost ? (
-          <span className="inline-flex items-center shrink-0 text-ink-2">{prefix}</span>
+          <span className="inline-flex items-center shrink-0 text-ink-2 [&>svg]:max-w-none">{prefix}</span>
         ) : null}
         <span className="flex-1 min-w-0 truncate">
           {hasPrefix && !ghost && (
@@ -171,7 +174,7 @@ export function Select({
           <SelectPrimitive.Value placeholder={<span className="text-ink-3">{placeholder}</span>} />
         </span>
         <SelectPrimitive.Icon className="flex shrink-0 text-ink-3">
-          <IconChevronDown size={16} stroke={1.75} aria-hidden="true" />
+          <IconChevronDown size={16} stroke={1.75} aria-hidden="true" className="max-w-none" />
         </SelectPrimitive.Icon>
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
