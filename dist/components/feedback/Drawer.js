@@ -36,7 +36,7 @@ function G({
         j,
         {
           className: a(
-            "fixed top-0 bottom-0 z-[var(--su-z-modal)] max-w-[calc(100vw-var(--su-space-8))] outline-none animate-su-fade-in motion-reduce:animate-none",
+            "fixed top-0 bottom-0 z-[var(--su-z-modal)] max-w-[100vw] sm:max-w-[calc(100vw-var(--su-space-8))] outline-none animate-su-fade-in motion-reduce:animate-none",
             f ? "left-0" : "right-0",
             i === void 0 && "w-[var(--su-drawer-width)]"
           ),

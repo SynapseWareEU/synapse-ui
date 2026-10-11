@@ -57,6 +57,13 @@ Nothing is removed and no default changes its look.
 - **Table `footerWrap`**: opt-in, for a footer that holds prose. It has 5 above and below and wraps its parts, so a note of several lines no longer touches the rules. A one-line footer is still 44 with a note or a control up to 32 high (the box is 44 with its 1px rule, so 33 of content fit); a taller control grows it by the difference. Without it the footer is as in release A: no block padding and one line, so content that pads itself (a pager) keeps its height.
 - **Table.Disclosure and Table.Facet** are 44 targets under `(hover: none)`; their drawn size does not change.
 
+### Release C: what the Lattice list kit needed (still 0.2.0)
+
+Nothing is removed. One fix changes what is drawn, and is noted.
+
+- **Popover `anchorRef`**: what the overlay is placed against, in place of its trigger: an element, or anything with a `getBoundingClientRect`. The trigger still opens the overlay and takes focus back. For the funnel of a column header, whose panel opens under the start of its column.
+- **Drawer** (fix): below `sm` (640) the sheet may take the whole viewport. It was capped at the viewport less 32 at every width, which on a phone left a strip too narrow to read and showed half of a navigation rail beside the sheet. From `sm` up nothing changes.
+
 ### Breaking changes
 
 1. **`--su-bg` changes meaning.** It is now the grey app ground (`#f4f5f7`), so `body` and `Surface tone="system"` turn grey. Use `--su-surface` (or `bg-surface`) for white panels.

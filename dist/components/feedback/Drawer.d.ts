@@ -5,7 +5,11 @@ export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root
     title?: ReactNode;
     description?: ReactNode;
     placement?: "left" | "right";
-    /** Panel width. Defaults to 480 (`--su-drawer-width`); never wider than the viewport − 32. */
+    /**
+     * Panel width. Defaults to 480 (`--su-drawer-width`); never wider than the viewport − 32. Below
+     * `sm` (640) it may take the whole viewport: a 32 strip of the page beside a sheet on a phone
+     * is too narrow to read and wide enough to show half of a navigation rail.
+     */
     width?: number | string;
     /**
      * Pinned action bar below the scroll region: 64 tall, left-packed. Put the primary action

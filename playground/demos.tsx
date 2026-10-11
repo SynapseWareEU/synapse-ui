@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import {
   IconBuildingWarehouse,
   IconDownload,
@@ -1450,16 +1450,30 @@ export function PanelDemo() {
   );
 }
 export function PopoverDemo() {
+  const column = useRef<HTMLDivElement>(null);
   return (
-    <UI.Popover
-      trigger={<UI.Button>Show details</UI.Button>}
-      content={
-        <div className="p-su1 text-body">
-          <strong className="font-semibold">A little more context</strong>
-          <p className="m-0 text-ink-2">This content stays close to its trigger.</p>
-        </div>
-      }
-    />
+    <UI.Space wrap>
+      <UI.Popover
+        trigger={<UI.Button>Show details</UI.Button>}
+        content={
+          <div className="p-su1 text-body">
+            <strong className="font-semibold">A little more context</strong>
+            <p className="m-0 text-ink-2">This content stays close to its trigger.</p>
+          </div>
+        }
+      />
+      {/* `anchorRef`: the small button opens it, the box it stands for places it. */}
+      <div ref={column} data-testid="popover-anchor" className="flex items-center gap-su2 w-[240px] px-su3 py-su2 su-panel">
+        <span className="flex-1 text-small text-ink-2">Zone</span>
+        <UI.Popover
+          align="start"
+          anchorRef={column}
+          aria-label="Zone filter"
+          trigger={<UI.Table.Facet aria-label="Filter by zone" />}
+          content={<p className="m-0 p-su1 text-body">Opens under the start of the box.</p>}
+        />
+      </div>
+    </UI.Space>
   );
 }
 export function QRCodeDemo() {

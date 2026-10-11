@@ -1,5 +1,5 @@
 import * as RadixPopover from "@radix-ui/react-popover";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useEffect, useState, type ComponentPropsWithoutRef, type ReactNode, type RefObject } from "react";
 import { cn } from "../../utils/cn";
 
 export interface PopoverProps
@@ -13,6 +13,13 @@ export interface PopoverProps
    * inside a frame the overlay must clear, such as a rail tile whose panel opens past the rail.
    */
   sideOffset?: number;
+  /**
+   * What the overlay is placed against, in place of the trigger: an element, or anything with a
+   * `getBoundingClientRect` (a rect the caller works out). For a small trigger that stands for
+   * something larger, such as the funnel in a column header whose panel opens under the column's
+   * start. The trigger still opens it, is still its `aria-controls`, and takes focus back.
+   */
+  anchorRef?: RefObject<{ getBoundingClientRect(): DOMRect } | null>;
   contentClassName?: string;
   /**
    * The accessible name of the overlay, which is a `dialog`: what it is for ("Filter by zone").
@@ -21,6 +28,19 @@ export interface PopoverProps
   "aria-label"?: string;
   /** Portal target; defaults to document.body. For shadow DOM / iframe hosts. */
   container?: HTMLElement | null;
+}
+
+type Measurable = { getBoundingClientRect(): DOMRect };
+
+function measurableOf(ref: RefObject<Measurable | null>): Measurable {
+  return {
+    getBoundingClientRect: () => ref.current?.getBoundingClientRect() ?? new DOMRect(),
+    // Read by the positioning library: whose scrollers to listen to.
+    get contextElement() {
+      const held = ref.current;
+      return typeof Element !== "undefined" && held instanceof Element ? held : undefined;
+    },
+  } as Measurable;
 }
 
 /**
@@ -33,16 +53,37 @@ export function Popover({
   side = "bottom",
   align = "center",
   sideOffset = 4,
+  anchorRef,
   contentClassName,
   container,
   "aria-label": ariaLabel,
   ...rest
 }: PopoverProps) {
+  const { onOpenChange, ...root } = rest;
+  // Radix takes a new anchor only when the ref's value changes, and its trigger announces itself
+  // as the anchor while it mounts (twice under StrictMode, the second time after this one was
+  // taken). So the anchor is handed over again, as a new object, each time the overlay opens: by
+  // then the trigger no longer competes. The object measures the caller's ref when asked, so the
+  // ref may be filled late; `contextElement` lets the overlay follow that element's scrollers.
+  const [virtual, setVirtual] = useState<RefObject<Measurable> | undefined>(() =>
+    anchorRef ? { current: measurableOf(anchorRef) } : undefined,
+  );
+  const open = root.open;
+  useEffect(() => {
+    setVirtual(anchorRef ? { current: measurableOf(anchorRef) } : undefined);
+  }, [anchorRef, open]);
   return (
-    <RadixPopover.Root {...rest}>
+    <RadixPopover.Root
+      {...root}
+      onOpenChange={(next) => {
+        if (next && anchorRef) setVirtual({ current: measurableOf(anchorRef) });
+        onOpenChange?.(next);
+      }}
+    >
       <RadixPopover.Trigger asChild>
         {trigger}
       </RadixPopover.Trigger>
+      {virtual ? <RadixPopover.Anchor virtualRef={virtual} /> : null}
       <RadixPopover.Portal container={container}>
         <RadixPopover.Content
           side={side}
