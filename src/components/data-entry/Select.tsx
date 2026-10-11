@@ -68,6 +68,14 @@ const ghostTriggerSizeClass: Record<InputSize, string> = {
 };
 
 /*
+ * A ghost trigger holding a code is never narrower than that code: an identifier is matched
+ * character by character, so in a row that runs out of room the name is cut, then the trigger's
+ * neighbours, and the code stays whole. Not on the compact form, which a phone header may have to
+ * cut rather than scroll sideways.
+ */
+const ghostTriggerCodeFloorClass = "[&:has([data-su-code])]:min-w-min";
+
+/*
  * Compact ghost: the box is the 44 target itself, padding 0 8, 6 between the parts. The name
  * beside the code is taken out of the trigger only; the list is in a portal and keeps the pair.
  */
@@ -83,11 +91,14 @@ export function SelectOptionLabel({ option, label }: { option: SelectOption; lab
   const name = label ?? option.label;
   if (!option.code) return <>{name}</>;
   return (
-    <span className="inline-flex max-w-full items-baseline gap-su2 align-top">
-      <span data-su-code="" className="shrink-0 font-mono font-medium">
+    // A grid, not a flex row: its min-content width is the code alone (the name's track starts at
+    // 0), which is what lets a ghost trigger floor itself at the code. The 8 is the name's margin
+    // rather than a gap, so a trigger that hides the name is left with nothing after the code.
+    <span className="inline-grid grid-cols-[max-content_minmax(0,auto)] max-w-full items-baseline align-top">
+      <span data-su-code="" className="font-mono font-medium">
         {option.code}
       </span>{" "}
-      <span className="min-w-0 truncate text-ink-2">{name}</span>
+      <span className="min-w-0 ms-su2 truncate text-ink-2">{name}</span>
     </span>
   );
 }
@@ -135,7 +146,7 @@ export function Select({
         id={item?.id}
         className={
           ghost
-            ? cn(ghostTriggerClass, compact ? ghostTriggerCompactClass : ghostTriggerSizeClass[size], className)
+            ? cn(ghostTriggerClass, compact ? ghostTriggerCompactClass : cn(ghostTriggerSizeClass[size], ghostTriggerCodeFloorClass), className)
             : cn(
                 selectTriggerClass,
                 selectTriggerSizeClass[size],

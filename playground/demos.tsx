@@ -958,6 +958,21 @@ export function SelectDemo() {
           { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
         ]}
       />
+      {/* A ghost in a row with no room: the name is cut, then the neighbour, never the code. */}
+      <div className="flex w-[200px] min-w-0 items-center gap-su2">
+        <UI.Select
+          variant="ghost"
+          aria-label="Warehouse, tight row"
+          prefix={<IconBuildingWarehouse size={16} {...UI.iconDefaults} className="text-ink-3" />}
+          defaultValue="buc"
+          className="max-w-[280px]"
+          options={[
+            { value: "buc", code: "RO_BUC_01", label: "Bucharest" },
+            { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
+          ]}
+        />
+        <span className="w-[160px] min-w-0 truncate text-body text-ink-2">A neighbour that gives way</span>
+      </div>
       {/* Compact ghost: the same picker in a phone header, the code alone in a 44 box. */}
       <UI.Select
         variant="ghost"
