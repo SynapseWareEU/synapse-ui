@@ -61,7 +61,7 @@ Nothing is removed and no default changes its look.
 
 Nothing is removed. One fix changes what is drawn, and is noted.
 
-- **Popover `anchorRef`**: what the overlay is placed against, in place of its trigger: an element, or anything with a `getBoundingClientRect`. The trigger still opens the overlay and takes focus back. For the funnel of a column header, whose panel opens under the start of its column.
+- **Popover `anchorRef`**: what the overlay is placed against, in place of its trigger: an element, or anything with a `getBoundingClientRect`. The trigger still opens the overlay and takes focus back. For the funnel of a column header, whose panel opens under the start of its column. **`alignOffset`** (px) shifts the overlay along the edge it is aligned to.
 - **Drawer** (fix): below `sm` (640) the sheet may take the whole viewport. It was capped at the viewport less 32 at every width, which on a phone left a strip too narrow to read and showed half of a navigation rail beside the sheet. From `sm` up nothing changes.
 
 ### Breaking changes

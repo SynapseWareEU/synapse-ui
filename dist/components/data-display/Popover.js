@@ -1,7 +1,7 @@
-import { jsxs as h, jsx as o } from "react/jsx-runtime";
-import { Root as x, Trigger as w, Anchor as y, Portal as C, Content as E } from "../../vendor/@radix-ui/react-popover/dist/index.js";
-import { useState as j, useEffect as z } from "react";
-import { cn as A } from "../../utils/cn.js";
+import { jsxs as x, jsx as o } from "react/jsx-runtime";
+import { Root as w, Trigger as y, Anchor as C, Portal as E, Content as j } from "../../vendor/@radix-ui/react-popover/dist/index.js";
+import { useState as z, useEffect as A } from "react";
+import { cn as B } from "../../utils/cn.js";
 function i(r) {
   return {
     getBoundingClientRect: () => {
@@ -15,46 +15,48 @@ function i(r) {
     }
   };
 }
-function k({
+function D({
   trigger: r,
   content: e,
   side: l = "bottom",
   align: c = "center",
   sideOffset: m = 4,
+  alignOffset: p,
   anchorRef: t,
-  contentClassName: p,
-  container: v,
-  "aria-label": f,
-  ...b
+  contentClassName: v,
+  container: f,
+  "aria-label": b,
+  ...g
 }) {
-  const { onOpenChange: n, ...a } = b, [d, s] = j(
+  const { onOpenChange: n, ...a } = g, [d, s] = z(
     () => t ? { current: i(t) } : void 0
-  ), g = a.open;
-  return z(() => {
+  ), h = a.open;
+  return A(() => {
     s(t ? { current: i(t) } : void 0);
-  }, [t, g]), /* @__PURE__ */ h(
-    x,
+  }, [t, h]), /* @__PURE__ */ x(
+    w,
     {
       ...a,
       onOpenChange: (u) => {
         u && t && s({ current: i(t) }), n == null || n(u);
       },
       children: [
-        /* @__PURE__ */ o(w, { asChild: !0, children: r }),
-        d ? /* @__PURE__ */ o(y, { virtualRef: d }) : null,
-        /* @__PURE__ */ o(C, { container: v, children: /* @__PURE__ */ o(
-          E,
+        /* @__PURE__ */ o(y, { asChild: !0, children: r }),
+        d ? /* @__PURE__ */ o(C, { virtualRef: d }) : null,
+        /* @__PURE__ */ o(E, { container: f, children: /* @__PURE__ */ o(
+          j,
           {
             side: l,
             align: c,
             sideOffset: m,
-            "aria-label": f,
-            className: A(
+            alignOffset: p,
+            "aria-label": b,
+            className: B(
               "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",
               "font-sans text-body text-ink su-focus-ring",
               // `data-side` holds exactly one value, so only one of these animations ever applies.
               "data-[side=bottom]:animate-su-dropdown-in data-[side=left]:animate-su-dropdown-in data-[side=right]:animate-su-dropdown-in data-[side=top]:animate-su-scale-in",
-              p
+              v
             ),
             children: /* @__PURE__ */ o("div", { className: "-m-su2 p-su2 max-h-[calc(var(--radix-popover-content-available-height)-2px)] overflow-y-auto rounded-[inherit]", children: e })
           }
@@ -64,5 +66,5 @@ function k({
   );
 }
 export {
-  k as Popover
+  D as Popover
 };

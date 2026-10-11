@@ -11,6 +11,12 @@ export interface PopoverProps extends Omit<ComponentPropsWithoutRef<typeof Radix
      */
     sideOffset?: number;
     /**
+     * Shift along the edge it is aligned to, in px (negative: before the start). With `anchorRef`
+     * it lines the overlay's content up with what the anchor holds, such as a column header's label
+     * 8 inside its cell.
+     */
+    alignOffset?: number;
+    /**
      * What the overlay is placed against, in place of the trigger: an element, or anything with a
      * `getBoundingClientRect` (a rect the caller works out). For a small trigger that stands for
      * something larger, such as the funnel in a column header whose panel opens under the column's
@@ -32,5 +38,5 @@ export interface PopoverProps extends Omit<ComponentPropsWithoutRef<typeof Radix
  * v2 overlay: surface-overlay, 1px border, radius 8, overlay shadow, padding 8, 4 from the
  * trigger, no arrow. Fades in with a 4px drift (150ms).
  */
-export declare function Popover({ trigger, content, side, align, sideOffset, anchorRef, contentClassName, container, "aria-label": ariaLabel, ...rest }: PopoverProps): import("react").JSX.Element;
+export declare function Popover({ trigger, content, side, align, sideOffset, alignOffset, anchorRef, contentClassName, container, "aria-label": ariaLabel, ...rest }: PopoverProps): import("react").JSX.Element;
 //# sourceMappingURL=Popover.d.ts.map

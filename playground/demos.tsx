@@ -1467,10 +1467,11 @@ export function PopoverDemo() {
         <span className="flex-1 text-small text-ink-2">Zone</span>
         <UI.Popover
           align="start"
+          alignOffset={-8}
           anchorRef={column}
           aria-label="Zone filter"
           trigger={<UI.Table.Facet aria-label="Filter by zone" />}
-          content={<p className="m-0 p-su1 text-body">Opens under the start of the box.</p>}
+          content={<p className="m-0 p-su1 text-body">Opens 8 before the start of the box.</p>}
         />
       </div>
     </UI.Space>
