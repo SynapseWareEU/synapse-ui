@@ -2491,7 +2491,7 @@ export function DocketDemo() {
         </div>
       </UI.ConfigProvider>
       <UI.ConfigProvider density="handheld" className="hh-frame">
-        <UI.Docket readOnly aria-label="Receipt">
+        <UI.Docket readOnly topRule aria-label="Receipt" data-testid="docket-ruled">
           <UI.DocketRow label="Location" value="A-09-01-1" data-testid="docket-location" />
           <UI.DocketRow label="Quantity" value="20 buc" mono={false} />
           {/* wrap: an identifier longer than the row is read whole. */}
@@ -2630,6 +2630,16 @@ export function QuantityStepperDemo() {
             stepButtons={false}
             unit="buc"
             inputProps={{ "data-testid": "qty-bare" }}
+          />
+          {/* keepTyped: a barcode fired into the count is shown and handed over whole, for the screen to refuse. */}
+          <UI.QuantityStepper
+            aria-label="Counted, as typed"
+            defaultDecimalValue=""
+            keepTyped
+            scale={4}
+            stepButtons={false}
+            unit="buc"
+            inputProps={{ "data-testid": "qty-typed" }}
           />
           {/* A value handed over in its display form is read as typed text would be, not thrown on. */}
           <UI.QuantityStepper

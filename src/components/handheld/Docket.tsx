@@ -11,18 +11,30 @@ export interface DocketProps extends HTMLAttributes<HTMLElement> {
    * `true`: a `<dl>` read-out (the done screen), rows without chevrons.
    */
   readOnly?: boolean;
+  /**
+   * Draw a hairline above the first row, for a docket that does not sit under the top bar (after
+   * a result band, or part-way down the done screen). Default false: the bar's own rule is above.
+   */
+  topRule?: boolean;
 }
 
 /**
  * The answers given so far on a handheld flow, one `DocketRow` each. Name the list with
  * `aria-label` ("Answers given. Tap one to scan it again."). Full bleed: rows carry their own
- * 16 inset and bottom hairline; add `border-t` when it does not sit under the top bar.
+ * 16 inset and bottom hairline; pass `topRule` when it does not sit under the top bar.
  */
-export function Docket({ readOnly = false, className, children, ...rest }: DocketProps) {
+export function Docket({ readOnly = false, topRule = false, className, children, ...rest }: DocketProps) {
   const Tag = readOnly ? "dl" : "ul";
   return (
     <DocketContext.Provider value={{ readOnly }}>
-      <Tag className={cn("m-0 p-0 list-none bg-surface font-sans", className)} {...rest}>
+      <Tag
+        className={cn(
+          "m-0 p-0 list-none bg-surface font-sans",
+          topRule && "border-0 border-t border-solid border-border",
+          className,
+        )}
+        {...rest}
+      >
         {children}
       </Tag>
     </DocketContext.Provider>

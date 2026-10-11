@@ -51,6 +51,14 @@ export interface QuantityStepperProps
   decimalSeparator?: string;
   /** Decimal mode: the most digits kept after the point (4 for a `numeric(15,4)`). Default: no cap. */
   scale?: number;
+  /**
+   * Decimal mode: hand `onDecimalChange` the text exactly as it was typed and show it, instead of
+   * cleaning it to digits and one point. For a field whose owner refuses a bad reading rather than
+   * repairing it: a barcode fired into a count ("VET-100") must not be read as the 100 inside it.
+   * `scale` and `max` no longer trim what is typed; the caller checks the text and says why it is
+   * refused. − + and ↑ ↓ still step the number read out of the text. Default false.
+   */
+  keepTyped?: boolean;
   /** Default 0. In decimal mode a number or decimal text ("0.5"). */
   min?: number | string;
   max?: number | string;
@@ -119,6 +127,7 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
       onDecimalChange,
       decimalSeparator = ".",
       scale,
+      keepTyped = false,
       min: minProp = 0,
       max: maxProp,
       step: stepProp = 1,
@@ -152,7 +161,8 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
     const [innerText, setInnerText] = useState(defaultDecimalValue ?? "");
     // Cleaned, not trusted: the arithmetic below throws on anything but canonical text, and it
     // runs during render.
-    const text = cleanDecimal(decimalValue !== undefined ? decimalValue : innerText);
+    const held = decimalValue !== undefined ? decimalValue : innerText;
+    const text = cleanDecimal(held);
     // The bounds as text for the decimal mode, as numbers for the whole-number mode.
     const minText = decimalText(minProp) ?? "0";
     const maxText = decimalText(maxProp);
@@ -183,6 +193,10 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
       : value != null && max != null && value >= max;
 
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
+      if (decimal && keepTyped) {
+        commitText(event.currentTarget.value);
+        return;
+      }
       if (decimal) {
         const typed = cleanDecimal(event.currentTarget.value, scale);
         commitText(
@@ -204,15 +218,22 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
 
     const unitText = typeof unit === "string" || typeof unit === "number" ? ` ${unit}` : "";
     const hasLabel = label != null && label !== false;
-    const empty = decimal ? text === "" : value == null;
+    const empty = decimal ? (keepTyped ? held === "" : text === "") : value == null;
     // What the field holds and what is read out. Decimal: the text itself with the caller's separator.
-    const shown = decimal ? showDecimal(text, decimalSeparator) : value == null ? "" : String(value);
+    // Kept as typed, the field shows the operator's own characters, the ones it will refuse too.
+    const shown = decimal
+      ? keepTyped ? held : showDecimal(text, decimalSeparator)
+      : value == null ? "" : String(value);
     const readOut = decimal
       ? text === "" ? "—" : showDecimal(text, decimalSeparator, true)
       : formatQuantity(value);
     // ARIA wants a number for `aria-valuenow`; the reading is in `aria-valuetext`, and the value
     // the caller holds stays the text.
-    const valueNow = decimal ? (text === "" ? undefined : Number(text)) : (value ?? undefined);
+    // Typed text that is not a number has no value to state: the 100 inside "VET-100" is not it.
+    const typedNumber = !keepTyped || held.replace(",", ".") === text;
+    const valueNow = decimal
+      ? text === "" || !typedNumber ? undefined : Number(text)
+      : (value ?? undefined);
     const Heading = labelAs;
     const question = hasLabel ? (
       <label htmlFor={id} className={cn(hhQuestionClass, !Heading && "mb-su3")}>
