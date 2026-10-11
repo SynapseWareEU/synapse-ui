@@ -947,6 +947,17 @@ export function SelectDemo() {
           { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
         ]}
       />
+      {/* Compact ghost: the same picker in a phone header, the code alone in a 44 box. */}
+      <UI.Select
+        variant="ghost"
+        compact
+        aria-label="Warehouse, phone"
+        defaultValue="buc"
+        options={[
+          { value: "buc", code: "RO_BUC_01", label: "Bucharest" },
+          { value: "clj", code: "RO_CLJ_02", label: "Cluj-Napoca" },
+        ]}
+      />
     </UI.Space>
   );
 }
