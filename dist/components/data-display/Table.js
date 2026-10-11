@@ -5,7 +5,7 @@ import { statusDotToneClass as I } from "./StatusDot.js";
 const y = S("default"), j = S(void 0), w = S({
   line: "single",
   expanded: !1
-}), b = S(!1), _ = S({ hidden: !1, sticky: !1 }), Z = { sm: 640, md: 768, lg: 1024, xl: 1280 }, ee = () => () => {
+}), b = S(!1), E = S({ hidden: !1, sticky: !1 }), Z = { sm: 640, md: 768, lg: 1024, xl: 1280 }, ee = () => () => {
 };
 function te(n) {
   const e = n ? `(min-width: ${Z[n]}px)` : void 0, a = Q(
@@ -23,7 +23,7 @@ function te(n) {
     () => !1
   );
 }
-function E({ size: n, children: e, className: a }) {
+function A({ size: n, children: e, className: a }) {
   return /* @__PURE__ */ t(
     "svg",
     {
@@ -41,11 +41,11 @@ function E({ size: n, children: e, className: a }) {
     }
   );
 }
-const R = (n) => n === "nested" ? "px-[calc(var(--su-table-gap)/2)] first:ps-[15px] last:pe-[15px]" : "px-[calc(var(--su-table-gap)/2)] first:ps-su4 last:pe-su4", $ = "border-b border-solid border-border", F = (n) => n === "nested" ? "px-[15px]" : "px-su4", A = "border-b border-solid border-border last:border-b-0", P = "block min-w-0 p-0 empty:hidden", ne = "[&:has(>[data-su-stack-end])]:before:content-empty [&:has(>[data-su-stack-end])]:before:order-1 [&:has(>[data-su-stack-end])]:before:basis-full [&>[data-su-stack-end]~*]:order-2 [&:has(>[data-su-stack-end])>:not([data-su-stack-end]~*)]:-mb-[2px]";
+const R = (n) => n === "nested" ? "px-[calc(var(--su-table-gap)/2)] first:ps-[15px] last:pe-[15px]" : "px-[calc(var(--su-table-gap)/2)] first:ps-su4 last:pe-su4", $ = "border-b border-solid border-border", F = (n) => n === "nested" ? "px-[15px]" : "px-su4", H = "border-b border-solid border-border last:border-b-0", P = "block min-w-0 p-0 empty:hidden", ne = "[&:has(>[data-su-stack-end])]:before:content-empty [&:has(>[data-su-stack-end])]:before:order-1 [&:has(>[data-su-stack-end])]:before:basis-full [&>[data-su-stack-end]~*]:order-2 [&:has(>[data-su-stack-end])>:not([data-su-stack-end]~*)]:-mb-[2px]";
 function K(n, e, a) {
   return o(n === "first" && !a ? "pt-[10px] pb-0 align-top" : n === "meta" ? "pt-0 pb-[9px] align-top" : "py-[3px] align-middle", n === "first" && !a || e ? void 0 : $);
 }
-function x({
+function f({
   striped: n,
   bordered: e,
   size: a = "default",
@@ -56,16 +56,16 @@ function x({
   stack: c,
   header: p,
   headerHidden: h = !1,
-  stickyHeader: v = !1,
+  stickyHeader: x = !1,
   panelClassName: g,
   columnGap: m,
-  className: f,
+  className: v,
   style: k,
   children: M,
   ...D
 }) {
-  const B = te(c), H = d(b), N = c ? B : H, C = v && !N, G = O(() => ({ hidden: h, sticky: C }), [h, C]);
-  return /* @__PURE__ */ t(y.Provider, { value: a, children: /* @__PURE__ */ t(j.Provider, { value: void 0, children: /* @__PURE__ */ t(b.Provider, { value: N, children: /* @__PURE__ */ t(_.Provider, { value: G, children: /* @__PURE__ */ u("div", { className: o("su-panel font-sans text-ink", C && "flex flex-col min-h-0", g), children: [
+  const B = te(c), _ = d(b), N = c ? B : _, C = x && !N, G = O(() => ({ hidden: h, sticky: C }), [h, C]);
+  return /* @__PURE__ */ t(y.Provider, { value: a, children: /* @__PURE__ */ t(j.Provider, { value: void 0, children: /* @__PURE__ */ t(b.Provider, { value: N, children: /* @__PURE__ */ t(E.Provider, { value: G, children: /* @__PURE__ */ u("div", { className: o("su-panel font-sans text-ink", x && "flex flex-col min-h-0", g), children: [
     p != null ? /* @__PURE__ */ t(
       "div",
       {
@@ -81,7 +81,7 @@ function x({
     /* @__PURE__ */ t(
       "div",
       {
-        className: N ? "relative" : C ? "relative flex-1 min-h-0 overflow-auto" : "relative overflow-x-auto",
+        className: N ? x ? "relative flex-1 min-h-0 overflow-y-auto" : "relative" : C ? "relative flex-1 min-h-0 overflow-auto" : "relative overflow-x-auto",
         children: /* @__PURE__ */ t(
           "table",
           {
@@ -94,7 +94,7 @@ function x({
             className: o(
               N ? "block w-full text-start" : "w-full border-separate [border-spacing:0] text-start",
               a === "nested" ? "text-small" : "text-body",
-              f
+              v
             ),
             ...D,
             children: M
@@ -145,7 +145,7 @@ function oe({
   children: i,
   ...c
 }) {
-  const p = d(j), h = d(y), v = d(b), g = d(_);
+  const p = d(j), h = d(y), x = d(b), g = d(E);
   if (p === "head")
     return /* @__PURE__ */ t(
       "tr",
@@ -159,8 +159,8 @@ function oe({
         children: i
       }
     );
-  const m = n ? "bg-action-subtle [@media(hover:hover)]:hover:bg-action-subtle-hover" : e ? "bg-surface-2 [@media(hover:hover)]:hover:bg-surface-hover" : "[@media(hover:hover)]:hover:bg-surface-hover", f = "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none", k = h === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]";
-  if (v)
+  const m = n ? "bg-action-subtle [@media(hover:hover)]:hover:bg-action-subtle-hover" : e ? "bg-surface-2 [@media(hover:hover)]:hover:bg-surface-hover" : "[@media(hover:hover)]:hover:bg-surface-hover", v = "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none", k = h === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]";
+  if (x)
     return /* @__PURE__ */ t(w.Provider, { value: { line: "single", expanded: e }, children: /* @__PURE__ */ u(
       "tr",
       {
@@ -170,9 +170,9 @@ function oe({
           "flex flex-wrap items-baseline gap-x-su3 gap-y-[2px] py-su2",
           ne,
           F(h),
-          e ? void 0 : A,
+          e ? void 0 : H,
           m,
-          f,
+          v,
           l
         ),
         ...c,
@@ -187,12 +187,12 @@ function oe({
       "tr",
       {
         "data-state": n ? "selected" : void 0,
-        className: o(k, m, f, "[&:last-child>*]:border-b-0", l),
+        className: o(k, m, v, "[&:last-child>*]:border-b-0", l),
         ...c,
         children: i
       }
     ) });
-  const { total: M, spanned: D } = re(i), B = Math.max(0, Math.min(r - 1, M - 1)), H = Math.max(1, M - B - D), N = n ? "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-surface-hover", C = n ? "[@media(hover:hover)]:[&:hover+tr]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:hover+tr]:bg-surface-hover";
+  const { total: M, spanned: D } = re(i), B = Math.max(0, Math.min(r - 1, M - 1)), _ = Math.max(1, M - B - D), N = n ? "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:has(+tr:hover)]:bg-surface-hover", C = n ? "[@media(hover:hover)]:[&:hover+tr]:bg-action-subtle-hover" : "[@media(hover:hover)]:[&:hover+tr]:bg-surface-hover";
   return /* @__PURE__ */ u(T, { children: [
     /* @__PURE__ */ t(w.Provider, { value: { line: "first", expanded: e }, children: /* @__PURE__ */ t(
       "tr",
@@ -203,7 +203,7 @@ function oe({
           m,
           N,
           C,
-          f,
+          v,
           l
         ),
         ...c,
@@ -218,13 +218,13 @@ function oe({
         className: o(
           "h-[30px]",
           m,
-          f,
+          v,
           "[&:last-child>*]:border-b-0",
           s == null ? void 0 : s.className
         ),
         children: [
           Array.from({ length: B }, (G, J) => /* @__PURE__ */ t(z, {}, J)),
-          /* @__PURE__ */ t(z, { colSpan: H, children: a })
+          /* @__PURE__ */ t(z, { colSpan: _, children: a })
         ]
       }
     ) })
@@ -239,14 +239,14 @@ function le({
   children: l,
   ...i
 }) {
-  const c = d(j), p = d(y), { line: h, expanded: v } = d(w), g = d(b), m = d(_);
+  const c = d(j), p = d(y), { line: h, expanded: x } = d(w), g = d(b), m = d(E);
   if (c === "body")
     return /* @__PURE__ */ t(
       "th",
       {
         className: o(
           g ? P : R(p),
-          g ? void 0 : K(h, v, (i.rowSpan ?? 1) > 1),
+          g ? void 0 : K(h, x, (i.rowSpan ?? 1) > 1),
           "[font-weight:inherit]",
           n && !g ? "text-end" : "text-start",
           s
@@ -257,7 +257,7 @@ function le({
     );
   if (m.hidden)
     return /* @__PURE__ */ t("th", { "aria-sort": e, className: o("h-0 p-0 border-0 font-normal text-start", s), ...i, children: /* @__PURE__ */ t("span", { className: "absolute w-px h-px overflow-hidden whitespace-nowrap [clip-path:inset(50%)]", children: l }) });
-  const f = e === "ascending" || e === "descending", k = f ? /* @__PURE__ */ u(E, { size: 14, children: [
+  const v = e === "ascending" || e === "descending", k = v ? /* @__PURE__ */ u(A, { size: 14, children: [
     /* @__PURE__ */ t("path", { d: "M12 5l0 14" }),
     e === "ascending" ? /* @__PURE__ */ u(T, { children: [
       /* @__PURE__ */ t("path", { d: "M18 11l-6 -6" }),
@@ -292,7 +292,7 @@ function le({
         m.sticky && "sticky top-0 z-[1]",
         $,
         p === "nested" ? "text-micro" : "text-small",
-        f ? "text-ink" : "text-ink-2",
+        v ? "text-ink" : "text-ink-2",
         n ? "text-end" : "text-start",
         s
       ),
@@ -330,8 +330,8 @@ function z({
   rowSpan: l,
   ...i
 }) {
-  const c = d(y), { line: p, expanded: h } = d(w), v = d(b), g = n || e === "number" || e === "actions", m = e === "empty" && s == null ? "—" : s;
-  if (v)
+  const c = d(y), { line: p, expanded: h } = d(w), x = d(b), g = n || e === "number" || e === "actions", m = e === "empty" && s == null ? "—" : s;
+  if (x)
     return /* @__PURE__ */ t(
       "td",
       {
@@ -348,7 +348,7 @@ function z({
         children: m
       }
     );
-  const f = p === "first" && (l ?? 1) <= 1 && (e === "control" || e === "actions");
+  const v = p === "first" && (l ?? 1) <= 1 && (e === "control" || e === "actions");
   return /* @__PURE__ */ t(
     "td",
     {
@@ -362,7 +362,7 @@ function z({
         r
       ),
       ...i,
-      children: f && m != null ? /* @__PURE__ */ t("span", { className: o("flex items-center h-[20px]", e === "actions" && "justify-end"), children: m }) : m
+      children: v && m != null ? /* @__PURE__ */ t("span", { className: o("flex items-center h-[20px]", e === "actions" && "justify-end"), children: m }) : m
     }
   );
 }
@@ -375,7 +375,7 @@ function de({ className: n, children: e, ...a }) {
       className: o(
         s ? "flex items-center gap-su2 min-h-[var(--su-row-group)]" : "h-[var(--su-row-group)] [&:last-child>*]:border-b-0",
         s ? F(r) : void 0,
-        s ? A : void 0,
+        s ? H : void 0,
         "bg-surface-2 text-small font-semibold text-ink",
         n
       ),
@@ -400,7 +400,7 @@ const ce = q(
           r
         ),
         ...s,
-        children: /* @__PURE__ */ t(E, { size: 16, className: e ? void 0 : "rtl:-scale-x-100", children: e ? /* @__PURE__ */ t("path", { d: "M6 9l6 6l6 -6" }) : /* @__PURE__ */ t("path", { d: "M9 6l6 6l-6 6" }) })
+        children: /* @__PURE__ */ t(A, { size: 16, className: e ? void 0 : "rtl:-scale-x-100", children: e ? /* @__PURE__ */ t("path", { d: "M6 9l6 6l6 -6" }) : /* @__PURE__ */ t("path", { d: "M9 6l6 6l-6 6" }) })
       }
     );
   }
@@ -419,7 +419,7 @@ const ce = q(
       ),
       ...l,
       children: [
-        /* @__PURE__ */ t(E, { size: 14, children: /* @__PURE__ */ t("path", { d: "M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" }) }),
+        /* @__PURE__ */ t(A, { size: 14, children: /* @__PURE__ */ t("path", { d: "M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" }) }),
         c && e ? /* @__PURE__ */ t("span", { className: "text-micro font-semibold su-tabular", children: e }) : null
       ]
     }
@@ -483,7 +483,7 @@ function pe({
       ),
       ...l,
       children: [
-        Array.from({ length: p }, (h, v) => /* @__PURE__ */ t(z, {}, v)),
+        Array.from({ length: p }, (h, x) => /* @__PURE__ */ t(z, {}, x)),
         /* @__PURE__ */ t(
           "td",
           {
@@ -573,7 +573,7 @@ function be({ columns: n, className: e, ...a }) {
         r === "nested" ? "h-[var(--su-row-nested)]" : "h-[var(--su-row)]",
         s ? "flex items-center gap-su3" : "[&:last-child>*]:border-b-0",
         s ? F(r) : void 0,
-        s ? A : void 0,
+        s ? H : void 0,
         e
       ),
       ...a,
@@ -581,20 +581,20 @@ function be({ columns: n, className: e, ...a }) {
     }
   ) });
 }
-x.Head = ae;
-x.Body = se;
-x.Row = oe;
-x.Th = le;
-x.Td = z;
-x.GroupRow = de;
-x.Disclosure = ce;
-x.Facet = ue;
-x.Detail = he;
-x.FoldRow = pe;
-x.Meta = me;
-x.SkeletonRow = be;
+f.Head = ae;
+f.Body = se;
+f.Row = oe;
+f.Th = le;
+f.Td = z;
+f.GroupRow = de;
+f.Disclosure = ce;
+f.Facet = ue;
+f.Detail = he;
+f.FoldRow = pe;
+f.Meta = me;
+f.SkeletonRow = be;
 export {
-  x as Table,
+  f as Table,
   se as TableBody,
   he as TableDetail,
   ce as TableDisclosure,

@@ -7,10 +7,18 @@
 
 const DECIMAL = /^\d+(\.\d*)?$/;
 
-/** A bound or a step given as a number or as text, as canonical decimal text. `undefined` if it is not one. */
+/**
+ * A bound or a step given as a number or as text, as canonical decimal text. `undefined` if it is
+ * not one: text that is not canonical, a negative (a quantity is unsigned), or a number too large
+ * to print in digits.
+ */
 export function decimalText(value: number | string | undefined): string | undefined {
   if (value === undefined) return undefined;
-  const text = String(value);
+  let text = String(value);
+  // A small number prints in exponent form (1e-7); its digits are still a decimal.
+  if (typeof value === "number" && value > 0 && value < 1e-6) {
+    text = value.toFixed(20).replace(/0+$/, "");
+  }
   return DECIMAL.test(text) ? text : undefined;
 }
 

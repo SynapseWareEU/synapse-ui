@@ -1,55 +1,55 @@
 const a = /^\d+(\.\d*)?$/;
-function h(t) {
+function p(t) {
   if (t === void 0) return;
-  const n = String(t);
-  return a.test(n) ? n : void 0;
+  let n = String(t);
+  return typeof t == "number" && t > 0 && t < 1e-6 && (n = t.toFixed(20).replace(/0+$/, "")), a.test(n) ? n : void 0;
 }
-function p(t, n) {
-  let i = "", c = "", e = !1;
+function $(t, n) {
+  let i = "", e = "", c = !1;
   for (const o of t)
-    o >= "0" && o <= "9" ? e ? c += o : i += o : (o === "," || o === ".") && !e && (e = !0);
-  return i = i.replace(/^0+(?=\d)/, ""), !e || n === 0 ? i : (n != null && (c = c.slice(0, n)), `${i || "0"}.${c}`);
+    o >= "0" && o <= "9" ? c ? e += o : i += o : (o === "," || o === ".") && !c && (c = !0);
+  return i = i.replace(/^0+(?=\d)/, ""), !c || n === 0 ? i : (n != null && (e = e.slice(0, n)), `${i || "0"}.${e}`);
 }
 function l(t) {
   const n = t.indexOf(".");
   return n === -1 ? [t, ""] : [t.slice(0, n), t.slice(n + 1)];
 }
 function r(t, n) {
-  const [i, c] = l(t);
-  return BigInt((i || "0") + c.padEnd(n, "0"));
+  const [i, e] = l(t);
+  return BigInt((i || "0") + e.padEnd(n, "0"));
 }
 function g(t, n) {
-  const i = t.toString().padStart(n + 1, "0"), c = i.slice(0, i.length - n), e = i.slice(i.length - n).replace(/0+$/, "");
-  return e ? `${c}.${e}` : c;
+  const i = t.toString().padStart(n + 1, "0"), e = i.slice(0, i.length - n), c = i.slice(i.length - n).replace(/0+$/, "");
+  return c ? `${e}.${c}` : e;
 }
-const s = (t) => l(t)[1].length;
-function $(t, n) {
-  const i = Math.max(s(t), s(n)), c = r(t, i), e = r(n, i);
-  return c < e ? -1 : c > e ? 1 : 0;
+const f = (t) => l(t)[1].length;
+function h(t, n) {
+  const i = Math.max(f(t), f(n)), e = r(t, i), c = r(n, i);
+  return e < c ? -1 : e > c ? 1 : 0;
 }
-function D(t, n, i, c, e) {
+function D(t, n, i, e, c) {
   const o = Math.max(
-    s(t),
-    s(n),
-    s(c),
-    e === void 0 ? 0 : s(e)
+    f(t),
+    f(n),
+    f(e),
+    c === void 0 ? 0 : f(c)
   );
-  let f = r(t, o) + BigInt(i) * r(n, o);
-  const d = r(c, o);
-  if (f < d && (f = d), e !== void 0) {
-    const u = r(e, o);
-    f > u && (f = u);
+  let s = r(t, o) + BigInt(i) * r(n, o);
+  const d = r(e, o);
+  if (s < d && (s = d), c !== void 0) {
+    const u = r(c, o);
+    s > u && (s = u);
   }
-  return g(f, o);
+  return g(s, o);
 }
 function m(t, n, i = !1) {
-  const [c, e] = l(t), o = i ? c.replace(/\B(?=(\d{3})+(?!\d))/g, " ") : c;
-  return t.includes(".") ? `${o}${n}${e}` : o;
+  const [e, c] = l(t), o = i ? e.replace(/\B(?=(\d{3})+(?!\d))/g, " ") : e;
+  return t.includes(".") ? `${o}${n}${c}` : o;
 }
 export {
-  p as cleanDecimal,
-  $ as compareDecimal,
-  h as decimalText,
+  $ as cleanDecimal,
+  h as compareDecimal,
+  p as decimalText,
   m as showDecimal,
   D as stepDecimal
 };

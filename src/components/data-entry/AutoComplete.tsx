@@ -46,7 +46,11 @@ export interface AutoCompleteProps
   className?: string;
   /** Native input id — also the target of an external `<label for>`. */
   id?: string;
-  /** Native input name, so the field is picked up by form submission / FormData. */
+  /**
+   * Native input name, so the field is picked up by form submission / FormData. In a `picker` the
+   * name posts the held option's `value`, from a hidden input: the visible box carries the line
+   * that is read or the typed term, and has no name.
+   */
   name?: string;
   /** Show a clear affix once there is a value. */
   allowClear?: boolean;
@@ -69,8 +73,10 @@ export interface AutoCompleteProps
    * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
    * the value (Escape closes the list and drops the term too). The list opens whenever the box
    * does, and says `notFoundContent` when it has no rows. Enter never submits the enclosing form,
-   * and picks nothing while `loading`: the rows of the search before are not the ones on screen. A `value` that is no option's reads as itself:
-   * keep the held option among `options` (it is remembered after a pick).
+   * and picks nothing while `loading`: the rows of the search before are not the ones on screen.
+   * Until a term is typed the active row is the held option's, or none: Enter on a box that was
+   * only focused changes nothing, and an arrow key starts the walk. A `value` that is no option's
+   * reads as itself: keep the held option among `options` (it is remembered after a pick).
    */
   picker?: boolean;
   /**
@@ -206,7 +212,8 @@ export function AutoComplete({
   const { size: fieldSize, disabled: isDisabled } = useFieldState(size, disabled);
   const [internal, setInternal] = useState(defaultValue);
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  // `null`: no arrow key yet, the active row is the default one (see `active`).
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   // false right after a pick, so reopening browses the whole list instead of the one committed label
   const filteringRef = useRef(true);
@@ -253,8 +260,18 @@ export function AutoComplete({
   };
 
   // activeIndex can outlive the list it was picked in (async options, a new filter)
-  const clamped = Math.max(0, Math.min(activeIndex, filtered.length - 1));
-  const active = filtered[clamped]?.disabled ? step(clamped, 1) : clamped;
+  const clamped = Math.max(0, Math.min(activeIndex ?? 0, filtered.length - 1));
+  // A picker with no term typed is showing its value, and Enter must not re-point it: the active
+  // row is the held option's, or none (-1), until an arrow key moves it. Anywhere else it is the
+  // first enabled row, what Enter is expected to pick after typing.
+  const active =
+    activeIndex === null && picker && !term
+      ? held === ""
+        ? -1
+        : filtered.findIndex((opt) => opt.value === held)
+      : filtered[clamped]?.disabled
+        ? step(clamped, 1)
+        : clamped;
   // While loading the list reads the searching row: the options held are the search before's,
   // and nothing the user cannot see may be picked or announced as active.
   const activeOption = loading ? undefined : filtered[active];
@@ -282,13 +299,13 @@ export function AutoComplete({
       emitChange(option.label);
     }
     onSelect?.(option.value, option);
-    setActiveIndex(0);
+    setActiveIndex(null);
     setOpen(false);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setOpen(true);
-    setActiveIndex(0);
+    setActiveIndex(null);
     if (!picker) {
       filteringRef.current = true;
       emitChange(event.target.value);
@@ -334,7 +351,8 @@ export function AutoComplete({
       setActiveIndex(step(active, 1));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      setActiveIndex(step(active, -1));
+      // From no active row, up starts at the last one, as down starts at the first.
+      setActiveIndex(step(Math.max(active, 0), -1));
     } else if (event.key === "Enter") {
       event.preventDefault(); // never let an open list submit the enclosing form
       if (loading) return;
@@ -344,11 +362,16 @@ export function AutoComplete({
       event.preventDefault();
       event.stopPropagation(); // otherwise the same key also dismisses the surrounding Modal/Drawer
       setOpen(false);
-      if (picker) dropTerm();
+      if (picker) {
+        dropTerm();
+        setActiveIndex(null);
+      }
     }
   };
 
-  const showClear = Boolean(allowClear && value && !isDisabled);
+  // A picker is cleared of its value, not of its text: the button stays while a term (or an
+  // emptied box) stands over a value still held.
+  const showClear = Boolean(allowClear && (picker ? held : value) && !isDisabled);
   // A picker's list always opens: an empty one says so (`notFoundContent`) instead of not showing.
   const showPanel = open && (picker || loading || filtered.length > 0 || options.length > 0);
   const padEnd = showClear ? fieldClearPadding(fieldSize) : undefined;
@@ -359,7 +382,7 @@ export function AutoComplete({
         {...rest}
         ref={inputRef}
         id={id}
-        name={name}
+        name={picker ? undefined : name}
         role="combobox"
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
@@ -397,11 +420,14 @@ export function AutoComplete({
           if (!rootRef.current?.contains(e.relatedTarget as Node)) setOpen(false);
           setFocused(false);
           dropTerm();
+          // A row walked to and left is not what Enter picks on the way back in.
+          if (picker) setActiveIndex(null);
           onBlur?.(e);
         }}
         onKeyDown={handleKeyDown}
         autoComplete="off"
       />
+      {picker && name ? <input type="hidden" name={name} value={held} disabled={isDisabled} /> : null}
       {paired ? (
         // The box at rest (§2.2, the reference pair). It sits where the input's text is: the same
         // padding, border width and type size, so the pair starts at the text's x.
@@ -429,7 +455,7 @@ export function AutoComplete({
             if (picker) dropTerm();
             emitChange("");
             onClear?.();
-            setActiveIndex(0);
+            setActiveIndex(null);
             setOpen(true);
           }}
         />

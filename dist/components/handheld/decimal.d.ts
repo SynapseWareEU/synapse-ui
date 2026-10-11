@@ -1,4 +1,8 @@
-/** A bound or a step given as a number or as text, as canonical decimal text. `undefined` if it is not one. */
+/**
+ * A bound or a step given as a number or as text, as canonical decimal text. `undefined` if it is
+ * not one: text that is not canonical, a negative (a quantity is unsigned), or a number too large
+ * to print in digits.
+ */
 export declare function decimalText(value: number | string | undefined): string | undefined;
 /**
  * What was typed, as canonical decimal text: the digits and the first separator ("," or "."),

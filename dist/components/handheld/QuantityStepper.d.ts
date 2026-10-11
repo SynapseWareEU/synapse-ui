@@ -10,7 +10,10 @@ export interface QuantityStepperProps extends Omit<HTMLAttributes<HTMLDivElement
      * "" when empty, "12." while the fraction is still to come). Any of the three `decimal*` props
      * turns the mode on, and `value` / `onChange` are then unused. The text is typed, stepped and
      * bounded as text: no floating point number is ever made of it, so "0.1" + "0.2" is "0.3".
-     * Feed it from a keypad with `applyKeypadKey(value, key, maxLength, scale)`.
+     * Feed it from a keypad with `applyKeypadKey(value, key, maxLength, scale)`. Text that is not
+     * canonical (a formatted quantity, "1.234,5") is read as typed text would be, digits and the
+     * first separator: pass the value, not its display form. Nothing here caps the digits before
+     * the point: give `max` where the column has a limit (a `numeric(15,4)` holds 11).
      */
     decimalValue?: string;
     defaultDecimalValue?: string;

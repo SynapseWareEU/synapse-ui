@@ -130,8 +130,10 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(event);
     // One read at a time: while the last one is being checked, Enter neither scans nor submits.
+    // What a wedge scanner typed before it is dropped, or the next read would be appended to it.
     if (busy && event.key === "Enter") {
       event.preventDefault();
+      if (rest.value === undefined) event.currentTarget.value = "";
       return;
     }
     if (!onScan || event.defaultPrevented || event.key !== "Enter" || event.nativeEvent.isComposing) {
@@ -161,7 +163,7 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
       {question && Heading ? <Heading className="m-0 mb-su3">{question}</Heading> : question}
       <div
         className={cn(
-          "flex items-center gap-su3 h-[var(--su-hh-control-lg)] min-w-0",
+          "relative flex items-center gap-su3 h-[var(--su-hh-control-lg)] min-w-0",
           "rounded-[var(--su-hh-radius)] border-[length:var(--su-hh-field-border)] border-solid",
           showToggle ? "pl-su4 pr-su2" : "px-su4",
           hhFieldBorder({ invalid, disabled }),
@@ -217,11 +219,14 @@ export const ScanField = forwardRef<HTMLInputElement, ScanFieldProps>(function S
           </button>
         ) : null}
         {busy ? (
-          <span role="status" className="relative inline-flex shrink-0 items-center justify-center size-[var(--su-hit-target)] text-action">
+          <span className="inline-flex shrink-0 items-center justify-center size-[var(--su-hit-target)] text-action">
             <RingSpinner size={24} />
-            <span className="absolute w-px h-px overflow-hidden [clip-path:inset(50%)]">{busyLabel}</span>
           </span>
         ) : null}
+        {/* Always mounted: a live region that arrives together with its text is not announced. */}
+        <span role="status" className="absolute w-px h-px overflow-hidden [clip-path:inset(50%)]">
+          {busy ? busyLabel : ""}
+        </span>
       </div>
       {hasHint ? (
         <p id={hintId} className="mt-su2 mb-0 font-sans text-hh-body text-ink-2">

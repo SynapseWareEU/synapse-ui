@@ -16,7 +16,11 @@ export interface AutoCompleteProps extends Omit<InputHTMLAttributes<HTMLInputEle
     className?: string;
     /** Native input id — also the target of an external `<label for>`. */
     id?: string;
-    /** Native input name, so the field is picked up by form submission / FormData. */
+    /**
+     * Native input name, so the field is picked up by form submission / FormData. In a `picker` the
+     * name posts the held option's `value`, from a hidden input: the visible box carries the line
+     * that is read or the typed term, and has no name.
+     */
     name?: string;
     /** Show a clear affix once there is a value. */
     allowClear?: boolean;
@@ -39,8 +43,10 @@ export interface AutoCompleteProps extends Omit<InputHTMLAttributes<HTMLInputEle
      * dropped again on a pick, a clear or when focus leaves, so the box never keeps text that is not
      * the value (Escape closes the list and drops the term too). The list opens whenever the box
      * does, and says `notFoundContent` when it has no rows. Enter never submits the enclosing form,
-     * and picks nothing while `loading`: the rows of the search before are not the ones on screen. A `value` that is no option's reads as itself:
-     * keep the held option among `options` (it is remembered after a pick).
+     * and picks nothing while `loading`: the rows of the search before are not the ones on screen.
+     * Until a term is typed the active row is the held option's, or none: Enter on a box that was
+     * only focused changes nothing, and an arrow key starts the walk. A `value` that is no option's
+     * reads as itself: keep the held option among `options` (it is remembered after a pick).
      */
     picker?: boolean;
     /**

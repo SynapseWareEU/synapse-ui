@@ -665,6 +665,7 @@ export function AutoCompleteDemo() {
       <UI.AutoComplete
         picker
         data-testid="partner-picker"
+        name="partner"
         placeholder="Search by code or name"
         allowClear
         clearLabel="Clear the partner"
@@ -1654,6 +1655,31 @@ export function TableDemo() {
           )}
         </UI.Table.Body>
       </UI.Table>
+      {/* stickyHeader on a table that stacks: at desk width the header is pinned, and below `lg`
+          the records scroll inside the same capped panel, so the last one and the footer stay
+          in reach. */}
+      <UI.Table
+        aria-label="Count tasks"
+        stack="lg"
+        stickyHeader
+        panelClassName="max-h-[236px]"
+        footer={<span data-testid="count-tasks-footer">12 count tasks</span>}
+      >
+        <UI.Table.Head>
+          <UI.Table.Row>
+            <UI.Table.Th className="w-[140px]">Bin</UI.Table.Th>
+            <UI.Table.Th>Task</UI.Table.Th>
+          </UI.Table.Row>
+        </UI.Table.Head>
+        <UI.Table.Body>
+          {Array.from({ length: 12 }, (_, i) => (
+            <UI.Table.Row key={i} data-testid={`count-task-${i + 1}`}>
+              <UI.Table.Td kind="id">{`A-01-${String(i + 1).padStart(2, "0")}`}</UI.Table.Td>
+              <UI.Table.Td>Count the bin</UI.Table.Td>
+            </UI.Table.Row>
+          ))}
+        </UI.Table.Body>
+      </UI.Table>
       {/* headerHidden: no header row is drawn, the cells still name the columns. Table.Detail with
           its own start (16, there is no disclosure column) and the 12-below strip. */}
       <UI.Table aria-label="Docks" headerHidden className="table-fixed">
@@ -2567,6 +2593,14 @@ export function QuantityStepperDemo() {
           <span className="text-hh-body text-ink-2" data-testid="qty-decimal-value">
             Value held: {kg === "" ? "empty" : kg}
           </span>
+          {/* A value handed over in its display form is read as typed text would be, not thrown on. */}
+          <UI.QuantityStepper
+            aria-label="Formatted value"
+            decimalValue="1,5"
+            decimalSeparator=","
+            unit="kg"
+            inputProps={{ "data-testid": "qty-formatted", readOnly: true }}
+          />
         </div>
       </UI.ConfigProvider>
     </div>

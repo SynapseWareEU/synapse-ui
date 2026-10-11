@@ -23,7 +23,8 @@ export declare const KEYPAD_DEFAULT_KEYS: readonly KeypadKey[];
 export declare const KEYPAD_DECIMAL_KEYS: readonly KeypadKey[];
 /**
  * Applies one keypad key to a digit string: appends digits, drops the last one on backspace.
- * Leading zeros collapse ("0" + "5" → "5"); `maxLength` caps the digit count.
+ * Leading zeros collapse ("0" + "5" → "5"); `maxLength` caps the digit count, the digits before
+ * and after the point together, so it does not by itself keep a decimal inside its column.
  *
  * `decimal` appends the one "." a quantity may hold ("" → "0.", "12" → "12."; a second one is
  * ignored). The string is the canonical decimal, whatever separator the key shows, and is only

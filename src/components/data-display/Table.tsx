@@ -195,7 +195,8 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
    * Opt-in: the body scrolls inside the panel under a pinned column header, and the `header`
    * strip, `empty` and `footer` stay in place. The panel becomes a column that can shrink, so
    * give it a height to fill through `panelClassName` (`flex-1 min-h-0` in a column, `h-full`, or
-   * a `max-h-*`). No effect in the stacked shape, which has no header row and scrolls with the page.
+   * a `max-h-*`). The stacked shape has no header row to pin, and keeps the rest: its records
+   * scroll inside the same height, between the strip and the footer, so none is cut off.
    */
   stickyHeader?: boolean;
   /** Classes for the panel, the table's outer box (`className` reaches the `<table>`). */
@@ -254,7 +255,7 @@ export function Table({
       <SectionContext.Provider value={undefined}>
         <StackedContext.Provider value={stacked}>
          <HeadContext.Provider value={head}>
-          <div className={cn("su-panel font-sans text-ink", sticky && "flex flex-col min-h-0", panelClassName)}>
+          <div className={cn("su-panel font-sans text-ink", stickyHeader && "flex flex-col min-h-0", panelClassName)}>
             {header != null ? (
               <div
                 className={cn(
@@ -269,10 +270,18 @@ export function Table({
             ) : null}
             {/* `relative`: the scroller is the containing block for absolutely positioned cell
                 content (an `sr-only` header label), so it cannot escape the scroll and widen the page.
-                Stacked, nothing is wider than the panel, so there is no scroller. */}
+                Stacked, nothing is wider than the panel, so nothing scrolls sideways; under
+                `stickyHeader` the panel still has the height its caller gave it, and the records
+                scroll in it (the panel clips, so they would otherwise be out of reach). */}
             <div
               className={
-                stacked ? "relative" : sticky ? "relative flex-1 min-h-0 overflow-auto" : "relative overflow-x-auto"
+                stacked
+                  ? stickyHeader
+                    ? "relative flex-1 min-h-0 overflow-y-auto"
+                    : "relative"
+                  : sticky
+                    ? "relative flex-1 min-h-0 overflow-auto"
+                    : "relative overflow-x-auto"
               }
             >
               <table

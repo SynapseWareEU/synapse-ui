@@ -193,6 +193,7 @@ try {
 
 
  // ——— Release B ———
+ const CSS_ID=id=>id.replace(/[^\w-]/g,c=>'\\'+c);
  const rect=l=>l.evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height,r:r.right,b:r.bottom}});
  await page.setViewportSize({width:1440,height:900});
  // AutoComplete picker: the value is the option's value, the box at rest draws code (mono 500) + name.
@@ -209,6 +210,18 @@ try {
  await page.keyboard.press('Tab');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works','a term that picked nothing is dropped on blur');
  await pk.click();await page.keyboard.type('q');await page.keyboard.press('Escape');assert.equal(await pk.inputValue(),'SUPP-012 Bandage Works','Escape drops the term with the list');assert.equal(await pk.getAttribute('aria-expanded'),'false');
  await page.getByRole('button',{name:'Clear the partner'}).click();assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: none');
+ // A picker that was only focused is showing its value: Enter must not re-point it to the first row.
+ await pk.focus();assert.equal(await pk.getAttribute('aria-expanded'),'true');assert.equal(await pk.getAttribute('aria-activedescendant'),null,'an empty picker at rest has no active row');
+ await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: none','Enter on an untouched empty picker picks nothing');
+ await pk.focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: cust-003','an arrow key starts the walk at the first row');
+ await page.keyboard.press('Tab');await pk.focus();assert.equal(await page.locator('#'+CSS_ID(await pk.getAttribute('aria-activedescendant'))).textContent(),'CUST-003 PetVet Cluj','the active row of a picker at rest is the held option');
+ await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: cust-003','focus then Enter keeps the value held');
+ await pk.focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('Tab');await pk.focus();await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: cust-003','a row walked to and left is not picked on the way back');
+ // The clear button belongs to the value, not to the text: it stays over an emptied box.
+ await pk.focus();await page.keyboard.press('Backspace');assert.equal(await pk.inputValue(),'');assert.equal(await page.getByRole('button',{name:'Clear the partner'}).count(),1,'the clear button stays while a value is held');
+ await page.keyboard.press('Enter');assert.equal(await page.getByTestId('partner-value').textContent(),'Value held: cust-003','Enter on an emptied box picks nothing either');
+ await page.keyboard.press('Tab');assert.equal(await pk.inputValue(),'CUST-003 PetVet Cluj');
+ assert.deepEqual(await page.locator('input[type="hidden"][name="partner"]').evaluateAll(e=>e.map(i=>i.value)),['cust-003'],'a picker posts the option value under its name');assert.equal(await pk.getAttribute('name'),null);
  // While loading, the options held are the search before's: Enter must not pick a row that is not on screen.
  const cp=page.getByTestId('carrier-picker');await cp.focus();await page.keyboard.type('zzz');
  assert.equal(await page.getByRole('listbox',{name:'Carriers'}).textContent(),'Searching…');assert.equal(await cp.getAttribute('aria-activedescendant'),null,'no active row while loading');
@@ -253,14 +266,26 @@ try {
  assert.deepEqual(await tp.getByRole('button',{expanded:true}).first().evaluate(e=>{const a=getComputedStyle(e,'::after');return [a.width,a.height]}),['44px','44px'],'Table.Disclosure is a 44 target on touch');
  assert.equal(await tp.evaluate(()=>document.documentElement.scrollWidth===document.documentElement.clientWidth),true);await touch.close();
  console.log('PASS: stackEnd ends a stacked record first line; disclosure and facet are 44 targets on touch.');
+ // stickyHeader + stack: at desk width the header is pinned; stacked, the capped panel scrolls its records.
+ const ct=page.getByRole('table',{name:'Count tasks'});await ct.waitFor();assert.equal((await rect(ct.locator('xpath=../..'))).h,236);
+ await ct.locator('xpath=..').evaluate(e=>{e.scrollTop=80});assert.equal(Math.round((await rect(ct.locator('th').first())).y),Math.round((await rect(ct.locator('xpath=..'))).y),'the header is still pinned at desk width');
+ await page.setViewportSize({width:390,height:844});const cl=page.getByRole('list',{name:'Count tasks'});await cl.waitFor();
+ const clPanel=await rect(cl.locator('xpath=../..')),clFoot=await rect(page.getByTestId('count-tasks-footer'));
+ assert.equal(clPanel.h,236,'stacked, the panel keeps the height its class caps it at');assert.ok(clFoot.y>=clPanel.y&&clFoot.b<=clPanel.b,'the footer is inside the panel, not clipped');
+ const clSc=await cl.locator('xpath=..').evaluate(e=>({c:e.clientHeight,s:e.scrollHeight,o:getComputedStyle(e).overflowY}));assert.ok(clSc.o==='auto'&&clSc.s>clSc.c,'the stacked records scroll inside the panel');
+ await page.getByTestId('count-task-12').scrollIntoViewIfNeeded();const lastB=await rect(page.getByTestId('count-task-12')),scB=await rect(cl.locator('xpath=..'));
+ assert.ok(lastB.y>=scB.y-1&&lastB.b<=scB.b+1,'the last stacked record can be reached');
+ assert.equal(await page.getByTestId('count-task-12').evaluate(e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}),true,'and is not clipped');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth===document.documentElement.clientWidth),true);await page.setViewportSize({width:1440,height:900});
  // Handheld: DocketRow wrap / valueProps / rest props, ScanField heading, hint and busy, the exported error line, the handheld Tag.
  await page.goto(BASE+'/#Docket');await page.getByTestId('docket-pallet').waitFor();
  assert.equal((await rect(page.getByTestId('docket-location'))).h,56,'a read-only row takes its rest props and is 56');assert.equal((await rect(page.getByTestId('docket-dock'))).h,56,'a wrapping row whose value fits is still 56');
  assert.deepEqual(await page.getByTestId('docket-pallet-value').evaluate(e=>[e.tagName,e.textContent,e.scrollWidth<=e.clientWidth,getComputedStyle(e).textOverflow]),['DD','359400000000000029',true,'clip'],'valueProps reach the value, which a wrapping row never cuts');
  await page.goto(BASE+'/#ScanField');const sf=page.getByTestId('scan-busy');await page.getByRole('heading',{name:'Scan the shelf',level:2}).waitFor();
  assert.equal(await sf.evaluate(e=>e.getAttribute('aria-describedby').split(' ').map(i=>document.getElementById(i)?.textContent).join('|')),'The label on the shelf where the goods go','the hint describes the input');
+ assert.equal(await page.getByRole('status').filter({hasText:/^$/}).count()>=1,true,'the busy live region is mounted before it speaks');
  await sf.fill('A-01');await sf.press('Enter');assert.equal(await sf.getAttribute('aria-busy'),'true');await page.getByRole('status').filter({hasText:'Checking the shelf'}).waitFor();
- await sf.fill('A-02');await sf.press('Enter');assert.equal(await page.getByTestId('scan-reads').textContent(),'Reads taken: 1','a busy field takes no second read');assert.equal(await sf.evaluate(e=>e===document.activeElement),true,'and keeps focus');
+ await sf.fill('A-02');await sf.press('Enter');assert.equal(await page.getByTestId('scan-reads').textContent(),'Reads taken: 1','a busy field takes no second read');assert.equal(await sf.inputValue(),'','and drops what was typed, so the next read is not appended to it');assert.equal(await sf.evaluate(e=>e===document.activeElement),true,'and keeps focus');
  assert.equal(await page.locator('#weight-error').evaluate(e=>getComputedStyle(e).fontSize),'17px','HandheldErrorLine is exported');
  await page.goto(BASE+'/#Tag');assert.deepEqual(await page.getByTestId('tag-handheld').evaluate(e=>[e.getBoundingClientRect().height,getComputedStyle(e).fontSize,getComputedStyle(e).lineHeight]),[28,'17px','24px'],'handheld Tag is 28 high, 17/24');
  console.log('PASS: DocketRow wrap, ScanField heading, hint and busy, HandheldErrorLine and the handheld Tag.');
@@ -268,6 +293,8 @@ try {
  await page.goto(BASE+'/#QuantityStepper');const qd=page.getByTestId('qty-decimal');await page.getByRole('heading',{name:'How many kilograms?',level:2}).waitFor();assert.equal(await qd.inputValue(),'0,1');
  await page.getByRole('button',{name:'Increase by 0.1'}).click();await page.getByRole('button',{name:'Increase by 0.1'}).click();assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 0.3','0.1 + 0.1 + 0.1 is 0.3, not 0.30000000000000004');assert.equal(await qd.inputValue(),'0,3');
  await qd.fill('12,34567');assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 12.3456','a typed comma is held as a point, cut at the scale');assert.equal(await qd.getAttribute('aria-valuetext'),'12,3456 kg');
+ assert.equal(await page.getByTestId('qty-formatted').inputValue(),'1,5','a decimalValue that is not canonical is read as typed text, and does not crash the screen');
+ assert.deepEqual(await page.evaluate(async()=>{const d=await import('/src/components/handheld/decimal.ts');return [d.decimalText(1e-7),d.decimalText(0.25),d.decimalText(-1)??null,d.decimalText('1e3')??null]}),['0.0000001','0.25',null,null],'a small number bound is still decimal text');
  await qd.fill('900');assert.equal(await page.getByTestId('qty-decimal-value').textContent(),'Value held: 500','typing past max stops at max');
  await page.goto(BASE+'/#Keypad');const kp=page.getByRole('group',{name:'Weight keypad'});assert.equal(await kp.getByRole('button',{name:'Decimal comma'}).textContent(),',');
  for(const k of ['Decimal comma','5','Decimal comma','0','5'])await kp.getByRole('button',{name:k,exact:true}).click();

@@ -56,7 +56,8 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
      * Opt-in: the body scrolls inside the panel under a pinned column header, and the `header`
      * strip, `empty` and `footer` stay in place. The panel becomes a column that can shrink, so
      * give it a height to fill through `panelClassName` (`flex-1 min-h-0` in a column, `h-full`, or
-     * a `max-h-*`). No effect in the stacked shape, which has no header row and scrolls with the page.
+     * a `max-h-*`). The stacked shape has no header row to pin, and keeps the rest: its records
+     * scroll inside the same height, between the strip and the footer, so none is cut off.
      */
     stickyHeader?: boolean;
     /** Classes for the panel, the table's outer box (`className` reaches the `<table>`). */
