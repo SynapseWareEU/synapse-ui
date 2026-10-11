@@ -259,7 +259,17 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
       );
     } else {
       // onKeyDown is chained in handleKeyDown, so it is kept out of the spread.
-      const { className: inputClassName, onKeyDown: _chained, ...restInput } = inputProps ?? {};
+      const { className: inputClassName, style: inputStyle, onKeyDown: _chained, ...restInput } = inputProps ?? {};
+      // A figure too long for the field at 64 shrinks until it fits, down to the handheld's 17
+      // floor: half a quantity is a different quantity, and the field has no way to show the rest.
+      // 0.62 is the advance of a tabular figure in the sans, with a little air. The width is the
+      // input's own box (`cqw`); a browser without container units keeps the 64.
+      const fit =
+        shown.length > 0
+          ? {
+              fontSize: `max(var(--su-hh-text-body), min(var(--su-hh-text-big), calc(100cqw / ${(shown.length * 0.62).toFixed(2)})))`,
+            }
+          : undefined;
       middle = (
         <div
           className={cn(
@@ -269,32 +279,35 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
             hhTransition,
           )}
         >
-          <input
-            ref={ref}
-            type="text"
-            role="spinbutton"
-            inputMode="none"
-            autoComplete="off"
-            aria-label={hasLabel ? undefined : ariaLabel}
-            aria-valuenow={valueNow}
-            aria-valuemin={min}
-            aria-valuemax={max}
-            aria-valuetext={!empty ? `${shown}${unitText}` : undefined}
-            aria-invalid={invalid || undefined}
-            {...restInput}
-            id={id}
-            value={shown}
-            disabled={disabled}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            aria-describedby={describedBy(restInput["aria-describedby"], hasError && errorId)}
-            className={cn(
-              "flex-1 min-w-0 h-[60px] m-0 p-0 border-0 rounded-su-row bg-transparent outline-none",
-              "text-end font-sans text-[length:var(--su-hh-text-big)] leading-[60px] font-semibold su-tabular",
-              "text-inherit caret-transparent disabled:cursor-not-allowed",
-              inputClassName,
-            )}
-          />
+          <span className="flex flex-1 min-w-0 [container-type:inline-size]">
+            <input
+              ref={ref}
+              type="text"
+              role="spinbutton"
+              inputMode="none"
+              autoComplete="off"
+              aria-label={hasLabel ? undefined : ariaLabel}
+              aria-valuenow={valueNow}
+              aria-valuemin={min}
+              aria-valuemax={max}
+              aria-valuetext={!empty ? `${shown}${unitText}` : undefined}
+              aria-invalid={invalid || undefined}
+              {...restInput}
+              id={id}
+              value={shown}
+              disabled={disabled}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              aria-describedby={describedBy(restInput["aria-describedby"], hasError && errorId)}
+              style={{ ...fit, ...inputStyle }}
+              className={cn(
+                "flex-1 min-w-0 h-[60px] m-0 p-0 border-0 rounded-su-row bg-transparent outline-none",
+                "text-end font-sans text-[length:var(--su-hh-text-big)] leading-[60px] font-semibold su-tabular",
+                "text-inherit caret-transparent disabled:cursor-not-allowed",
+                inputClassName,
+              )}
+            />
+          </span>
           {/* The keypad appends at the end, so the caret is drawn there, not left to the browser. */}
           {!disabled ? (
             <span aria-hidden className="shrink-0 w-[2px] h-[44px] ms-su1 bg-action forced-colors:bg-[Highlight]" />
