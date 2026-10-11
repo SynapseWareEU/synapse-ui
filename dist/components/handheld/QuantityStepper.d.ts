@@ -26,6 +26,14 @@ export interface QuantityStepperProps extends Omit<HTMLAttributes<HTMLDivElement
     decimalSeparator?: string;
     /** Decimal mode: the most digits kept after the point (4 for a `numeric(15,4)`). Default: no cap. */
     scale?: number;
+    /**
+     * Decimal mode: hand `onDecimalChange` the text exactly as it was typed and show it, instead of
+     * cleaning it to digits and one point. For a field whose owner refuses a bad reading rather than
+     * repairing it: a barcode fired into a count ("VET-100") must not be read as the 100 inside it.
+     * `scale` and `max` no longer trim what is typed; the caller checks the text and says why it is
+     * refused. − + and ↑ ↓ still step the number read out of the text. Default false.
+     */
+    keepTyped?: boolean;
     /** Default 0. In decimal mode a number or decimal text ("0.5"). */
     min?: number | string;
     max?: number | string;

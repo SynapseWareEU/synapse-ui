@@ -1,142 +1,147 @@
-import { jsx as t, jsxs as k } from "react/jsx-runtime";
-import { forwardRef as $e, useId as De, useState as W } from "react";
+import { jsx as n, jsxs as S } from "react/jsx-runtime";
+import { forwardRef as Fe, useId as _e, useState as Z } from "react";
 import { cn as m } from "../../utils/cn.js";
-import { cleanDecimal as X, decimalText as O, compareDecimal as Q, showDecimal as Z, stepDecimal as Me } from "./decimal.js";
-import { describedBy as C, HandheldErrorLine as Fe, hhQuestionClass as _e, hhSecondaryClass as V, HH_STROKE as P, hhTransition as Ee, hhFieldBorder as He } from "./shared.js";
-import Ke from "../../vendor/@tabler/icons-react/dist/esm/icons/IconMinus.js";
-import ze from "../../vendor/@tabler/icons-react/dist/esm/icons/IconPlus.js";
-function Oe(h) {
+import { cleanDecimal as C, decimalText as q, compareDecimal as A, showDecimal as V, stepDecimal as Ee } from "./decimal.js";
+import { describedBy as P, HandheldErrorLine as He, hhQuestionClass as Ke, hhSecondaryClass as ee, HH_STROKE as te, hhTransition as ze, hhFieldBorder as Oe } from "./shared.js";
+import Qe from "../../vendor/@tabler/icons-react/dist/esm/icons/IconMinus.js";
+import je from "../../vendor/@tabler/icons-react/dist/esm/icons/IconPlus.js";
+function qe(h) {
   if (h == null) return "—";
   const [f, b] = String(h).split("."), l = f.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   return b ? `${l},${b}` : l;
 }
-const ee = (h) => h.preventDefault(), Ye = $e(
+const ne = (h) => h.preventDefault(), Je = Fe(
   function({
     value: f,
     defaultValue: b = null,
     onChange: l,
     decimalValue: v,
-    defaultDecimalValue: j,
+    defaultDecimalValue: B,
     onDecimalChange: y,
-    decimalSeparator: q = ".",
-    scale: te,
-    min: A = 0,
-    max: T,
-    step: B = 1,
-    stepButtons: ne = !0,
-    unit: i,
-    variant: R = "field",
-    label: S,
-    labelAs: se,
-    error: $,
-    invalid: re,
+    decimalSeparator: R = ".",
+    scale: se,
+    keepTyped: N = !1,
+    min: U = 0,
+    max: $,
+    step: Y = 1,
+    stepButtons: re = !0,
+    unit: a,
+    variant: L = "field",
+    label: D,
+    labelAs: oe,
+    error: M,
+    invalid: ae,
     disabled: c,
-    decrementLabel: oe,
-    incrementLabel: ie,
+    decrementLabel: ie,
+    incrementLabel: le,
     inputProps: o,
-    className: ae,
-    "aria-label": U,
-    ...le
-  }, ce) {
-    const de = De(), d = (o == null ? void 0 : o.id) ?? `su-qty-${de}`, D = `${d}-error`, [ue, me] = W(b), s = f !== void 0 ? f : ue, p = $ != null && $ !== !1, Y = re ?? p, r = v !== void 0 || j !== void 0 || y !== void 0, [he, fe] = W(j ?? ""), n = X(v !== void 0 ? v : he), M = O(A) ?? "0", u = O(T), F = O(B) ?? "1", N = Number(A), x = T === void 0 ? void 0 : Number(T), _ = Number(B), xe = (e) => Math.min(Math.max(e, N), x ?? Number.POSITIVE_INFINITY), L = (e) => {
-      f === void 0 && me(e), l == null || l(e);
-    }, G = (e) => {
-      v === void 0 && fe(e), y == null || y(e);
-    }, E = (e) => {
-      r ? G(Me(n === "" ? M : n, F, e, M, u)) : L(xe((s ?? N) + e * _));
-    }, be = r ? n !== "" && Q(n, M) <= 0 : s != null && s <= N, ve = r ? n !== "" && u !== void 0 && Q(n, u) >= 0 : s != null && x != null && s >= x, ye = (e) => {
-      if (r) {
-        const I = X(e.currentTarget.value, te);
-        G(
-          I !== "" && u !== void 0 && Q(I, u) > 0 ? u : I
+    className: ce,
+    "aria-label": G,
+    ...de
+  }, ue) {
+    const me = _e(), d = (o == null ? void 0 : o.id) ?? `su-qty-${me}`, F = `${d}-error`, [he, fe] = Z(b), r = f !== void 0 ? f : he, p = M != null && M !== !1, J = ae ?? p, s = v !== void 0 || B !== void 0 || y !== void 0, [xe, be] = Z(B ?? ""), g = v !== void 0 ? v : xe, t = C(g), _ = q(U) ?? "0", u = q($), E = q(Y) ?? "1", w = Number(U), x = $ === void 0 ? void 0 : Number($), H = Number(Y), ve = (e) => Math.min(Math.max(e, w), x ?? Number.POSITIVE_INFINITY), W = (e) => {
+      f === void 0 && fe(e), l == null || l(e);
+    }, K = (e) => {
+      v === void 0 && be(e), y == null || y(e);
+    }, z = (e) => {
+      s ? K(Ee(t === "" ? _ : t, E, e, _, u)) : W(ve((r ?? w) + e * H));
+    }, ye = s ? t !== "" && A(t, _) <= 0 : r != null && r <= w, Ne = s ? t !== "" && u !== void 0 && A(t, u) >= 0 : r != null && x != null && r >= x, pe = (e) => {
+      if (s && N) {
+        K(e.currentTarget.value);
+        return;
+      }
+      if (s) {
+        const k = C(e.currentTarget.value, se);
+        K(
+          k !== "" && u !== void 0 && A(k, u) > 0 ? u : k
         );
         return;
       }
-      const a = e.currentTarget.value.replace(/\D/g, "");
-      L(a === "" ? null : Math.min(Number(a), x ?? Number.POSITIVE_INFINITY));
-    }, pe = (e) => {
-      var a;
-      (a = o == null ? void 0 : o.onKeyDown) == null || a.call(o, e), !e.defaultPrevented && (e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), E(e.key === "ArrowUp" ? 1 : -1));
-    }, Ne = typeof i == "string" || typeof i == "number" ? ` ${i}` : "", H = S != null && S !== !1, ge = r ? n === "" : s == null, g = r ? Z(n, q) : s == null ? "" : String(s), we = r ? n === "" ? "—" : Z(n, q, !0) : Oe(s), Ie = r ? n === "" ? void 0 : Number(n) : s ?? void 0, K = se, z = H ? /* @__PURE__ */ t("label", { htmlFor: d, className: m(_e, !K && "mb-su3"), children: S }) : null, ke = /* @__PURE__ */ t(
+      const i = e.currentTarget.value.replace(/\D/g, "");
+      W(i === "" ? null : Math.min(Number(i), x ?? Number.POSITIVE_INFINITY));
+    }, ge = (e) => {
+      var i;
+      (i = o == null ? void 0 : o.onKeyDown) == null || i.call(o, e), !e.defaultPrevented && (e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), z(e.key === "ArrowUp" ? 1 : -1));
+    }, we = typeof a == "string" || typeof a == "number" ? ` ${a}` : "", O = D != null && D !== !1, Ie = s ? N ? g === "" : t === "" : r == null, I = s ? N ? g : V(t, R) : r == null ? "" : String(r), Te = s ? t === "" ? "—" : V(t, R, !0) : qe(r), ke = !N || g.replace(",", ".") === t, Se = s ? t === "" || !ke ? void 0 : Number(t) : r ?? void 0, Q = oe, j = O ? /* @__PURE__ */ n("label", { htmlFor: d, className: m(Ke, !Q && "mb-su3"), children: D }) : null, $e = /* @__PURE__ */ n(
       "button",
       {
         type: "button",
-        "aria-label": oe ?? `Decrease by ${r ? F : _}`,
+        "aria-label": ie ?? `Decrease by ${s ? E : H}`,
         "aria-controls": d,
-        disabled: c || be,
-        onMouseDown: ee,
-        onClick: () => E(-1),
-        className: V,
-        children: /* @__PURE__ */ t(Ke, { size: 28, stroke: P, "aria-hidden": !0 })
+        disabled: c || ye,
+        onMouseDown: ne,
+        onClick: () => z(-1),
+        className: ee,
+        children: /* @__PURE__ */ n(Qe, { size: 28, stroke: te, "aria-hidden": !0 })
       }
-    ), Te = /* @__PURE__ */ t(
+    ), De = /* @__PURE__ */ n(
       "button",
       {
         type: "button",
-        "aria-label": ie ?? `Increase by ${r ? F : _}`,
+        "aria-label": le ?? `Increase by ${s ? E : H}`,
         "aria-controls": d,
-        disabled: c || ve,
-        onMouseDown: ee,
-        onClick: () => E(1),
-        className: V,
-        children: /* @__PURE__ */ t(ze, { size: 28, stroke: P, "aria-hidden": !0 })
+        disabled: c || Ne,
+        onMouseDown: ne,
+        onClick: () => z(1),
+        className: ee,
+        children: /* @__PURE__ */ n(je, { size: 28, stroke: te, "aria-hidden": !0 })
       }
     );
-    let w;
-    if (R === "output")
-      w = /* @__PURE__ */ k(
+    let T;
+    if (L === "output")
+      T = /* @__PURE__ */ S(
         "output",
         {
           id: d,
           "aria-live": "polite",
-          "aria-label": H ? void 0 : U,
-          "aria-describedby": C(p && D),
+          "aria-label": O ? void 0 : G,
+          "aria-describedby": P(p && F),
           className: m(
             "flex items-baseline justify-center gap-[6px] min-w-0 font-sans",
             c ? "text-ink-3" : "text-ink"
           ),
           children: [
-            /* @__PURE__ */ t("span", { className: "text-hh-big font-semibold su-tabular truncate", children: we }),
-            i != null ? /* @__PURE__ */ t("span", { className: "shrink-0 text-hh-key text-ink-2", children: i }) : null
+            /* @__PURE__ */ n("span", { className: "text-hh-big font-semibold su-tabular truncate", children: Te }),
+            a != null ? /* @__PURE__ */ n("span", { className: "shrink-0 text-hh-key text-ink-2", children: a }) : null
           ]
         }
       );
     else {
-      const { className: e, style: a, onKeyDown: I, ...J } = o ?? {}, Se = g.length > 0 ? {
-        fontSize: `max(var(--su-hh-text-body), min(var(--su-hh-text-big), calc(100cqw / ${(g.length * 0.62).toFixed(2)})))`
+      const { className: e, style: i, onKeyDown: k, ...X } = o ?? {}, Me = I.length > 0 ? {
+        fontSize: `max(var(--su-hh-text-body), min(var(--su-hh-text-big), calc(100cqw / ${(I.length * 0.62).toFixed(2)})))`
       } : void 0;
-      w = /* @__PURE__ */ k(
+      T = /* @__PURE__ */ S(
         "div",
         {
           className: m(
             "flex items-center min-w-0 h-[var(--su-hh-control-lg)] px-su4",
             "rounded-[var(--su-hh-radius)] border-[length:var(--su-hh-field-border)] border-solid",
-            He({ invalid: Y, disabled: c, active: !0 }),
-            Ee
+            Oe({ invalid: J, disabled: c, active: !0 }),
+            ze
           ),
           children: [
-            /* @__PURE__ */ t("span", { className: "flex flex-1 min-w-0 [container-type:inline-size]", children: /* @__PURE__ */ t(
+            /* @__PURE__ */ n("span", { className: "flex flex-1 min-w-0 [container-type:inline-size]", children: /* @__PURE__ */ n(
               "input",
               {
-                ref: ce,
+                ref: ue,
                 type: "text",
                 role: "spinbutton",
                 inputMode: "none",
                 autoComplete: "off",
-                "aria-label": H ? void 0 : U,
-                "aria-valuenow": Ie,
-                "aria-valuemin": N,
+                "aria-label": O ? void 0 : G,
+                "aria-valuenow": Se,
+                "aria-valuemin": w,
                 "aria-valuemax": x,
-                "aria-valuetext": ge ? void 0 : `${g}${Ne}`,
-                "aria-invalid": Y || void 0,
-                ...J,
+                "aria-valuetext": Ie ? void 0 : `${I}${we}`,
+                "aria-invalid": J || void 0,
+                ...X,
                 id: d,
-                value: g,
+                value: I,
                 disabled: c,
-                onChange: ye,
-                onKeyDown: pe,
-                "aria-describedby": C(J["aria-describedby"], p && D),
-                style: { ...Se, ...a },
+                onChange: pe,
+                onKeyDown: ge,
+                "aria-describedby": P(X["aria-describedby"], p && F),
+                style: { ...Me, ...i },
                 className: m(
                   "flex-1 min-w-0 h-[60px] m-0 p-0 border-0 rounded-su-row bg-transparent outline-none",
                   "text-end font-sans text-[length:var(--su-hh-text-big)] leading-[60px] font-semibold su-tabular",
@@ -145,32 +150,32 @@ const ee = (h) => h.preventDefault(), Ye = $e(
                 )
               }
             ) }),
-            c ? null : /* @__PURE__ */ t("span", { "aria-hidden": !0, className: "shrink-0 w-[2px] h-[44px] ms-su1 bg-action forced-colors:bg-[Highlight]" }),
-            i != null ? /* @__PURE__ */ t("span", { className: "shrink-0 self-end ms-[10px] text-hh-value font-medium text-ink-2", children: i }) : null
+            c ? null : /* @__PURE__ */ n("span", { "aria-hidden": !0, className: "shrink-0 w-[2px] h-[44px] ms-su1 bg-action forced-colors:bg-[Highlight]" }),
+            a != null ? /* @__PURE__ */ n("span", { className: "shrink-0 self-end ms-[10px] text-hh-value font-medium text-ink-2", children: a }) : null
           ]
         }
       );
     }
-    return /* @__PURE__ */ k("div", { className: m("flex flex-col font-sans", ae), ...le, children: [
-      z && K ? /* @__PURE__ */ t(K, { className: "m-0 mb-su3", children: z }) : z,
-      ne ? /* @__PURE__ */ k(
+    return /* @__PURE__ */ S("div", { className: m("flex flex-col font-sans", ce), ...de, children: [
+      j && Q ? /* @__PURE__ */ n(Q, { className: "m-0 mb-su3", children: j }) : j,
+      re ? /* @__PURE__ */ S(
         "div",
         {
           className: m(
             "grid grid-cols-[var(--su-hh-control-lg)_minmax(0,1fr)_var(--su-hh-control-lg)] gap-x-su2",
-            R === "output" ? "items-center" : "items-stretch"
+            L === "output" ? "items-center" : "items-stretch"
           ),
           children: [
-            ke,
-            w,
-            Te
+            $e,
+            T,
+            De
           ]
         }
-      ) : w,
-      p ? /* @__PURE__ */ t(Fe, { id: D, children: $ }) : null
+      ) : T,
+      p ? /* @__PURE__ */ n(He, { id: F, children: M }) : null
     ] });
   }
 );
 export {
-  Ye as QuantityStepper
+  Je as QuantityStepper
 };

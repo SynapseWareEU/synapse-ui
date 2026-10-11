@@ -5,13 +5,18 @@ export interface DocketProps extends HTMLAttributes<HTMLElement> {
      * `true`: a `<dl>` read-out (the done screen), rows without chevrons.
      */
     readOnly?: boolean;
+    /**
+     * Draw a hairline above the first row, for a docket that does not sit under the top bar (after
+     * a result band, or part-way down the done screen). Default false: the bar's own rule is above.
+     */
+    topRule?: boolean;
 }
 /**
  * The answers given so far on a handheld flow, one `DocketRow` each. Name the list with
  * `aria-label` ("Answers given. Tap one to scan it again."). Full bleed: rows carry their own
- * 16 inset and bottom hairline; add `border-t` when it does not sit under the top bar.
+ * 16 inset and bottom hairline; pass `topRule` when it does not sit under the top bar.
  */
-export declare function Docket({ readOnly, className, children, ...rest }: DocketProps): import("react").JSX.Element;
+export declare function Docket({ readOnly, topRule, className, children, ...rest }: DocketProps): import("react").JSX.Element;
 export interface DocketRowProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value"> {
     /** The key, 18/24 500 ink-2 ("Location"). */
     label: ReactNode;
