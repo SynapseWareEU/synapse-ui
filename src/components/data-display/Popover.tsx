@@ -20,6 +20,12 @@ export interface PopoverProps
    */
   alignOffset?: number;
   /**
+   * How close to the viewport's edge the overlay may come before it is moved back in, in px.
+   * Default 0, as before: an overlay pushed in by the edge then touches it. Give the page's own
+   * margin where the trigger can stand at the far edge (the last column of a table).
+   */
+  collisionPadding?: number;
+  /**
    * What the overlay is placed against, in place of the trigger: an element, or anything with a
    * `getBoundingClientRect` (a rect the caller works out). For a small trigger that stands for
    * something larger, such as the funnel in a column header whose panel opens under the column's
@@ -60,6 +66,7 @@ export function Popover({
   align = "center",
   sideOffset = 4,
   alignOffset,
+  collisionPadding,
   anchorRef,
   contentClassName,
   container,
@@ -97,6 +104,7 @@ export function Popover({
           align={align}
           sideOffset={sideOffset}
           alignOffset={alignOffset}
+          collisionPadding={collisionPadding}
           aria-label={ariaLabel}
           className={cn(
             "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",

@@ -17,6 +17,12 @@ export interface PopoverProps extends Omit<ComponentPropsWithoutRef<typeof Radix
      */
     alignOffset?: number;
     /**
+     * How close to the viewport's edge the overlay may come before it is moved back in, in px.
+     * Default 0, as before: an overlay pushed in by the edge then touches it. Give the page's own
+     * margin where the trigger can stand at the far edge (the last column of a table).
+     */
+    collisionPadding?: number;
+    /**
      * What the overlay is placed against, in place of the trigger: an element, or anything with a
      * `getBoundingClientRect` (a rect the caller works out). For a small trigger that stands for
      * something larger, such as the funnel in a column header whose panel opens under the column's
@@ -38,5 +44,5 @@ export interface PopoverProps extends Omit<ComponentPropsWithoutRef<typeof Radix
  * v2 overlay: surface-overlay, 1px border, radius 8, overlay shadow, padding 8, 4 from the
  * trigger, no arrow. Fades in with a 4px drift (150ms).
  */
-export declare function Popover({ trigger, content, side, align, sideOffset, alignOffset, anchorRef, contentClassName, container, "aria-label": ariaLabel, ...rest }: PopoverProps): import("react").JSX.Element;
+export declare function Popover({ trigger, content, side, align, sideOffset, alignOffset, collisionPadding, anchorRef, contentClassName, container, "aria-label": ariaLabel, ...rest }: PopoverProps): import("react").JSX.Element;
 //# sourceMappingURL=Popover.d.ts.map

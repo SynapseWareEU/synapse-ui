@@ -1,7 +1,7 @@
-import { jsxs as x, jsx as o } from "react/jsx-runtime";
-import { Root as w, Trigger as y, Anchor as C, Portal as E, Content as j } from "../../vendor/@radix-ui/react-popover/dist/index.js";
-import { useState as z, useEffect as A } from "react";
-import { cn as B } from "../../utils/cn.js";
+import { jsxs as w, jsx as o } from "react/jsx-runtime";
+import { Root as y, Trigger as C, Anchor as E, Portal as j, Content as z } from "../../vendor/@radix-ui/react-popover/dist/index.js";
+import { useState as A, useEffect as B } from "react";
+import { cn as N } from "../../utils/cn.js";
 function i(r) {
   return {
     getBoundingClientRect: () => {
@@ -15,48 +15,50 @@ function i(r) {
     }
   };
 }
-function D({
+function M({
   trigger: r,
   content: e,
   side: l = "bottom",
   align: c = "center",
   sideOffset: m = 4,
   alignOffset: p,
+  collisionPadding: v,
   anchorRef: t,
-  contentClassName: v,
-  container: f,
-  "aria-label": b,
-  ...g
+  contentClassName: f,
+  container: b,
+  "aria-label": g,
+  ...h
 }) {
-  const { onOpenChange: n, ...a } = g, [d, s] = z(
+  const { onOpenChange: n, ...a } = h, [d, s] = A(
     () => t ? { current: i(t) } : void 0
-  ), h = a.open;
-  return A(() => {
+  ), x = a.open;
+  return B(() => {
     s(t ? { current: i(t) } : void 0);
-  }, [t, h]), /* @__PURE__ */ x(
-    w,
+  }, [t, x]), /* @__PURE__ */ w(
+    y,
     {
       ...a,
       onOpenChange: (u) => {
         u && t && s({ current: i(t) }), n == null || n(u);
       },
       children: [
-        /* @__PURE__ */ o(y, { asChild: !0, children: r }),
-        d ? /* @__PURE__ */ o(C, { virtualRef: d }) : null,
-        /* @__PURE__ */ o(E, { container: f, children: /* @__PURE__ */ o(
-          j,
+        /* @__PURE__ */ o(C, { asChild: !0, children: r }),
+        d ? /* @__PURE__ */ o(E, { virtualRef: d }) : null,
+        /* @__PURE__ */ o(j, { container: b, children: /* @__PURE__ */ o(
+          z,
           {
             side: l,
             align: c,
             sideOffset: m,
             alignOffset: p,
-            "aria-label": b,
-            className: B(
+            collisionPadding: v,
+            "aria-label": g,
+            className: N(
               "z-[var(--su-z-dropdown)] p-su2 border border-solid border-border rounded-su-surface bg-surface-overlay shadow-su-overlay",
               "font-sans text-body text-ink su-focus-ring",
               // `data-side` holds exactly one value, so only one of these animations ever applies.
               "data-[side=bottom]:animate-su-dropdown-in data-[side=left]:animate-su-dropdown-in data-[side=right]:animate-su-dropdown-in data-[side=top]:animate-su-scale-in",
-              v
+              f
             ),
             children: /* @__PURE__ */ o("div", { className: "-m-su2 p-su2 max-h-[calc(var(--radix-popover-content-available-height)-2px)] overflow-y-auto rounded-[inherit]", children: e })
           }
@@ -66,5 +68,5 @@ function D({
   );
 }
 export {
-  D as Popover
+  M as Popover
 };

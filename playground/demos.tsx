@@ -1469,6 +1469,7 @@ export function PopoverDemo() {
           align="start"
           alignOffset={-8}
           anchorRef={column}
+          collisionPadding={16}
           aria-label="Zone filter"
           trigger={<UI.Table.Facet aria-label="Filter by zone" />}
           content={<p className="m-0 p-su1 text-body">Opens 8 before the start of the box.</p>}
