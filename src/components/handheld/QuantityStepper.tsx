@@ -56,6 +56,12 @@ export interface QuantityStepperProps
   max?: number | string;
   /** What ± add or take away. Default 1. In decimal mode a number or decimal text ("0.25"). */
   step?: number | string;
+  /**
+   * Draw the − and + buttons. Default true. `false` leaves the field alone at the full width
+   * (V2HHCount): a count is typed, not nudged from a figure the screen proposed. ↑ and ↓ on the
+   * field still step it.
+   */
+  stepButtons?: boolean;
   /** Unit after the number ("buc"): 24/30 500 ink-2 in the field, 18/24 ink-2 in the output. */
   unit?: ReactNode;
   /**
@@ -97,7 +103,7 @@ const keepFocus = (event: MouseEvent) => event.preventDefault();
 
 /**
  * Handheld stepper (spec §4.7): `grid: 64 1fr 64`, gap 8. ± are 64×64 secondary buttons with 28
- * icons. The field variant is the number field the keypad types into: 2px action border,
+ * icons; `stepButtons={false}` draws the field alone, full width. The field variant is the number field the keypad types into: 2px action border,
  * radius 8, padding 0 16, a 2×44 action caret, the unit bottom-aligned 10 after it. The input is a
  * `spinbutton` (↑/↓ step it) with `inputMode="none"` so the on-screen keypad, not the OS
  * keyboard, is the way in.
@@ -116,6 +122,7 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
       min: minProp = 0,
       max: maxProp,
       step: stepProp = 1,
+      stepButtons = true,
       unit,
       variant = "field",
       label,
@@ -322,16 +329,20 @@ export const QuantityStepper = forwardRef<HTMLInputElement, QuantityStepperProps
     return (
       <div className={cn("flex flex-col font-sans", className)} {...rest}>
         {question && Heading ? <Heading className="m-0 mb-su3">{question}</Heading> : question}
-        <div
-          className={cn(
-            "grid grid-cols-[var(--su-hh-control-lg)_minmax(0,1fr)_var(--su-hh-control-lg)] gap-x-su2",
-            variant === "output" ? "items-center" : "items-stretch",
-          )}
-        >
-          {minus}
-          {middle}
-          {plus}
-        </div>
+        {stepButtons ? (
+          <div
+            className={cn(
+              "grid grid-cols-[var(--su-hh-control-lg)_minmax(0,1fr)_var(--su-hh-control-lg)] gap-x-su2",
+              variant === "output" ? "items-center" : "items-stretch",
+            )}
+          >
+            {minus}
+            {middle}
+            {plus}
+          </div>
+        ) : (
+          middle
+        )}
         {hasError ? <HandheldErrorLine id={errorId}>{error}</HandheldErrorLine> : null}
       </div>
     );

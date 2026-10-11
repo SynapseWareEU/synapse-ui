@@ -63,6 +63,7 @@ Nothing is removed. One fix changes what is drawn, and is noted.
 
 - **Popover `anchorRef`**: what the overlay is placed against, in place of its trigger: an element, or anything with a `getBoundingClientRect`. The trigger still opens the overlay and takes focus back. For the funnel of a column header, whose panel opens under the start of its column. **`alignOffset`** (px) shifts the overlay along the edge it is aligned to, and **`collisionPadding`** (px, default 0 as before) keeps it that far from the viewport's edge when the edge pushes it in.
 - **Button `wrap`** (off by default): the label wraps at words, centred, instead of ending in an ellipsis, and the button grows from its height, which becomes a floor (at least 4 above and below the text, 8 on a handheld). For a handheld action whose label names an identifier, such as a bin code, and has to be read whole. No effect on `text` and icon-only buttons.
+- **QuantityStepper `stepButtons`** (default true): `false` draws the field alone at the full width, with no − and + buttons, for a quantity that is typed and never nudged (a count). ↑ and ↓ on the field still step it.
 - **Drawer** (fix): below `sm` (640) the sheet may take the whole viewport. It was capped at the viewport less 32 at every width, which on a phone left a strip too narrow to read and showed half of a navigation rail beside the sheet. From `sm` up nothing changes.
 
 ### Breaking changes

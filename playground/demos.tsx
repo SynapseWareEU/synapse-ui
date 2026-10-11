@@ -2623,6 +2623,14 @@ export function QuantityStepperDemo() {
           <span className="text-hh-body text-ink-2" data-testid="qty-decimal-value">
             Value held: {kg === "" ? "empty" : kg}
           </span>
+          {/* A count is typed, not stepped: the field alone, at the full width (V2HHCount). */}
+          <UI.QuantityStepper
+            aria-label="Counted"
+            defaultDecimalValue="77"
+            stepButtons={false}
+            unit="buc"
+            inputProps={{ "data-testid": "qty-bare" }}
+          />
           {/* A value handed over in its display form is read as typed text would be, not thrown on. */}
           <UI.QuantityStepper
             aria-label="Formatted value"
