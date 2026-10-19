@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const s=require("react");function o(e=1){const[c,d]=s.useState(e);return s.useEffect(()=>{const t=window.matchMedia("(prefers-reduced-motion: reduce)"),n=()=>d(t.matches?0:e);return n(),t.addEventListener("change",n),()=>t.removeEventListener("change",n)},[e]),c}exports.useShaderSpeed=o;

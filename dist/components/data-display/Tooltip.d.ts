@@ -6,10 +6,14 @@ export interface TooltipProps extends ComponentPropsWithoutRef<typeof RadixToolt
     align?: ComponentPropsWithoutRef<typeof RadixTooltip.Content>["align"];
     children: ReactNode;
 }
+/** Tooltips open after 500ms and close as soon as the pointer or focus leaves. */
 export declare function TooltipProvider({ children, ...rest }: ComponentPropsWithoutRef<typeof RadixTooltip.Provider>): import("react").JSX.Element;
 /**
  * Requires a parent `TooltipProvider` (or `App`, which mounts one).
  * Avoids nesting a Provider per tooltip instance.
+ *
+ * Inverse bubble for naming icon-only buttons and revealing truncated values. Never put
+ * essential information in it.
  */
 export declare function Tooltip({ content, side, align, children, ...rest }: TooltipProps): import("react").JSX.Element;
 export declare namespace Tooltip {

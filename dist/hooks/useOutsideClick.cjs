@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const i=require("react");function c(e,t,n=!0){i.useEffect(()=>{if(!n)return;const r=u=>{e.current&&!e.current.contains(u.target)&&t()};return document.addEventListener("pointerdown",r),()=>document.removeEventListener("pointerdown",r)},[e,t,n])}exports.useOutsideClick=c;

@@ -2,7 +2,10 @@ import * as ScrollArea from "@radix-ui/react-scroll-area";
 import { type ComponentPropsWithoutRef, type ReactNode } from "react";
 export interface ListyProps extends ComponentPropsWithoutRef<typeof ScrollArea.Root> {
     height?: number | string;
-    /** Virtual rows have a fixed height; disable virtualization for variable-height content. */
+    /**
+     * Virtual rows have a fixed height: 48 (default, two-line rows) or 40 (one-line rows).
+     * Disable virtualization for variable-height content.
+     */
     itemHeight?: number;
     overscan?: number;
     virtual?: boolean;

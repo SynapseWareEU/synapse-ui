@@ -1,17 +1,19 @@
-import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { useState, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import type * as AlertDialog from "@radix-ui/react-alert-dialog";
+import * as RadixPopover from "@radix-ui/react-popover";
+import { useId, useRef, useState, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { Button } from "../general/Button";
 
 export interface PopconfirmProps
   extends ComponentPropsWithoutRef<typeof AlertDialog.Root> {
+  /** 14/20 600 ink. */
   title?: ReactNode;
+  /** 13/18 ink-2. */
   description?: ReactNode;
   okText?: ReactNode;
   cancelText?: ReactNode;
   /**
-   * Confirm handler. Return a promise to keep the dialog open (confirm button
-   * spinning) until it settles; a rejection leaves the dialog open.
+   * Confirm handler. Return a promise to keep the popover open (confirm button
+   * spinning) until it settles; a rejection leaves it open.
    */
   onConfirm?: () => void | Promise<unknown>;
   /** Fired when the user dismisses via Cancel. */
@@ -25,23 +27,12 @@ export interface PopconfirmProps
   children: ReactNode;
 }
 
-/* Edge-to-edge alert button bar: each button owns half the footer, so the
-   48px min-height and the hairline seam come from the buttons themselves.
-   `[&>span:first-child]` / `[&>span:nth-child(2)]` reach into Button's primary
-   (scan) chrome to centre the label and drop the page-level scan end cell,
-   which reads as a stray square at this width. See sharedRequests. */
-const footerButtonClass =
-  "flex-1 min-w-0 overflow-hidden !rounded-none min-h-[48px] " +
-  // The buttons sit flush with the dialog edge, so the 3px outset ring would be
-  // clipped by the Content's overflow — draw it inset instead, same 2px square.
-  "focus-visible:!outline-offset-[-3px]";
-const confirmButtonClass =
-  footerButtonClass +
-  " [&>span:nth-child(2)]:hidden [&>span:first-child]:(flex-1 justify-center)";
-
 /**
- * Modal confirmation before a consequential action. Uses Radix Alert Dialog
- * (focus trap, inert backdrop) instead of a floating popover.
+ * Confirmation before a consequential action (spec §4.4). A 320-wide popover anchored 4px from
+ * its trigger: surface-overlay, hairline, 8px radius, overlay shadow, padded 16 with an 8 gap.
+ * Actions are left-packed: confirm (small primary, or small danger primary) then cancel (small
+ * secondary). It is modal and announced as an `alertdialog`: focus is trapped inside, starts
+ * on Cancel so Enter never confirms by accident, and returns to the trigger on close.
  */
 export function Popconfirm({
   title = "Are you sure?",
@@ -57,21 +48,21 @@ export function Popconfirm({
   open: openProp,
   defaultOpen,
   onOpenChange,
-  ...rest
 }: PopconfirmProps) {
   const confirmDanger = okDanger ?? danger ?? false;
   const [openState, setOpenState] = useState(defaultOpen ?? false);
   const [pending, setPending] = useState(false);
   const open = openProp ?? openState;
+  const titleId = useId();
+  const descriptionId = useId();
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
   const setOpen = (next: boolean) => {
     if (openProp === undefined) setOpenState(next);
     onOpenChange?.(next);
   };
 
-  // AlertDialog.Action is Radix's Close, so the confirm button is a plain
-  // Button and we own the close — otherwise an async onConfirm can never
-  // hold the dialog open.
+  // We own the close, so an async onConfirm can hold the popover open.
   const confirm = () => {
     const result = onConfirm?.();
     if (!result || typeof (result as Promise<unknown>).then !== "function") {
@@ -87,63 +78,61 @@ export function Popconfirm({
       .finally(() => setPending(false));
   };
 
+  const cancel = () => {
+    onCancel?.();
+    setOpen(false);
+  };
+
   return (
-    <AlertDialog.Root
-      {...rest}
-      open={disabled ? false : open}
-      onOpenChange={setOpen}
-    >
-      <AlertDialog.Trigger asChild disabled={disabled}>
+    <RadixPopover.Root modal open={disabled ? false : open} onOpenChange={setOpen}>
+      <RadixPopover.Trigger asChild disabled={disabled}>
         {children}
-      </AlertDialog.Trigger>
-      <AlertDialog.Portal>
-        <AlertDialog.Overlay className="su-overlay" />
-        <AlertDialog.Content
+      </RadixPopover.Trigger>
+      <RadixPopover.Portal>
+        <RadixPopover.Content
+          role="alertdialog"
+          aria-labelledby={titleId}
+          aria-describedby={description ? descriptionId : undefined}
+          side="bottom"
+          align="start"
+          sideOffset={4}
+          collisionPadding={8}
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            cancelRef.current?.focus();
+          }}
           onEscapeKeyDown={(event) => {
             if (pending) event.preventDefault();
           }}
-          className="fixed inset-0 z-[var(--su-z-modal)] m-auto w-[min(280px,calc(100vw-var(--su-space-8)))] h-fit flex flex-col overflow-hidden border border-solid border-rule-strong rounded-none bg-paper shadow-none animate-su-pop-in motion-reduce:animate-none"
+          onInteractOutside={(event) => {
+            if (pending) event.preventDefault();
+          }}
+          className="z-[var(--su-z-dropdown)] box-border w-[320px] max-w-[calc(100vw-var(--su-space-8))] flex flex-col gap-su2 p-su4 rounded-su-surface border border-solid border-border bg-surface-overlay text-ink font-sans shadow-su-overlay outline-none animate-su-dropdown-in motion-reduce:animate-none"
         >
-          <AlertDialog.Title className="pt-su5 px-su5 pb-0 font-sans text-title-3 font-semibold tracking-[var(--su-tracking-tight)] text-ink text-center">
+          <div id={titleId} className="text-body font-semibold text-ink [overflow-wrap:anywhere]">
             {title}
-          </AlertDialog.Title>
+          </div>
           {description ? (
-            <AlertDialog.Description className="m-0 pt-su3 px-su5 pb-su4 text-body text-ink-2 text-center">
+            <div id={descriptionId} className="text-small text-ink-2 [overflow-wrap:anywhere]">
               {description}
-            </AlertDialog.Description>
-          ) : (
-            <VisuallyHidden.Root asChild>
-              <AlertDialog.Description>{title}</AlertDialog.Description>
-            </VisuallyHidden.Root>
-          )}
-          <div className="flex justify-stretch">
-            <AlertDialog.Cancel asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={pending}
-                onClick={onCancel}
-                className={
-                  footerButtonClass +
-                  " [border-inline-end:0.5px_solid_var(--su-separator)]"
-                }
-              >
-                {cancelText}
-              </Button>
-            </AlertDialog.Cancel>
+            </div>
+          ) : null}
+          <div className="mt-su1 flex flex-wrap items-center gap-su2">
             <Button
               variant="primary"
               size="sm"
-              className={confirmButtonClass}
               danger={confirmDanger}
               loading={pending}
               onClick={confirm}
             >
               {okText}
             </Button>
+            <Button ref={cancelRef} size="sm" disabled={pending} onClick={cancel}>
+              {cancelText}
+            </Button>
           </div>
-        </AlertDialog.Content>
-      </AlertDialog.Portal>
-    </AlertDialog.Root>
+        </RadixPopover.Content>
+      </RadixPopover.Portal>
+    </RadixPopover.Root>
   );
 }

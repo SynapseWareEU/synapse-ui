@@ -1,0 +1,5 @@
+import { createSidecarMedium as e } from "../../../use-sidecar/dist/es2015/medium.js";
+var a = e();
+export {
+  a as effectCar
+};

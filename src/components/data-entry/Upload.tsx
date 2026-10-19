@@ -6,7 +6,7 @@ import {
   type DragEvent,
   type ReactNode,
 } from "react";
-import { IconUpload } from "@tabler/icons-react";
+import { IconFile, IconUpload, IconX } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
 import { Icon, iconDefaults } from "../general/Icon";
 import { useFieldState, useFormItemContext } from "./Form";
@@ -25,6 +25,8 @@ export interface UploadProps {
   maxCount?: number;
   className?: string;
   children?: ReactNode;
+  /** A 13/18 ink-2 line under the prompt, e.g. "PDF or CSV, up to 10 MB". Shown with `children` too. */
+  hint?: ReactNode;
   /** Accessible name for the dropzone / file input. Defaults to the visible prompt. */
   "aria-label"?: string;
   "aria-labelledby"?: string;
@@ -65,10 +67,42 @@ function matchesAccept(file: File, accept: string) {
 
 const UNITS = ["B", "KB", "MB", "GB", "TB"];
 
+/** "1,5 MB", "1 023 B": decimal comma, U+202F thousands separator, no trailing ",0". */
 function formatBytes(bytes: number) {
   const i = bytes > 0 ? Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), 4) : 0;
-  return `${Number((bytes / 1024 ** i).toFixed(i === 0 ? 0 : 1))} ${UNITS[i]}`;
+  const [whole, fraction] = (bytes / 1024 ** i).toFixed(i === 0 ? 0 : 1).split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F");
+  return `${fraction && fraction !== "0" ? `${grouped},${fraction}` : grouped} ${UNITS[i]}`;
 }
+
+/*
+ * Dropzone: 1px dashed border-strong, radius 8, surface, padding 24, centred. Hover (hover devices
+ * only): surface-2. Drag-over: 1px dashed action on action-subtle. Invalid: dashed danger.
+ * Disabled: surface-2, border colour, ink-3. One class per property per branch, no opacity.
+ */
+const dropzoneBaseClass =
+  "su-focus-ring flex flex-col items-center justify-center gap-su2 p-su6 rounded-su-surface border border-dashed text-center text-body transition-[border-color,background-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none";
+
+const dropzoneStateClass = {
+  idle: "cursor-pointer bg-surface border-border-strong text-ink [@media(hover:hover)]:hover:bg-surface-2",
+  invalid: "cursor-pointer bg-surface border-danger text-ink [@media(hover:hover)]:hover:bg-surface-2",
+  drag: "cursor-pointer bg-action-subtle border-action text-ink",
+  disabled: "cursor-not-allowed bg-surface-2 border-border text-ink-3",
+};
+
+/* File rows: 40 tall inside one panel, hairlines between them. */
+const fileRowClass =
+  "flex items-center gap-su2 h-[40px] ps-su3 pe-su1 border-t border-solid border-border first:border-t-0";
+
+/* Remove: a 32 ghost icon button, 18 icon in ink-2; hover fill + ink, press border colour. */
+const removeButtonClass = [
+  "inline-flex shrink-0 items-center justify-center size-[32px] p-0 rounded-su-control bg-transparent text-ink-2 cursor-pointer su-focus-ring",
+  "transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  "[@media(hover:hover)]:[&:enabled:not(:active):hover]:bg-fill [@media(hover:hover)]:[&:enabled:not(:active):hover]:text-ink",
+  "enabled:active:bg-border enabled:active:text-ink",
+  "disabled:text-ink-3 disabled:cursor-not-allowed",
+  "[@media(hover:none)]:su-hit-44",
+].join(" ");
 
 export function Upload({
   accept,
@@ -83,6 +117,7 @@ export function Upload({
   onChange,
   beforeUpload,
   onRemove,
+  hint,
 }: UploadProps) {
   const item = useFormItemContext();
   const { disabled: isDisabled } = useFieldState(undefined, disabled);
@@ -143,7 +178,7 @@ export function Upload({
     emit(files.filter((f) => f.uid !== file.uid));
   };
 
-  const defaultLabel = "Click or drag files to upload";
+  const defaultLabel = "Click to upload or drag files here";
   // The dropzone is a div, so a FormItem's <label for> can never name it. Point at
   // the item's label element when there is one; otherwise synthesize a name.
   const labelledBy = ariaLabelledBy ?? (ariaLabel ? undefined : item?.labelId);
@@ -156,13 +191,18 @@ export function Upload({
       <div
         role="button"
         tabIndex={isDisabled ? -1 : 0}
+        aria-disabled={isDisabled || undefined}
         aria-label={accessibleName}
         aria-labelledby={labelledBy}
         className={cn(
-          "su-focus-ring flex flex-col items-center justify-center gap-su2 min-h-[120px] p-su4 border-[1.5px] border-dashed border-rule-strong rounded-none bg-canvas text-label-secondary text-footnote text-center cursor-pointer transition-[border-color,background] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] focus-visible:border-accent",
-          !isDisabled && "hover:(border-accent bg-accent-soft)",
-          dragActive && "border-accent bg-accent-soft",
-          isDisabled && "opacity-45 cursor-not-allowed",
+          dropzoneBaseClass,
+          isDisabled
+            ? dropzoneStateClass.disabled
+            : dragActive
+              ? dropzoneStateClass.drag
+              : item?.error
+                ? dropzoneStateClass.invalid
+                : dropzoneStateClass.idle,
         )}
         onClick={() => !isDisabled && inputRef.current?.click()}
         onKeyDown={(e) => {
@@ -194,33 +234,44 @@ export function Upload({
         />
         {children ?? (
           <>
-            <Icon size="lg" className="text-accent">
+            <Icon className="size-[24px] text-ink-3">
               <IconUpload {...iconDefaults} />
             </Icon>
-            <span>{defaultLabel}</span>
+            <span>
+              <span className={cn("font-medium", !isDisabled && "text-action-text")}>
+                Click to upload
+              </span>{" "}
+              or drag files here
+            </span>
           </>
+        )}
+        {hint != null && (
+          <span className={cn("-mt-su1 text-small", isDisabled ? "text-ink-3" : "text-ink-2")}>
+            {hint}
+          </span>
         )}
       </div>
       {files.length > 0 && (
-        <ul className="flex flex-col gap-su2 mt-su3 list-none m-0 p-0">
+        <ul className="su-panel list-none m-0 mt-su2 p-0">
           {files.map((file) => (
-            <li
-              key={file.uid}
-              className="su-hairline flex items-center justify-between gap-su3 pl-su3 rounded-none bg-paper text-footnote text-label"
-            >
-              <span className="flex min-w-0 items-baseline gap-su2">
-                <span className="truncate">{file.name}</span>
-                <span className="shrink-0 font-mono text-label-tertiary text-caption-2">
-                  {formatBytes(file.size)}
-                </span>
+            <li key={file.uid} className={fileRowClass}>
+              <Icon className="size-[16px] text-ink-3">
+                <IconFile {...iconDefaults} />
+              </Icon>
+              <span className="min-w-0 flex-1 truncate text-body text-ink">{file.name}</span>
+              <span className="shrink-0 text-small text-ink-2 su-tabular">
+                {formatBytes(file.size)}
               </span>
               <button
                 type="button"
-                className="su-focus-ring shrink-0 min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] px-su2 rounded-none bg-transparent text-danger-text text-footnote cursor-pointer transition-[background] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:not-disabled:bg-fill disabled:(opacity-45 cursor-not-allowed)"
+                className={removeButtonClass}
+                aria-label={`Remove ${file.name}`}
                 disabled={isDisabled}
                 onClick={() => removeFile(file)}
               >
-                Remove
+                <Icon className="size-[18px]">
+                  <IconX {...iconDefaults} />
+                </Icon>
               </button>
             </li>
           ))}

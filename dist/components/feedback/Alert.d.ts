@@ -1,18 +1,31 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { type FeedbackTone } from "./shared";
-export type AlertType = FeedbackTone;
+import { type FeedbackToneOrNeutral } from "./shared";
+/** `neutral` is the v2 default (the grey note); the four tones are tinted. */
+export type AlertType = FeedbackToneOrNeutral;
 export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+    /** Tone. Defaults to `neutral`: surface-2 with a hairline, the note drawn on the login screen. */
     type?: AlertType;
+    /** 14/20 500 ink. The title stays ink in every tone. */
     title?: ReactNode;
     closable?: boolean;
     onClose?: () => void;
     /** The close button's accessible name, "Close alert" by default. Pass the application's word. */
     closeLabel?: string;
-    /** Show the per-type status glyph, so state isn't carried by colour alone. */
+    /** Show the per-type status icon (16, in the tone's text colour). */
     showIcon?: boolean;
-    /** Custom glyph; implies `showIcon`. */
+    /** Custom icon; implies `showIcon`. */
     icon?: ReactNode;
+    /** Trailing action link (14/20 500), e.g. a `Button variant="text"`. */
+    action?: ReactNode;
+    /** Denser description: 13/18 instead of 14/20. */
+    compact?: boolean;
+    /** Description, ink-2, on the line below the title. */
     children?: ReactNode;
 }
-export declare function Alert({ type, title, closable, onClose, closeLabel, showIcon, icon, className, children, ...rest }: AlertProps): import("react").JSX.Element;
+/**
+ * Inline status note (spec §4.4). A tinted, 8px-rounded box: icon 16 at the top, the title on
+ * the first line and the description below it, an optional action link and a 28 dismiss.
+ * Errors and warnings are announced (`role="alert"`); the other tones are `role="status"`.
+ */
+export declare function Alert({ type, title, closable, onClose, closeLabel, showIcon, icon, action, compact, className, children, ...rest }: AlertProps): import("react").JSX.Element;
 //# sourceMappingURL=Alert.d.ts.map

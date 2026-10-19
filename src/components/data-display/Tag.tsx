@@ -1,64 +1,155 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "../../utils/cn";
 
-export type TagColor = "default" | "accent" | "success" | "warning" | "danger";
+/**
+ * Tones. One word, one tone, everywhere: danger for late, expired, blocked, refused; warning for
+ * today, expiring, quarantine, paused, partial; info for work in progress only; neutral for
+ * finished, shipped, closed, cancelled, inactive and roles. Silent defaults (active, available,
+ * open, waiting) get no tag at all. `default` is the v1 name for `neutral`.
+ */
+export type TagColor =
+  | "default"
+  | "neutral"
+  | "info"
+  | "accent"
+  | "success"
+  | "warning"
+  | "danger";
+
+export type TagSize = "default" | "handheld";
 
 export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   color?: TagColor;
+  /**
+   * `handheld`: the tag at terminal scale, 28 high, 17/24 500, padding 0 10, the same 6 dot. The
+   * default 12px tag is under the handheld's 17px floor. Not for the filter chip (`closable`).
+   */
+  size?: TagSize;
+  /** A 6px dot in the tone's solid colour before the text. `accent` has no dot. */
+  dot?: boolean;
+  /**
+   * Renders the filter chip: 28 high, action-subtle, with a 20px remove button.
+   * `color` and `dot` do not apply to it.
+   */
   closable?: boolean;
   onClose?: () => void;
-  /** The remove button's accessible name, "Remove <text>" (or "Remove tag") by default. Pass the application's words. */
+  /** Filter chip only: the key ("Zone:") in 500 before the values (`children`, 400). */
+  filterLabel?: ReactNode;
+  /**
+   * The remove button's accessible name. By default "Remove the <key> filter" when `filterLabel`
+   * is a string, else "Remove <text>" (or "Remove tag"). Pass the application's words.
+   */
   removeLabel?: string;
   children?: ReactNode;
 }
 
-const colorClass: Record<TagColor, string | undefined> = {
-  default: undefined,
-  accent: "bg-accent-soft text-accent",
-  success:
-    "bg-[color-mix(in_srgb,var(--su-success)_15%,transparent)] text-success",
-  warning:
-    "bg-[color-mix(in_srgb,var(--su-warning)_15%,transparent)] text-warning",
-  danger: "bg-[color-mix(in_srgb,var(--su-danger)_15%,transparent)] text-danger",
+const toneClass: Record<TagColor, string> = {
+  default: "bg-neutral-tint text-neutral-text",
+  neutral: "bg-neutral-tint text-neutral-text",
+  info: "bg-info-tint text-info-text",
+  accent: "bg-action-subtle text-action-text",
+  success: "bg-success-tint text-success-text",
+  warning: "bg-warning-tint text-warning-text",
+  danger: "bg-danger-tint text-danger-text",
 };
+
+const dotClass: Record<TagColor, string | undefined> = {
+  default: "bg-neutral",
+  neutral: "bg-neutral",
+  info: "bg-info",
+  accent: undefined,
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-danger",
+};
+
+// In forced colours the tint disappears, so the box keeps a system-colour outline.
+const forcedBox = "forced-colors:border forced-colors:border-solid forced-colors:border-[CanvasText]";
+
+function closeName(removeLabel: string | undefined, filterLabel: ReactNode, children: ReactNode) {
+  if (removeLabel) return removeLabel;
+  if (typeof filterLabel === "string") return `Remove the ${filterLabel.replace(/:\s*$/, "")} filter`;
+  if (typeof children === "string") return `Remove ${children}`;
+  return "Remove tag";
+}
 
 export function Tag({
   color = "default",
+  dot = false,
+  size = "default",
   closable = false,
   onClose,
+  filterLabel,
   removeLabel,
   className,
   children,
   ...rest
 }: TagProps) {
+  if (closable) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-[4px] h-[28px] ps-[8px] pe-[4px] rounded-su-tag bg-action-subtle text-action-text font-sans text-small font-normal whitespace-nowrap",
+          forcedBox,
+          className,
+        )}
+        {...rest}
+      >
+        <span className="min-w-0 truncate">
+          {filterLabel != null ? (
+            <>
+              <span className="font-medium">{filterLabel}</span>{" "}
+            </>
+          ) : null}
+          {children}
+        </span>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center shrink-0 size-[20px] p-0 border-none rounded-su-tag bg-transparent text-inherit cursor-pointer su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-action-subtle-hover [@media(hover:none)]:su-hit-44"
+          onClick={onClose}
+          aria-label={closeName(removeLabel, filterLabel, children)}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
+        </button>
+      </span>
+    );
+  }
+
+  const dotTone = dot ? dotClass[color] : undefined;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-su1 px-su2 rounded-none text-caption-1 font-medium bg-canvas text-label",
-        // A closable tag grows to the 44px hit target instead of letting the
-        // close button's invisible box spill over neighbouring tags.
-        closable
-          ? "py-0 pr-0 min-h-[var(--su-hit-target)]"
-          : "py-su1",
-        colorClass[color],
+        "inline-flex items-center gap-[6px] rounded-su-tag font-sans font-medium whitespace-nowrap",
+        size === "handheld" ? "h-[28px] px-[10px] text-hh-body" : "h-[22px] px-[8px] text-micro",
+        toneClass[color],
+        forcedBox,
         className,
       )}
       {...rest}
     >
-      {children}
-      {closable ? (
-        <button
-          type="button"
-          className="inline-flex items-center justify-center shrink-0 self-stretch p-0 min-w-[var(--su-hit-target)] bg-transparent text-inherit text-[14px] leading-none cursor-pointer su-focus-ring"
-          onClick={onClose}
-          aria-label={
-            removeLabel ??
-            (typeof children === "string" ? `Remove ${children}` : "Remove tag")
-          }
-        >
-          <span aria-hidden="true">×</span>
-        </button>
+      {dotTone ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "inline-block shrink-0 size-[6px] rounded-su-round forced-colors:[forced-color-adjust:none]",
+            dotTone,
+          )}
+        />
       ) : null}
+      {children}
     </span>
   );
 }

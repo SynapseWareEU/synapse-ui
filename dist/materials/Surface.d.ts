@@ -4,9 +4,14 @@ export type SurfaceRadius = "none" | "sm" | "md" | "lg" | "xl";
 export type SurfaceElevation = "none" | "1" | "2";
 export interface SurfaceProps extends HTMLAttributes<HTMLElement> {
     as?: ElementType;
+    /**
+     * `system` is the grey app ground (`--su-bg`); `systemSecondary` is the white panel surface,
+     * `systemTertiary` the subtle surface-2. The grouped and fill tones alias onto the same ramp.
+     */
     tone?: SurfaceTone;
-    /** Kept for API; brand is square (always 0). */
+    /** `sm` 4 (tags, chips) · `md` 6 (controls) · `lg`/`xl` 8 (panels, cards). Default square. */
     radius?: SurfaceRadius;
+    /** Content stays flat: `1` is a border hairline, `2` a border-strong one. Never a shadow. */
     elevation?: SurfaceElevation;
     children?: ReactNode;
 }

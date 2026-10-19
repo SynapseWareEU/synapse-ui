@@ -2,7 +2,7 @@ export { Anchor } from "./Anchor";
 export type { AnchorProps, AnchorItem } from "./Anchor";
 
 export { Breadcrumb } from "./Breadcrumb";
-export type { BreadcrumbProps, BreadcrumbItem } from "./Breadcrumb";
+export type { BreadcrumbProps, BreadcrumbItem, BreadcrumbVariant } from "./Breadcrumb";
 
 export {
   Dropdown,
@@ -37,13 +37,13 @@ export type {
 } from "./Dropdown";
 
 export { Menu } from "./Menu";
-export type { MenuProps, MenuItem } from "./Menu";
+export type { MenuProps, MenuItem, MenuVariant } from "./Menu";
 
 export { Pagination, paginationRange } from "./Pagination";
-export type { PaginationProps } from "./Pagination";
+export type { PaginationProps, PaginationVariant, PaginationLabels } from "./Pagination";
 
 export { Steps } from "./Steps";
-export type { StepsProps, StepItem, StepStatus } from "./Steps";
+export type { StepsProps, StepItem, StepStatus, StepsType } from "./Steps";
 
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export type { TabsProps, TabsListProps, TabsTriggerProps, TabsContentProps } from "./Tabs";

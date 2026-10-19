@@ -14,10 +14,10 @@ export interface AffixProps extends HTMLAttributes<HTMLDivElement> {
  * so the content below it never jumps when it pins. Pass `offsetBottom` to pin
  * against the bottom edge (a bottom action bar in a scroll panel) instead.
  *
- * For chrome that should read as material (nav bars, floating toolbars), wrap
- * the content in `<Glass>` inside `<Affix>` — Affix only positions, Glass
- * supplies the blur and hairline. Don't put a background or blur on Affix
- * itself.
+ * Affix only positions: it has no visuals. What it pins brings its own surface —
+ * usually opaque (`bg-surface` plus a 1px border). The one place glass is
+ * allowed is a sticky header that content scrolls under (`<Header
+ * material="glass">`); don't put a background or blur on Affix itself.
  */
 export function Affix({
   offsetTop,

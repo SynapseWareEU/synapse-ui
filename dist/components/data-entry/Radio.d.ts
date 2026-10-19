@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 export interface RadioOption {
     label: ReactNode;
     value: string;
@@ -21,6 +21,10 @@ export interface RadioProps {
     className?: string;
     children?: ReactNode;
 }
+/**
+ * Prefer `Segmented` for 2–4 short options; RadioGroup is for longer or more numerous ones.
+ * Vertical rows are 20 tall, 8 apart; horizontal items are 16 apart.
+ */
 export declare function RadioGroupRoot({ value, defaultValue, disabled, name, direction, options, className, children, onValueChange, }: RadioGroupProps): import("react").JSX.Element;
 export declare function Radio({ value, disabled, className, children }: RadioProps): import("react").JSX.Element;
 export { RadioGroupRoot as RadioGroup };

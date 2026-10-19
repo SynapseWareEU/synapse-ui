@@ -2,12 +2,17 @@ import type { HTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cn } from "../../utils/cn";
 
 export interface ListItemProps extends Omit<HTMLAttributes<HTMLLIElement>, "title"> {
+  /** 14/20 ink, one line with ellipsis. Identifiers inside go in mono 0.9em (500 for the subject). */
   title?: ReactNode;
+  /** 13/18 ink-2, one line with ellipsis. A row with a description is 48 high; one-line rows are 40. */
   description?: ReactNode;
+  /** Trailing content, usually one link (14/20 500). */
   extra?: ReactNode;
+  /** Leading content: an 8px `<StatusDot>` in exception lists, or an `<Avatar>`. */
   avatar?: ReactNode;
   /**
-   * Clickable row: pointer cursor, hover fill, 44px hit target and a square focus ring.
+   * Clickable row: pointer cursor, surface-hover under a pointer and an inset focus ring (a Panel
+   * frame clips anything outside the row).
    * With `onClick` it also becomes a keyboard target (role="button", Enter/Space).
    */
   interactive?: boolean;
@@ -29,13 +34,16 @@ export function ListItem({
   // ponytail: role="button" trades this row's `listitem` role for a keyboard target.
   // Need both? Put a real <button>/<a> in `title` and leave `interactive` as paint only.
   const activatable = interactive && onClick != null;
+  const twoLine = description != null;
 
   return (
     <li
       className={cn(
-        "flex items-start gap-su3 py-su3 px-su4",
+        // Row: padding 0 16, gap 12, content centred. 48 with a second line, 40 without.
+        "flex items-center gap-su3 px-su4 py-su1 font-sans text-body text-ink",
+        twoLine ? "min-h-[var(--su-row-exception)]" : "min-h-[var(--su-row)]",
         interactive &&
-          "min-h-[var(--su-hit-target)] cursor-pointer transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-fill-quaternary su-focus-ring focus-visible:relative focus-visible:z-10",
+          "cursor-pointer transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-hover outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-focus focus-visible:outline-offset-[-2px]",
         className,
       )}
       onClick={onClick}
@@ -54,25 +62,25 @@ export function ListItem({
       {...(activatable ? { role: "button", tabIndex: 0 } : null)}
       {...rest}
     >
-      {avatar ? <div className="shrink-0">{avatar}</div> : null}
+      {avatar ? <div className="flex shrink-0 items-center">{avatar}</div> : null}
       <div className="flex-1 min-w-0">
-        {title ? (
-          <div className="text-body font-medium text-label">{title}</div>
-        ) : null}
+        {title ? <div className="truncate text-body text-ink">{title}</div> : null}
         {description ? (
-          <div className="mt-su1 text-footnote text-label-secondary">{description}</div>
+          <div className="truncate text-small text-ink-2">{description}</div>
         ) : null}
         {children}
       </div>
       {extra ? (
-        <div className="shrink-0 text-label-secondary text-footnote">{extra}</div>
+        <div className="shrink-0 whitespace-nowrap text-body font-medium text-ink-2">{extra}</div>
       ) : null}
     </li>
   );
 }
 
 export interface ListProps extends HTMLAttributes<HTMLUListElement> {
+  /** Framed as a Panel: surface, 1px border, radius 8. */
   bordered?: boolean;
+  /** 1px border between rows (none after the last). */
   split?: boolean;
   children?: ReactNode;
 }
@@ -87,11 +95,9 @@ export function List({ bordered = false, split = true, className, children, ...r
       // role="list" is required: `list-none` strips the implicit list role in Safari/VoiceOver.
       role="list"
       className={cn(
-        "m-0 p-0 list-none rounded-none bg-paper border-solid",
-        bordered
-          ? "border border-rule border-t-rule-strong"
-          : "border-t border-rule-strong",
-        split && "[&>li+li]:border-t [&>li+li]:border-solid [&>li+li]:border-rule",
+        "m-0 p-0 list-none",
+        bordered && "su-panel",
+        split && "[&>li+li]:border-t [&>li+li]:border-solid [&>li+li]:border-border",
         className,
       )}
       {...rest}

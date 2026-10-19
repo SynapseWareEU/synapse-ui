@@ -11,12 +11,20 @@ import { DirectionProvider } from "@radix-ui/react-direction";
 
 export type ThemeMode = "light" | "dark";
 
+/** Control density. `handheld` re-sizes generic controls for the 390-wide terminal (56/64 heights, 17px body). */
+export type ConfigDensity = "desk" | "handheld";
+
 export interface ConfigProviderProps {
   children: ReactNode;
   locale?: string;
   direction?: "ltr" | "rtl";
   /** Sets `data-theme` on the target element. Default: light */
   theme?: ThemeMode;
+  /**
+   * Sets `data-density` on the target element. Inherited by nested providers. Default: desk
+   * (no attribute is written unless the prop is set, or a parent provider is handheld).
+   */
+  density?: ConfigDensity;
   /** CSS variable overrides keyed as `--su-*` or without the prefix */
   tokens?: Record<string, string>;
   /** Element that receives theme + token styles. Default: document.documentElement */
@@ -29,6 +37,7 @@ interface ConfigContextValue {
   locale: string;
   direction: "ltr" | "rtl";
   theme: ThemeMode;
+  density: ConfigDensity;
   tokens: Record<string, string>;
 }
 
@@ -36,6 +45,7 @@ const ConfigContext = createContext<ConfigContextValue | null>(null);
 const EMPTY_TOKENS: Record<string, string> = {};
 const DEFAULT_CONFIG: ConfigContextValue = {
   theme: "light",
+  density: "desk",
   tokens: EMPTY_TOKENS,
   locale: "en-US",
   direction: "ltr",
@@ -54,6 +64,7 @@ const normalizeTokenEntries = (
 export function ConfigProvider({
   children,
   theme: themeProp,
+  density: densityProp,
   locale: localeProp,
   direction: directionProp,
   tokens = EMPTY_TOKENS,
@@ -64,26 +75,33 @@ export function ConfigProvider({
   const parent = useContext(ConfigContext);
   const wrapper = useRef<HTMLDivElement>(null);
   const theme = themeProp ?? parent?.theme ?? "light";
+  const density = densityProp ?? parent?.density ?? "desk";
+  // Every provider element carries `data-theme`, which re-declares the desk sizes, so a nested
+  // provider under a handheld one must repeat `data-density` itself. Desk by default writes nothing.
+  const densityAttr =
+    densityProp !== undefined || density === "handheld" ? density : undefined;
   const locale = localeProp ?? parent?.locale ?? "en-US";
   const direction = directionProp ?? parent?.direction ?? "ltr";
   const normalized = useMemo(() => normalizeTokenEntries(tokens), [tokens]);
   const value = useMemo(
     () => ({
       theme,
+      density,
       locale,
       direction,
       tokens: { ...parent?.tokens, ...normalized },
     }),
-    [theme, locale, direction, normalized, parent],
+    [theme, density, locale, direction, normalized, parent],
   );
 
   useLayoutEffect(() => {
     const el = target ?? (parent ? wrapper.current : document.documentElement);
     if (!el) return;
-    const previousAttributes = ["data-theme", "lang", "dir"].map(
+    const previousAttributes = ["data-theme", "data-density", "lang", "dir"].map(
       (name) => [name, el.getAttribute(name)] as const,
     );
     el.setAttribute("data-theme", theme);
+    if (densityAttr) el.setAttribute("data-density", densityAttr);
     el.setAttribute("lang", locale);
     el.setAttribute("dir", direction);
 
@@ -103,7 +121,7 @@ export function ConfigProvider({
         else el.style.removeProperty(key);
       }
     };
-  }, [theme, locale, direction, normalized, target, !!parent]);
+  }, [theme, densityAttr, locale, direction, normalized, target, !!parent]);
 
   // A root provider already themes <html> from the effect above, so the wrapper
   // element only earns its place for subtree scoping or caller-supplied styling.
@@ -121,6 +139,7 @@ export function ConfigProvider({
           className={className}
           style={{ ...normalized, ...style }}
           data-theme={theme}
+          data-density={densityAttr}
           lang={locale}
           dir={direction}
           data-su-config=""

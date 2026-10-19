@@ -2,6 +2,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 export interface TimelineItem {
     title?: ReactNode;
     description?: ReactNode;
+    /** Replaces the 8px dot, e.g. with a 16 icon. Drawn in the tone's text colour. */
     dot?: ReactNode;
     color?: "default" | "accent" | "success" | "warning" | "danger";
 }

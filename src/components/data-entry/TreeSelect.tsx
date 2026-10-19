@@ -1,8 +1,10 @@
 import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { cn } from "../../utils/cn";
+import { CheckboxMark } from "./Checkbox";
 import { useFieldState, useFormItemContext } from "./Form";
-import { selectTriggerClass } from "./Select";
+import { selectTriggerClass, selectTriggerSizeClass } from "./Select";
 import type { TreeSelectNode } from "./types";
 
 type TreeSelectBaseProps = {
@@ -50,10 +52,29 @@ interface TreeNodeRowProps {
   onSelect: (key: string) => void;
 }
 
-/** 44px wide, stretched to the row's 44px min height = a real 44x44 hit target
- *  (DESIGN.md line 56). The glyph stays 16px; the box does the work. */
+/*
+ * TreeSelect (§4.2, D): rows 32, padding 0 8, radius 4 (inside an overlay), 20 indent per level.
+ * Toggle: a 24 mini button with a 16 ink-3 chevron. `multiple` adds the shared 16 checkbox mark,
+ * 8 before the title. Selected: action-subtle with ink text; hover: surface-hover (action-subtle-hover on a
+ * selected row). The row's buttons are Tab stops, so they keep the focus outline, drawn inset so
+ * it stays inside the row.
+ */
+const rowClass =
+  "flex items-center gap-su1 w-full min-w-0 min-h-[var(--su-row-overlay)] [@media(hover:none)]:min-h-[var(--su-hit-target)] pe-su2 py-0 rounded-su-tag transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none";
+
+// One background per state, so stylesheet order never decides between them.
+const rowStateClass = {
+  idle: "text-ink [@media(hover:hover)]:hover:bg-surface-hover",
+  selected: "bg-action-subtle text-ink [@media(hover:hover)]:hover:bg-action-subtle-hover",
+  disabled: "text-ink-3",
+};
+
 const expandButtonClass =
-  "inline-flex items-center justify-center shrink-0 self-stretch w-11 p-0 bg-transparent text-label-secondary text-caption-1 leading-none cursor-pointer su-focus-ring disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center shrink-0 size-[var(--su-control-mini)] p-0 rounded-su-tag bg-transparent text-ink-3 cursor-pointer su-focus-ring focus-visible:-outline-offset-2 transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none [@media(hover:hover)]:hover:enabled:bg-fill [@media(hover:hover)]:hover:enabled:text-ink disabled:cursor-not-allowed [@media(hover:none)]:su-hit-44";
+
+// `group/cb` lets the shared CheckboxMark take its hover from the whole label.
+const labelButtonClass =
+  "group/cb flex items-center gap-su2 flex-1 self-stretch min-w-0 p-0 rounded-su-tag bg-transparent font-sans text-body text-start cursor-pointer su-focus-ring focus-visible:-outline-offset-2 disabled:cursor-not-allowed";
 
 function TreeNodeRow({
   node,
@@ -84,12 +105,11 @@ function TreeNodeRow({
         aria-selected={isSelected}
         aria-expanded={hasChildren ? isExpanded : undefined}
         className={cn(
-          "flex items-center gap-su1 w-full min-w-0 min-h-[var(--su-hit-target)] pe-su2 py-0 rounded-none hover:bg-fill-secondary",
-          isSelected && "bg-fill-secondary shadow-[inset_2px_0_0_var(--su-accent)]",
-          isDisabled && "opacity-45",
+          rowClass,
+          rowStateClass[isDisabled ? "disabled" : isSelected ? "selected" : "idle"],
         )}
         // Indentation is data-driven (one level per depth), so it stays inline.
-        style={{ paddingInlineStart: `calc(var(--su-space-2) + ${depth * 12}px)` }}
+        style={{ paddingInlineStart: `calc(var(--su-space-2) + ${depth * 20}px)` }}
       >
         {hasChildren ? (
           <button
@@ -100,22 +120,22 @@ function TreeNodeRow({
             disabled={isDisabled}
             onClick={() => onToggleExpand(node.key)}
           >
-            {isExpanded ? "▾" : "▸"}
+            {isExpanded ? (
+              <IconChevronDown size={16} stroke={1.75} aria-hidden="true" />
+            ) : (
+              <IconChevronRight size={16} stroke={1.75} aria-hidden="true" className="rtl:-scale-x-100" />
+            )}
           </button>
         ) : (
-          <span className="shrink-0 w-11" aria-hidden="true" />
+          <span className="shrink-0 size-[var(--su-control-mini)]" aria-hidden="true" />
         )}
         <button
           type="button"
           disabled={isDisabled}
-          className="flex items-center gap-su2 flex-1 self-stretch min-w-0 p-0 bg-transparent text-label text-body text-start cursor-pointer su-focus-ring disabled:cursor-not-allowed"
+          className={labelButtonClass}
           onClick={() => onSelect(node.key)}
         >
-          {multiple && (
-            <span className="shrink-0 w-[14px] text-accent" aria-hidden="true">
-              {isSelected ? "✓" : ""}
-            </span>
-          )}
+          {multiple && <CheckboxMark checked={isSelected} disabled={isDisabled} />}
           <span className="min-w-0 truncate">{node.title}</span>
         </button>
       </div>
@@ -153,7 +173,7 @@ export function TreeSelect(props: TreeSelectProps) {
   } = props;
 
   const item = useFormItemContext();
-  const { disabled: isDisabled } = useFieldState(undefined, disabled);
+  const { size, disabled: isDisabled } = useFieldState(undefined, disabled);
 
   const [internal, setInternal] = useState<string | string[] | undefined>(defaultValue);
   const [open, setOpen] = useState(false);
@@ -210,18 +230,16 @@ export function TreeSelect(props: TreeSelectProps) {
       type="button"
       id={item?.id}
       disabled={isDisabled}
-      className={cn(selectTriggerClass, className)}
+      className={cn(selectTriggerClass, selectTriggerSizeClass[size], "w-full", className)}
       aria-haspopup="tree"
       aria-describedby={item?.descriptionId}
       aria-invalid={item?.error ? true : undefined}
       title={display ?? undefined}
     >
-      <span className={cn("flex-1 min-w-0 truncate", display ? undefined : "text-label-tertiary")}>
+      <span className={cn("flex-1 min-w-0 truncate", !display && "text-ink-3")}>
         {display ?? placeholder}
       </span>
-      <span className="shrink-0 text-label-secondary text-[12px]" aria-hidden="true">
-        ▾
-      </span>
+      <IconChevronDown size={16} stroke={1.75} aria-hidden="true" className="shrink-0 text-ink-3" />
     </button>
   );
 
@@ -234,10 +252,10 @@ export function TreeSelect(props: TreeSelectProps) {
           align="start"
           sideOffset={4}
           collisionPadding={8}
-          className="su-popover overflow-auto w-[var(--radix-popover-trigger-width)] max-h-[var(--su-dropdown-max-h)]"
+          className="su-popover overflow-auto overscroll-contain w-[var(--radix-popover-trigger-width)] max-h-[var(--su-dropdown-max-h)] animate-su-dropdown-in motion-reduce:animate-none"
         >
           {treeData.length === 0 ? (
-            <p className="m-0 px-su3 py-su3 su-label text-ink-2 text-start">No options</p>
+            <p className="m-0 p-su2 text-small text-ink-2 text-start">No options</p>
           ) : (
             treeData.map((node) => (
               <TreeNodeRow

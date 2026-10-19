@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const s=require("react/jsx-runtime"),u=require("../../utils/cn.cjs");function o({offsetTop:e,offsetBottom:i,className:t,children:r,style:c,...n}){return s.jsx("div",{className:u.cn("sticky z-[var(--su-z-sticky)]",t),style:{top:i===void 0?e??0:e,bottom:i,...c},...n,children:r})}exports.Affix=o;

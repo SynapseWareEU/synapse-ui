@@ -1,41 +1,42 @@
-import type { HTMLAttributes, SVGAttributes } from "react";
+import type { CSSProperties, HTMLAttributes, SVGAttributes } from "react";
 import { cn } from "../../utils/cn";
 
 export type IconSize = "sm" | "md" | "lg";
 
-/** Defaults for a bare @tabler/icons-react glyph rendered outside <Icon> — instrument stroke, square joins */
+/** Defaults for a bare @tabler/icons-react glyph rendered outside <Icon>: v2 stroke, round caps and joins. */
 export const iconDefaults = {
-  stroke: 1.5,
-  strokeLinejoin: "miter" as const,
-  strokeLinecap: "square" as const,
+  stroke: 1.75,
+  strokeLinejoin: "round" as const,
+  strokeLinecap: "round" as const,
 };
 
 /**
- * One table for the scale. `stroke` is a user-space value in a 24 viewBox, so the
- * rendered hairline is `stroke × px / 24` — 1.25px at every step, which is what
- * "a consistent stroke at every size" means. Class strings stay literal so the
- * UnoCSS scanner finds them.
+ * One table for the scale (v2 §3): `sm` 14 (sort arrows, chip remove, field error), `md` 16 (the
+ * default inside 36px controls), `lg` 20 (rail, phone header, palette search). A number renders
+ * that many px (18 for 32px icon buttons, 24 for empty states and handheld). The stroke is
+ * 1.75 in the 24 viewBox at every size, as drawn. Class strings stay literal so the UnoCSS
+ * scanner finds them.
  */
 const SIZES = {
-  sm: { box: "size-4", stroke: 1.875, strokeClass: "[&>svg]:[stroke-width:1.875]" },
-  md: { box: "size-5", stroke: 1.5, strokeClass: "[&>svg]:[stroke-width:1.5]" },
-  lg: { box: "size-6", stroke: 1.25, strokeClass: "[&>svg]:[stroke-width:1.25]" },
-  inherit: { box: "size-[1em]", stroke: 1.5, strokeClass: "[&>svg]:[stroke-width:1.5]" },
-} satisfies Record<IconSize | "inherit", { box: string; stroke: number; strokeClass: string }>;
+  sm: "size-[14px]",
+  md: "size-[16px]",
+  lg: "size-[20px]",
+  inherit: "size-[1em]",
+} satisfies Record<IconSize | "inherit", string>;
 
 export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
   /**
-   * `sm` 16 / `md` 20 / `lg` 24, or `inherit` to track the surrounding font-size (1em).
-   * A `size-*` / `w-*` / `h-*` class in `className` wins instead (the built-in class is
-   * dropped), because `cn()` does not resolve conflicts and UnoCSS decides the order.
+   * `sm` 14 / `md` 16 / `lg` 20, a number of px, or `inherit` to track the surrounding
+   * font-size (1em). A `size-*` / `w-*` / `h-*` class in `className` wins instead (the built-in
+   * size is dropped), because `cn()` does not resolve conflicts and UnoCSS decides the order.
    */
-  size?: IconSize | "inherit";
+  size?: IconSize | "inherit" | number;
   /** Accessible name. Omit for decorative icons — they are `aria-hidden` by default. */
   label?: string;
 }
 
 export interface SvgIconProps extends SVGAttributes<SVGElement> {
-  size?: IconSize | "inherit";
+  size?: IconSize | "inherit" | number;
   /** Accessible name. Omit for decorative icons — they are `aria-hidden` by default. */
   label?: string;
 }
@@ -55,28 +56,39 @@ function ariaFor(
 
 const ownSizeRe = /(?:^|\s)!?(?:size|w|h|min-w|min-h|max-w|max-h)-/;
 
+/** Size class and inline box for one `size` value; nothing when the caller sizes it by class. */
+function sizing(
+  size: IconSize | "inherit" | number,
+  className: string | undefined,
+  style: CSSProperties | undefined,
+): { box?: string; style?: CSSProperties } {
+  if (ownSizeRe.test(className ?? "")) return { style };
+  if (typeof size === "number") return { style: { width: size, height: size, ...style } };
+  return { box: SIZES[size], style };
+}
+
 /**
- * Icon box. Sizes its child SVG, normalises its stroke, and stays out of the way of colour.
+ * Icon box. Sizes its child SVG, sets the v2 stroke (1.75, round caps and joins), and stays out
+ * of the way of colour: the glyph is `currentColor`, so the host decides (ink-2 inside
+ * controls, ink-3 for chevrons and field adornments).
  *
- * Presentational only — for a clickable icon use `<Button>`, which supplies the 44px hit
- * target, the focus ring and the keyboard path.
+ * Presentational only — for a clickable icon use `<Button>` with an `aria-label`, which supplies
+ * the focus ring, the keyboard path and the 44px touch pad.
  */
-export function Icon({ size = "md", className, children, label, ...rest }: IconProps) {
-  // ponytail: a `size-*`/`w-*`/`h-*` in className drops the built-in size AND its stroke class,
-  // so a custom-sized icon keeps its own stroke. Add a numeric `size` prop if that ever bites.
-  const ownSize = ownSizeRe.test(className ?? "");
+export function Icon({ size = "md", className, children, label, style, ...rest }: IconProps) {
+  const own = sizing(size, className, style);
   return (
     <span
       className={cn(
         "inline-flex shrink-0 items-center justify-center [vertical-align:-0.125em]",
-        // ponytail: CSS beats SVG presentation attributes, so a child that deliberately set a
-        // different stroke must use a class or style to win. Fine for Tabler/inline glyphs.
-        "[&>svg]:block [&>svg]:size-full [&>svg]:[stroke-linecap:square] [&>svg]:[stroke-linejoin:miter]",
+        // CSS beats SVG presentation attributes, so a glyph's own `stroke` prop is normalised
+        // here; a child that deliberately needs another stroke must use a class or style.
+        "[&>svg]:block [&>svg]:size-full [&>svg]:[stroke-width:1.75] [&>svg]:[stroke-linecap:round] [&>svg]:[stroke-linejoin:round]",
         "contrast-more:[&>svg]:[stroke-width:2]",
-        !ownSize && SIZES[size].box,
-        !ownSize && SIZES[size].strokeClass,
+        own.box,
         className,
       )}
+      style={own.style}
       {...ariaFor(label, rest)}
       {...rest}
     >
@@ -85,19 +97,17 @@ export function Icon({ size = "md", className, children, label, ...rest }: IconP
   );
 }
 
-/** Stroke SVG shell aligned with Tabler / SynapseWare instrument icons */
-export function SvgIcon({ size = "md", className, children, label, ...rest }: SvgIconProps) {
+/** Stroke SVG shell drawn like the Tabler set: 24 viewBox, stroke 1.75, round caps and joins. */
+export function SvgIcon({ size = "md", className, children, label, style, ...rest }: SvgIconProps) {
+  const own = sizing(size, className, style);
   return (
     <svg
-      className={cn(
-        "block shrink-0 contrast-more:[stroke-width:2]",
-        ownSizeRe.test(className ?? "") ? undefined : SIZES[size].box,
-        className,
-      )}
+      className={cn("block shrink-0 contrast-more:[stroke-width:2]", own.box, className)}
+      style={own.style}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={SIZES[size].stroke}
+      strokeWidth={iconDefaults.stroke}
       strokeLinecap={iconDefaults.strokeLinecap}
       strokeLinejoin={iconDefaults.strokeLinejoin}
       {...ariaFor(label, rest)}

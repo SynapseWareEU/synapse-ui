@@ -2,6 +2,10 @@ import { type BorderBeamProps as LibBorderBeamProps } from "border-beam";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { type ThemeMode } from "../../ConfigProvider";
 export type BorderBeamSize = NonNullable<LibBorderBeamProps["size"]>;
+/**
+ * @deprecated Lattice UI v2 draws no animated beams on content. Kept for compatibility (and
+ * unused by every v2 surface); it and the `border-beam` postinstall patch go in the next major.
+ */
 export interface BorderBeamProps extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "className" | "style"> {
     /** Rotation/travel duration in seconds. Default: the preset's own pacing. */
     duration?: number;
@@ -20,6 +24,10 @@ export interface BorderBeamProps extends Omit<HTMLAttributes<HTMLDivElement>, "c
 /**
  * libraries.dev/beam (`border-beam`) with SynapseWare ocean palette
  * swapped to action + mint (see scripts/patch-border-beam.mjs), square corners.
+ *
+ * @deprecated Lattice UI v2 drops the beam from product UI: it is attention-grabbing motion on
+ * content and depends on string-patching a dependency. Unchanged and unused by v2 components;
+ * removed, with the patch script, in the next major. For emphasis use a Panel, a Tag or Alert.
  */
 export declare function BorderBeam({ duration, size, active, strength, theme: themeProp, className, style, children, ...rest }: BorderBeamProps): import("react").JSX.Element;
 //# sourceMappingURL=BorderBeam.d.ts.map

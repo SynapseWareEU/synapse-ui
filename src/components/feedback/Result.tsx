@@ -1,38 +1,29 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { iconDefaults } from "../general/Icon";
 import { cn } from "../../utils/cn";
+import { toneIcon, toneTextClass, type FeedbackToneOrNeutral } from "./shared";
 
 export type ResultStatus = "success" | "error" | "info" | "warning" | "404" | "403" | "500";
 
 export interface ResultProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   status?: ResultStatus;
+  /** 24/32 600, −0.01em. */
   title?: ReactNode;
+  /** 14/20 ink-2, at most 420 wide. */
   subTitle?: ReactNode;
+  /** Actions, 24 below the text with an 8 gap. */
   extra?: ReactNode;
+  /** Replaces the status icon (or the HTTP code). */
   icon?: ReactNode;
 }
 
-const statusIcon: Record<ResultStatus, string> = {
-  success: "✓",
-  error: "✕",
-  info: "i",
-  warning: "!",
-  "404": "404",
-  "403": "403",
-  "500": "500",
-};
+const isCode = (status: ResultStatus): status is "404" | "403" | "500" => /^\d/.test(status);
 
-const statusClass: Record<ResultStatus, string> = {
-  success:
-    "bg-[color-mix(in_srgb,var(--su-success)_15%,transparent)] text-success",
-  error: "bg-[color-mix(in_srgb,var(--su-danger)_15%,transparent)] text-danger",
-  info: "bg-[color-mix(in_srgb,var(--su-info)_15%,transparent)] text-info",
-  warning:
-    "bg-[color-mix(in_srgb,var(--su-warning)_15%,transparent)] text-warning",
-  "404": "bg-fill-secondary text-label-secondary",
-  "403": "bg-fill-secondary text-label-secondary",
-  "500": "bg-fill-secondary text-label-secondary",
-};
-
+/**
+ * Outcome page (spec §4.4, desk). A centred column at most 480 wide, padded 48 24: a 32 icon in
+ * the tone's text colour (or the HTTP code in display 32/40 600 ink-2, sans), the title, the
+ * text and the actions.
+ */
 export function Result({
   status = "info",
   title,
@@ -43,10 +34,13 @@ export function Result({
   className,
   ...rest
 }: ResultProps) {
+  const code = isCode(status);
+  const tone: FeedbackToneOrNeutral = code ? "neutral" : status;
+  const Glyph = toneIcon[tone];
   return (
     <div
       className={cn(
-        "flex flex-col items-center text-center py-su8 px-su4",
+        "box-border w-full max-w-[480px] mx-auto flex flex-col items-center text-center py-su10 px-su6 font-sans",
         className,
       )}
       {...rest}
@@ -54,25 +48,26 @@ export function Result({
       <div
         aria-hidden="true"
         className={cn(
-          "inline-flex items-center justify-center size-[72px] rounded-none text-title-2 font-semibold",
-          /^\d/.test(status) && "font-mono tabular-nums",
-          statusClass[status],
+          "flex items-center justify-center",
+          code ? "text-display font-semibold text-ink-2 su-tabular" : toneTextClass[tone],
         )}
       >
-        {icon ?? statusIcon[status]}
+        {icon ?? (code ? status : <Glyph size={32} {...iconDefaults} />)}
       </div>
       {title ? (
-        <div className="mt-su4 text-title-3 font-semibold text-label max-w-full [overflow-wrap:anywhere]">
+        <div className="mt-su4 max-w-full text-title font-semibold text-ink [overflow-wrap:anywhere]">
           {title}
         </div>
       ) : null}
       {subTitle ? (
-        <div className="mt-su2 max-w-[480px] text-subhead text-label-secondary [overflow-wrap:anywhere]">
+        <div className="mt-su2 max-w-[420px] text-body text-ink-2 [overflow-wrap:anywhere]">
           {subTitle}
         </div>
       ) : null}
-      {extra ? <div className="mt-su5">{extra}</div> : null}
-      {children ? <div className="mt-su4 w-full">{children}</div> : null}
+      {extra ? (
+        <div className="mt-su6 flex flex-wrap items-center justify-center gap-su2">{extra}</div>
+      ) : null}
+      {children ? <div className="mt-su6 w-full">{children}</div> : null}
     </div>
   );
 }

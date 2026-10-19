@@ -1,0 +1,1 @@
+"use strict";Object.defineProperties(exports,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}});const e=require("./SideEffect.cjs"),r=require("./medium.cjs"),t=require("../../../use-sidecar/dist/es2015/exports.cjs"),o=t.exportSidecar(r.effectCar,e.RemoveScrollSideCar);exports.default=o;

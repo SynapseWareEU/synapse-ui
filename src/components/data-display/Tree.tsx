@@ -6,6 +6,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { cn } from "../../utils/cn";
 
 export interface TreeNode {
@@ -28,9 +29,12 @@ export interface TreeProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelec
  * One focusable control per row (APG roving tabindex): the chevron is a click zone
  * inside the row button, not a nested button, so pointer users get a separate
  * expand target while keyboard users expand with ArrowRight/ArrowLeft.
+ *
+ * v2 rows: 32 tall, padding 0 8, 20 indent per level, 14/20 ink, square inside the panel.
+ * The panel clips its corners, so the focus ring is drawn inset.
  */
 const rowClass =
-  "flex items-center gap-su2 w-full min-h-[var(--su-hit-target)] pe-su3 ps-[calc(var(--su-space-2)+var(--su-tree-depth,0)*var(--su-space-4))] text-subhead text-start cursor-pointer transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] su-focus-ring disabled:(opacity-45 cursor-not-allowed)";
+  "flex items-center gap-su1 w-full min-h-[var(--su-control-sm)] pe-su2 ps-[calc(var(--su-space-2)+var(--su-tree-depth,0)*20px)] rounded-su-row font-sans text-body text-start transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] su-focus-ring focus-visible:outline-offset-[-2px]";
 
 function TreeNodeView({
   node,
@@ -65,33 +69,43 @@ function TreeNodeView({
         tabIndex={node.key === focusKey ? 0 : -1}
         className={cn(
           rowClass,
-          isSelected
-            ? "bg-fill-secondary text-label font-medium"
-            : "bg-transparent text-label enabled:hover:bg-fill-quaternary enabled:active:bg-fill-tertiary",
+          // One background and one text colour per state (no opacity for disabled).
+          node.disabled
+            ? "bg-transparent text-ink-3 cursor-not-allowed"
+            : isSelected
+              ? "bg-action-subtle text-ink cursor-pointer [@media(hover:hover)]:hover:bg-action-subtle-hover"
+              : "bg-transparent text-ink cursor-pointer [@media(hover:hover)]:hover:bg-surface-hover",
         )}
         style={{ "--su-tree-depth": depth } as CSSProperties}
         disabled={node.disabled}
         onClick={() => select(node.key)}
       >
         {hasChildren ? (
+          // 24 mini ghost toggle, 16 ink-3 chevron (right → down). The ::before stretches its
+          // tap area to the full 32 row height without moving the glyph or the label.
           <span
             aria-hidden
             className={cn(
-              // The ::before stretches the twisty's tap area to the full row height
-              // (32×44) without moving the glyph or the label.
-              "relative shrink-0 w-4 before:(absolute -inset-y-su3 -inset-x-su2 content-[''])",
-              "text-label-tertiary transition-transform duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
-              isOpen && "rotate-90",
+              "relative inline-flex shrink-0 items-center justify-center size-[var(--su-control-mini)] rounded-su-tag text-ink-3",
+              "before:content-empty before:absolute before:-inset-[4px]",
+              !node.disabled && "[@media(hover:hover)]:hover:bg-fill",
             )}
             onClick={(event) => {
               event.stopPropagation();
               toggle(node.key);
             }}
           >
-            ›
+            <IconChevronDown
+              size={16}
+              stroke={1.75}
+              className={cn(
+                "transition-transform duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
+                isOpen ? "rotate-0" : "-rotate-90 rtl:rotate-90",
+              )}
+            />
           </span>
         ) : (
-          <span className="shrink-0 w-4" aria-hidden />
+          <span className="shrink-0 size-[var(--su-control-mini)]" aria-hidden />
         )}
         <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {node.title}
@@ -215,7 +229,8 @@ export function Tree({
     <div
       ref={ref}
       className={cn(
-        "rounded-none bg-paper border-t border-solid border-rule-strong py-su2",
+        // Panel: surface, 1px border, radius 8 (a caller's utilities still override the skin).
+        "su-panel py-su1",
         className,
       )}
       role="tree"

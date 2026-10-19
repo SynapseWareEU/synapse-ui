@@ -9,11 +9,11 @@ export interface DividerProps
   orientation?: "horizontal" | "vertical";
   /** `false` when the rule separates genuinely distinct groups; leave `true` for visual rhythm. */
   decorative?: boolean;
-  /** Hairline (10%/12%) by default; `"strong"` is the brand's bay-top / table-head rule (22%/24%). */
+  /** `"hairline"` (default) is the border colour; `"strong"` is border-strong, for a heavier break. */
   strength?: "hairline" | "strong";
-  /** Block margin on a horizontal rule, inline margin on a vertical one. */
+  /** Block margin on a horizontal rule (`compact` 8, `default` 16), inline margin on a vertical one (4, 8). */
   spacing?: DividerSpacing;
-  /** Mono eyebrow sitting on the rule. Ignored when `orientation="vertical"` (as in Ant).
+  /** Label sitting on the rule: 13/18 500 ink-2, sentence case, 12 from each line. Ignored when `orientation="vertical"` (as in Ant).
    *  Note: `asChild` is ignored while `children` is set — the labelled rule is a plain row. */
   children?: ReactNode;
   labelPlacement?: "start" | "center" | "end";
@@ -22,7 +22,7 @@ export interface DividerProps
 const blockSpacing: Record<DividerSpacing, string> = {
   none: "",
   compact: "my-su2",
-  default: "my-su6",
+  default: "my-su4",
 };
 
 const inlineSpacing: Record<DividerSpacing, string> = {
@@ -34,7 +34,7 @@ const inlineSpacing: Record<DividerSpacing, string> = {
 /**
  * Anything the component already sets (colour, size, margin) loses to its own
  * utilities regardless of class order — UnoCSS decides by stylesheet order, not
- * attribute order. Use the props above, or the important prefix: `className="bg-rule-strong!"`.
+ * attribute order. Use the props above, or the important prefix: `className="bg-border-strong!"`.
  */
 export function Divider({
   orientation = "horizontal",
@@ -49,7 +49,7 @@ export function Divider({
 }: DividerProps) {
   const rule = cn(
     "shrink-0 forced-colors:bg-[CanvasText]",
-    strength === "strong" ? "bg-rule-strong" : "bg-separator",
+    strength === "strong" ? "bg-border-strong" : "bg-border",
   );
 
   if (children != null && children !== false && orientation === "horizontal") {
@@ -72,7 +72,7 @@ export function Divider({
             labelPlacement === "start" ? "w-[var(--su-space-2)]" : "flex-1",
           )}
         />
-        <span className="su-label text-ink-2 whitespace-nowrap">
+        <span className="su-label whitespace-nowrap">
           {children}
         </span>
         <span
@@ -92,7 +92,8 @@ export function Divider({
         rule,
         orientation === "vertical"
           ? cn(
-              "w-px self-stretch inline-block align-middle min-h-[0.9em]",
+              // 1×20, centred on the line it separates (header, toolbar).
+              "w-px h-[20px] self-center inline-block align-middle",
               inlineSpacing[spacing],
             )
           : cn("h-px w-full", blockSpacing[spacing]),

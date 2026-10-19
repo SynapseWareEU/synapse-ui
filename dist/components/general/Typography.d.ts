@@ -1,15 +1,24 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
-export type TypographyVariant = "largeTitle" | "title1" | "title2" | "title3" | "headline" | "lede" | "body" | "callout" | "subhead" | "footnote" | "caption1" | "caption2" | "label" | "code";
+export type TypographyVariant = "largeTitle" | "title1" | "title2" | "title3" | "headline" | "lede" | "body" | "callout" | "subhead" | "footnote" | "caption1" | "caption2" | "label" | "code"
+/** Row identity (SKU, SO number, bin): mono 14/20 500 ink. */
+ | "id"
+/** Supporting identifier: mono 13/18 400 ink-2. */
+ | "idSecondary";
 /**
  * Ink roles carry text; status tones encode real product state (never decoration).
- * - `primary` / `secondary` — body and supporting copy.
- * - `tertiary` — placeholders and 19px+ only; ink-3 is 3.62:1 on light and fails 4.5:1.
- * - `quaternary` — decorative / disabled, never body copy (~2:1).
- * There is deliberately no `accent` tone: deep blue is the action colour and nothing else borrows it.
+ * - `primary` ink / `secondary` ink-2 — body and supporting copy.
+ * - `tertiary` ink-3 — only on white, and only for placeholders, disabled text and the empty "—".
+ * - `quaternary` — deprecated for text (border-strong, decorative only).
+ * - `danger` / `warning` / `success` / `info` — the `*-text` tokens.
+ * There is deliberately no `accent` tone: links are `<a>` (or `Button variant="text"`).
  */
-export type TypographyTone = "primary" | "secondary" | "tertiary" | "quaternary" | "danger" | "success" | "warning";
+export type TypographyTone = "primary" | "secondary" | "tertiary" | "quaternary" | "danger" | "success" | "warning" | "info";
 export interface TypographyProps extends HTMLAttributes<HTMLElement> {
     variant?: TypographyVariant;
+    /**
+     * Text colour. Defaults to `primary`, except `lede`, `label` and `idSecondary` (ink-2) and
+     * `code` (inherits the surrounding colour).
+     */
     tone?: TypographyTone;
     /**
      * Visual role and document element are independent — use `as` to keep the

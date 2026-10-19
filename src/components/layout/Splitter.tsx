@@ -27,7 +27,7 @@ export interface SplitterProps extends HTMLAttributes<HTMLDivElement> {
   ref?: Ref<HTMLDivElement>;
 }
 
-const paneClass = "overflow-auto bg-paper";
+const paneClass = "overflow-auto bg-surface";
 
 export function Splitter({
   direction = "horizontal",
@@ -70,7 +70,8 @@ export function Splitter({
         else if (ref) ref.current = node;
       }}
       className={cn(
-        "flex w-full h-full su-hairline rounded-none bg-paper",
+        // A panel: surface, 1px border, radius 8 (overflow-hidden keeps the panes inside the corners).
+        "flex w-full h-full su-panel",
         isH ? "flex-row" : "flex-col",
         className,
       )}
@@ -85,24 +86,25 @@ export function Splitter({
       </div>
       <div
         className={cn(
-          // 8px of layout, 44px of hit area via the `after:` overlay.
-          // ponytail: the overlay eats pointer events 18px into each pane (a pane
-          // scrollbar hugging the divider included); gate it behind
-          // `[@media(pointer:coarse)]:` if that ever bites on desktop.
+          // An 8-wide handle around a 1px border line. On desk the 8px is the target; touch
+          // screens get a 44px hit pad from the `after:` overlay.
+          // ponytail: on touch the overlay eats pointer events 18px into each pane (a pane
+          // scrollbar hugging the divider included).
           "relative z-1 shrink-0 flex items-center justify-center touch-none",
           "su-focus-ring",
-          "before:content-[''] before:absolute before:bg-rule-strong before:[transition:background-color_var(--su-duration-fast)_var(--su-ease-out),width_var(--su-duration-fast)_var(--su-ease-out),height_var(--su-duration-fast)_var(--su-ease-out)] motion-reduce:before:transition-none",
-          "after:content-[''] after:absolute",
+          "before:content-[''] before:absolute before:bg-border forced-colors:before:bg-[CanvasText] before:[transition:background-color_var(--su-duration-fast)_var(--su-ease-out),width_var(--su-duration-fast)_var(--su-ease-out),height_var(--su-duration-fast)_var(--su-ease-out)] motion-reduce:before:transition-none",
+          "[@media(hover:none)]:after:content-[''] [@media(hover:none)]:after:absolute",
           isH
-            ? "w-[var(--su-space-2)] min-w-[var(--su-space-2)] before:top-0 before:bottom-0 before:left-1/2 before:w-px before:-translate-x-1/2 after:top-0 after:bottom-0 after:left-[-18px] after:right-[-18px]"
-            : "h-[var(--su-space-2)] min-h-[var(--su-space-2)] before:left-0 before:right-0 before:top-1/2 before:h-px before:-translate-y-1/2 after:left-0 after:right-0 after:top-[-18px] after:bottom-[-18px]",
+            ? "w-[var(--su-space-2)] min-w-[var(--su-space-2)] before:top-0 before:bottom-0 before:left-1/2 before:w-px before:-translate-x-1/2 [@media(hover:none)]:after:top-0 [@media(hover:none)]:after:bottom-0 [@media(hover:none)]:after:left-[-18px] [@media(hover:none)]:after:right-[-18px]"
+            : "h-[var(--su-space-2)] min-h-[var(--su-space-2)] before:left-0 before:right-0 before:top-1/2 before:h-px before:-translate-y-1/2 [@media(hover:none)]:after:left-0 [@media(hover:none)]:after:right-0 [@media(hover:none)]:after:top-[-18px] [@media(hover:none)]:after:bottom-[-18px]",
+          // Hover or drag: the line becomes a 2px action line. Focus: the outline.
           resizable
             ? cn(
                 isH ? "cursor-col-resize" : "cursor-row-resize",
-                "hover:before:bg-accent focus-visible:before:bg-accent active:before:bg-[var(--su-accent-active)]",
+                "[@media(hover:hover)]:hover:before:bg-action active:before:bg-action forced-colors:active:before:bg-[Highlight]",
                 isH
-                  ? "hover:before:w-[2px] focus-visible:before:w-[2px] active:before:w-[2px]"
-                  : "hover:before:h-[2px] focus-visible:before:h-[2px] active:before:h-[2px]",
+                  ? "[@media(hover:hover)]:hover:before:w-[2px] active:before:w-[2px]"
+                  : "[@media(hover:hover)]:hover:before:h-[2px] active:before:h-[2px]",
               )
             : "cursor-default",
         )}
@@ -158,15 +160,7 @@ export function Splitter({
                 : size + (grow ? step : -step),
           );
         }}
-      >
-        <span
-          aria-hidden
-          className={cn(
-            "relative bg-label-tertiary",
-            isH ? "w-[2px] h-[16px]" : "h-[2px] w-[16px]",
-          )}
-        />
-      </div>
+      />
       <div className={cn(paneClass, "flex-1")}>{second}</div>
     </div>
   );

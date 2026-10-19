@@ -27,18 +27,21 @@ function normalizeHash(href: string): string {
   return at >= 0 ? href.slice(at + 1) : href;
 }
 
-const listClass = "flex flex-col m-0 p-0 list-none border-s border-s-solid border-s-rule";
+/** A 2px line down the start edge; the current item paints its own 2px action segment over it. */
+const listClass = "flex flex-col m-0 p-0 list-none border-s-2 border-s-solid border-s-border";
 
+/** Items 32 tall (44 on touch screens), padding 0 12, 13/18. */
 const linkClass =
-  "flex items-center min-h-[var(--su-hit-target)] -ms-px py-su2 px-su3 border-s-2 border-s-solid text-footnote font-medium break-words no-underline su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] hover:no-underline";
+  "flex items-center min-h-[var(--su-row-overlay)] [@media(hover:none)]:min-h-[var(--su-hit-target)] -ms-[2px] py-su1 px-su3 border-s-2 border-s-solid font-sans text-small break-words no-underline rounded-e-su-tag su-focus-ring transition-colors duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none hover:no-underline";
 
 // Colour lives in exactly one of the two branches — hover only on fine pointers,
 // so a tap does not leave a second item looking current.
 const restLinkClass =
-  "border-s-transparent text-label-secondary [@media(hover:hover)]:hover:text-label";
+  "border-s-transparent text-ink-2 font-normal [@media(hover:hover)]:hover:text-ink";
 
+/** Current: ink 500 on a 2px action segment of the line. */
 const activeLinkClass =
-  "border-s-accent text-accent [@media(hover:hover)]:hover:text-[var(--su-accent-hover)] contrast-more:font-semibold";
+  "border-s-action text-ink font-medium forced-colors:border-s-[Highlight]";
 
 export function Anchor({
   items,

@@ -9,6 +9,18 @@ export interface DatePickerProps {
     className?: string;
     onChange?: (value: string) => void;
 }
+/**
+ * v2 picker field, layered on the shared Input surface (`inputClass`, which also draws the
+ * disabled state: surface-2, border colour, ink-3, no opacity). The native calendar / clock glyph
+ * is the 16px end icon with 8 before it; `nativePickerClass` puts it at about ink-3.
+ * Shared with TimePicker.
+ */
+export declare const pickerFieldClass = "[&::-webkit-calendar-picker-indicator]:size-[16px] [&::-webkit-calendar-picker-indicator]:m-0 [&::-webkit-calendar-picker-indicator]:ms-su2 [&::-webkit-calendar-picker-indicator]:p-0";
+/**
+ * End padding per size, as on the select trigger (8 / 10 / 12), so at `md` the text box ends
+ * where Select's does (`padding-right: 34` with the glyph and its gap).
+ */
+export declare const pickerEndPadClass: Record<InputSize, string>;
 export declare function DatePicker({ value: valueProp, defaultValue, min, max, disabled, size: sizeProp, className, onChange, }: DatePickerProps): import("react").JSX.Element;
 export declare namespace DatePicker {
     var RangePicker: typeof DateRangePicker;

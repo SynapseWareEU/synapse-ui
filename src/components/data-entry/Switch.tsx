@@ -1,7 +1,6 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { cn } from "../../utils/cn";
-import { SlotSpinner } from "../general/SlotSpinner";
 import { useFormContext, useFormItemContext } from "./Form";
 
 export interface SwitchProps {
@@ -10,39 +9,74 @@ export interface SwitchProps {
   checked?: boolean;
   defaultChecked?: boolean;
   disabled?: boolean;
-  /** Async toggle in flight: shows a slot spinner in the thumb and blocks input. */
+  /** Async toggle in flight: shows a ring spinner in the thumb and blocks input. */
   loading?: boolean;
   required?: boolean;
   name?: string;
   value?: string;
   id?: string;
   className?: string;
-  children?: ReactNode;
+  /**
+   * The state in words, beside the switch in 14/20 ink ("Pornit", "Se cere la fiecare recepție").
+   * v2 always pairs the switch with its state; the field label sits above, in a FormItem.
+   * A function receives the current state, so an uncontrolled switch can word both of them:
+   * `{(on) => (on ? "Pornit" : "Oprit")}`.
+   *
+   * When the switch already has a name (the FormItem's label, `aria-label` or `aria-labelledby`)
+   * that name is kept and the words are visual only: the state itself is announced by the switch
+   * role. With no other name, the words are the label, as a plain `<label>` wrapping them.
+   */
+  children?: ReactNode | ((checked: boolean) => ReactNode);
   onCheckedChange?: (checked: boolean) => void;
 }
 
-/**
- * 51×31 track, 1.5px solid edge so the unchecked state clears WCAG 1.4.11 (3:1)
- * on its own — the `--su-gray-4` fill alone sits at ~1.5:1 against paper.
- * Border-box maths: 48×28 inner, 24px thumb, 2px gutter on every side.
+/*
+ * Track 36×20, radius 10 (pill), padding 3, no border. On: action. Off: ink-3 (#6f7684).
+ * Hover (hover devices only, whole row): on → action-hover, off → ink-2.
+ * Disabled: on → border-strong, off → border; the state words turn ink-3. No opacity.
  */
-const trackClass = [
-  "relative flex items-center w-[51px] h-[31px] p-0 rounded-none cursor-pointer",
-  "border-[1.5px] border-solid border-ink-3 bg-[var(--su-gray-4)] contrast-more:border-[var(--su-label)]",
-  "transition-[background-color,border-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)]",
-  "data-[state=checked]:(bg-action border-action)",
-  "disabled:cursor-not-allowed",
+const trackBaseClass = [
+  "relative inline-flex shrink-0 items-center w-[36px] h-[20px] p-[3px] border-0 rounded-su-pill",
+  "transition-[background-color] duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  // High Contrast: keep the token colours (GrayText / Highlight track, HighlightText thumb);
+  // a borderless track would otherwise be erased to Canvas.
+  "forced-colors:[forced-color-adjust:none]",
   "su-focus-ring",
 ].join(" ");
 
-const thumbClass = [
-  "flex items-center justify-center size-[24px] rounded-none bg-on-action shadow-none",
-  "border border-solid border-ink-3 data-[state=checked]:border-transparent",
-  "transition-transform duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] will-change-transform",
-  "translate-x-[2px] data-[state=checked]:translate-x-[22px]",
-  // physical translates, mirrored under [dir=rtl] so the thumb travels toward the trailing edge
-  "rtl:-translate-x-[2px] rtl:data-[state=checked]:-translate-x-[22px]",
+const trackEnabledClass = [
+  "bg-ink-3 data-[state=checked]:bg-action",
+  "[@media(hover:hover)]:group-hover/sw:data-[state=unchecked]:bg-ink-2",
+  "[@media(hover:hover)]:group-hover/sw:data-[state=checked]:bg-action-hover",
 ].join(" ");
+
+const trackDisabledClass =
+  "cursor-not-allowed bg-border data-[state=checked]:bg-border-strong";
+
+/* Thumb: 14 circle, white in both themes (on-action), no shadow; travels 16 in 150ms ease-out. */
+const thumbClass = [
+  "pointer-events-none flex items-center justify-center size-[14px] rounded-full bg-on-action",
+  "transition-transform duration-[var(--su-duration-fast)] ease-[var(--su-ease-out)] motion-reduce:transition-none",
+  "translate-x-0 data-[state=checked]:translate-x-[16px]",
+  // physical translate, mirrored under [dir=rtl] so the thumb travels toward the trailing edge
+  "rtl:data-[state=checked]:-translate-x-[16px]",
+].join(" ");
+
+/** 10px ring spinner in the thumb: border-colour track, arc in the track's own colour. */
+function ThumbSpinner() {
+  return (
+    <svg
+      viewBox="0 0 10 10"
+      fill="none"
+      aria-hidden="true"
+      className="block size-[10px] animate-spin motion-reduce:animate-none text-ink-3 [[data-state=checked]_&]:text-action"
+      style={{ animationDuration: "800ms" }}
+    >
+      <circle cx="5" cy="5" r="4" strokeWidth="1.5" className="stroke-border" />
+      <path d="M5 1a4 4 0 0 1 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 /** ponytail: no `size` variant or ref forwarding (siblings have neither) — add when a caller needs one. */
 export function Switch({
@@ -63,29 +97,40 @@ export function Switch({
   const form = useFormContext();
   const item = useFormItemContext();
   const isDisabled = disabled ?? form.disabled;
+  // Mirrors the uncontrolled state, only so `children` as a function can word it.
+  const [inner, setInner] = useState(defaultChecked ?? false);
+  const words = typeof children === "function" ? children(checked ?? inner) : children;
+  // The name the switch has without its state words. `aria-labelledby` outranks both the
+  // FormLabel's `htmlFor` and the wrapping <label>, so the words stay out of the name and the
+  // name does not change each time the switch is flipped.
+  const labelledBy = ariaLabelledBy ?? (ariaLabel == null ? item?.labelId : undefined);
+  const named = ariaLabel != null || labelledBy != null;
 
   return (
     <label
       className={cn(
-        "inline-flex items-center gap-su2 min-h-[var(--su-hit-target)] cursor-pointer",
-        isDisabled && "opacity-45 cursor-not-allowed",
-        loading && "cursor-wait",
+        // The switch field row: 36 tall, switch + 10 + state words.
+        "group/sw inline-flex items-center gap-[10px] min-h-[var(--su-control-md)]",
+        "[@media(hover:none)]:min-h-[max(var(--su-control-md),var(--su-hit-target))]",
+        isDisabled ? "cursor-not-allowed" : loading ? "cursor-wait" : "cursor-pointer",
         className,
       )}
     >
       <SwitchPrimitive.Root
         id={idProp ?? item?.id}
-        // Visible children already name the control via the wrapping <label>;
-        // forwarding aria-label too would let the two diverge (WCAG 2.5.3).
-        aria-label={children ? undefined : ariaLabel}
-        aria-labelledby={children ? undefined : ariaLabelledBy}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         checked={checked}
         defaultChecked={defaultChecked}
         disabled={isDisabled}
         required={required ?? item?.required}
         name={name}
         value={value}
-        className={cn(trackClass, loading && "cursor-wait")}
+        className={cn(
+          trackBaseClass,
+          isDisabled ? trackDisabledClass : trackEnabledClass,
+          !isDisabled && (loading ? "cursor-wait" : "cursor-pointer"),
+        )}
         // Loading is busy, not disabled: full contrast, still focusable, clicks
         // guarded (Button.tsx convention). preventDefault stops Radix's own
         // toggle handler, so space/enter are covered too.
@@ -96,19 +141,26 @@ export function Switch({
           }
         }}
         onCheckedChange={(next) => {
-          if (!loading) onCheckedChange?.(next);
+          if (loading) return;
+          setInner(next);
+          onCheckedChange?.(next);
         }}
         aria-describedby={item?.descriptionId}
         aria-invalid={item?.error ? true : undefined}
         aria-busy={loading || undefined}
       >
         <SwitchPrimitive.Thumb className={thumbClass}>
-          {loading ? <SlotSpinner size="sm" /> : null}
+          {loading ? <ThumbSpinner /> : null}
         </SwitchPrimitive.Thumb>
       </SwitchPrimitive.Root>
-      {children && (
-        <span className="text-body text-label select-none">
-          {children}
+      {words && (
+        <span
+          // Named elsewhere: the words repeat what the switch role already says ("on" / "off").
+          aria-hidden={named || undefined}
+          data-su-switch-state=""
+          className={cn("text-body select-none", isDisabled ? "text-ink-3" : "text-ink")}
+        >
+          {words}
         </span>
       )}
     </label>

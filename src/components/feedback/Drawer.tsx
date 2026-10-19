@@ -1,16 +1,25 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { IconX } from "@tabler/icons-react";
 import { useRef, type ComponentPropsWithoutRef, type ReactNode } from "react";
-import { Button } from "../general/Button";
 import { iconDefaults } from "../general/Icon";
 import { cn } from "../../utils/cn";
+import { closeButtonClass } from "./shared";
 
 export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root> {
+  /** 16/24 600 ink, one line with an ellipsis. An identifier in it reads best in mono 0.9em. */
   title?: ReactNode;
   description?: ReactNode;
   placement?: "left" | "right";
+  /**
+   * Panel width. Defaults to 480 (`--su-drawer-width`); never wider than the viewport − 32. Below
+   * `sm` (640) it may take the whole viewport: a 32 strip of the page beside a sheet on a phone
+   * is too narrow to read and wide enough to show half of a navigation rail.
+   */
   width?: number | string;
-  /** Pinned action bar below the scroll region (Apply / Cancel). */
+  /**
+   * Pinned action bar below the scroll region: 64 tall, left-packed. Put the primary action
+   * first, then the secondary one.
+   */
   footer?: ReactNode;
   children?: ReactNode;
   trigger?: ReactNode;
@@ -18,11 +27,17 @@ export interface DrawerProps extends ComponentPropsWithoutRef<typeof Dialog.Root
   closeLabel?: string;
 }
 
+/**
+ * Side sheet for edits (spec §4.4). Flush to the viewport edge and square: 480 wide by default,
+ * surface-overlay with a hairline on its inner edge and the overlay shadow, over the scrim.
+ * Header 56, body padded 24 with a 16 gap between blocks, footer 64. Enters with a 16px slide
+ * and a fade over 240ms (none under reduced motion).
+ */
 export function Drawer({
   title,
   description,
   placement = "right",
-  width = 320,
+  width,
   footer,
   children,
   trigger,
@@ -49,19 +64,21 @@ export function Drawer({
     }
   }
   wasOpen.current = rest.open === true;
+  const left = placement === "left";
   return (
     <Dialog.Root {...rest}>
       {trigger ? <Dialog.Trigger asChild>{trigger}</Dialog.Trigger> : null}
       <Dialog.Portal>
         <Dialog.Overlay className="su-overlay" />
+        {/* Two layers so the two keyframes can run together: the dialog fades, the panel
+            inside it slides 16px. One element can only carry one `animation`. */}
         <Dialog.Content
           className={cn(
-            "fixed top-0 bottom-0 z-[var(--su-z-modal)] max-w-[calc(100vw-var(--su-space-8))] flex flex-col rounded-none bg-paper shadow-none motion-reduce:animate-none",
-            placement === "left"
-              ? "left-0 border-r border-solid border-rule-strong animate-su-slide-in-left"
-              : "right-0 border-l border-solid border-rule-strong animate-su-slide-in",
+            "fixed top-0 bottom-0 z-[var(--su-z-modal)] max-w-[100vw] sm:max-w-[calc(100vw-var(--su-space-8))] outline-none animate-su-fade-in motion-reduce:animate-none",
+            left ? "left-0" : "right-0",
+            width === undefined && "w-[var(--su-drawer-width)]",
           )}
-          style={{ width }}
+          style={width !== undefined ? { width } : undefined}
           onCloseAutoFocus={(event) => {
             if (trigger) return; // Radix focuses the trigger itself
             // No "is it still open" guard: a drawer that closes by unmounting never renders closed.
@@ -72,39 +89,41 @@ export function Drawer({
         >
           <div
             className={cn(
-              "flex items-start gap-su3 p-su4",
-              title ? "border-b border-solid border-rule" : undefined,
+              "h-full w-full flex flex-col bg-surface-overlay text-ink font-sans shadow-su-overlay border-solid border-border motion-reduce:animate-none",
+              left ? "border-r animate-su-slide-in-left" : "border-l animate-su-slide-in",
             )}
           >
-            {title ? (
-              <Dialog.Title className="flex-1 min-w-0 m-0 pt-[6px] font-sans text-headline font-semibold text-ink text-start leading-[var(--su-leading-snug)]">
-                {title}
-              </Dialog.Title>
-            ) : (
-              <Dialog.Title className="sr-only">Drawer</Dialog.Title>
-            )}
-            <Dialog.Close asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shrink-0 ms-auto min-w-[var(--su-hit-target)] min-h-[var(--su-hit-target)] p-0 text-ink-2 enabled:hover:(text-ink bg-fill-tertiary)"
-                aria-label={closeLabel}
-              >
-                <IconX size={16} {...iconDefaults} />
-              </Button>
-            </Dialog.Close>
-          </div>
-          {description ? (
-            <Dialog.Description className="sr-only">{description}</Dialog.Description>
-          ) : null}
-          <div className="flex-1 overflow-auto p-su4 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-            {children}
-          </div>
-          {footer ? (
-            <div className="flex justify-end flex-wrap gap-su2 py-su3 px-su4 pb-su4 border-t border-solid border-rule">
-              {footer}
+            <div
+              className={cn(
+                "flex-none flex items-center gap-su3 h-[var(--su-drawer-header)] ps-su6 pe-su3",
+                title ? "border-b border-solid border-border" : undefined,
+              )}
+            >
+              {title ? (
+                <Dialog.Title className="flex-1 min-w-0 m-0 truncate font-sans text-section font-semibold text-ink text-start">
+                  {title}
+                </Dialog.Title>
+              ) : (
+                <Dialog.Title className="sr-only">Drawer</Dialog.Title>
+              )}
+              <Dialog.Close asChild>
+                <button type="button" className={cn(closeButtonClass, "ms-auto")} aria-label={closeLabel}>
+                  <IconX size={18} {...iconDefaults} />
+                </button>
+              </Dialog.Close>
             </div>
-          ) : null}
+            {description ? (
+              <Dialog.Description className="sr-only">{description}</Dialog.Description>
+            ) : null}
+            <div className="flex-1 min-h-0 overflow-auto p-su6 flex flex-col gap-su4 text-body text-ink [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+              {children}
+            </div>
+            {footer ? (
+              <div className="flex-none flex flex-wrap items-center justify-start gap-su2 min-h-[var(--su-drawer-footer)] py-su3 px-su6 border-t border-solid border-border">
+                {footer}
+              </div>
+            ) : null}
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

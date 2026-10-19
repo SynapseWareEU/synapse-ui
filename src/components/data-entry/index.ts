@@ -5,7 +5,7 @@ export { Cascader } from "./Cascader";
 export type { CascaderProps } from "./Cascader";
 
 export { Checkbox } from "./Checkbox";
-export type { CheckboxProps } from "./Checkbox";
+export type { CheckboxProps, CheckboxState } from "./Checkbox";
 
 export { ColorPicker } from "./ColorPicker";
 export type { ColorPickerProps } from "./ColorPicker";
@@ -13,16 +13,29 @@ export type { ColorPickerProps } from "./ColorPicker";
 export { DatePicker, DateRangePicker } from "./DatePicker";
 export type { DatePickerProps, DateRangePickerProps } from "./DatePicker";
 
-export { Form, FormItem, FormLabel, useFormContext, useFormItemContext } from "./Form";
+export {
+  Form,
+  FormItem,
+  FormLabel,
+  FormSection,
+  FormActions,
+  useFormContext,
+  useFormItemContext,
+} from "./Form";
 export type {
   FormProps,
   FormItemProps,
   FormLabelProps,
+  FormSectionProps,
+  FormActionsProps,
   FormLayout,
 } from "./Form";
 
-export { Input } from "./Input";
+export { Input, inputClass, inputSizeClass } from "./Input";
 export type { InputProps } from "./Input";
+
+export { TextArea } from "./TextArea";
+export type { TextAreaProps } from "./TextArea";
 
 export { InputNumber } from "./InputNumber";
 export type { InputNumberProps } from "./InputNumber";
@@ -37,7 +50,7 @@ export { Rate } from "./Rate";
 export type { RateProps } from "./Rate";
 
 export { Select } from "./Select";
-export type { SelectProps } from "./Select";
+export type { SelectProps, SelectVariant } from "./Select";
 
 export { Slider } from "./Slider";
 export type { SliderProps } from "./Slider";
